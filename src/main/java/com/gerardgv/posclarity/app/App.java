@@ -1,4 +1,6 @@
-package com.gerardgv.posclarity;
+package com.gerardgv.posclarity.app;
+
+
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
