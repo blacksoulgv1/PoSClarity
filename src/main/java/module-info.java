@@ -1,7 +1,8 @@
 module com.gerardgv.posclarity {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
-    opens com.gerardgv.posclarity to javafx.fxml;
-    exports com.gerardgv.posclarity;
+    exports com.gerardgv.posclarity.app;
+    opens com.gerardgv.posclarity.app to javafx.fxml;
 }
