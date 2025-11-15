@@ -92,4 +92,46 @@ public class ProductDAO {
         }
         return product;
     }
+    
+    //Actualizar Producto
+    public boolean update(Product product){
+        
+        String sql = "UPDATE products SET modelo=?, marca=?, stock=?, categoria=?, precio=?, tipo_producto=?"
+                + " WHERE id_product=?";
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setString(1,product.getModelo());
+            stm.setString(2,product.getMarca());
+            stm.setInt(3, product.getStock());
+            stm.setString(4,product.getCategoria());
+            stm.setDouble(5,product.getPrecio());
+            stm.setInt(7,product.getId_product());
+            
+            return stm.executeUpdate() > 0;
+            
+        } catch (SQLException e) {
+            System.out.println("Error al actualizar producto");
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    //Eliminar producto
+    public boolean delete(int id){
+        String sql = "DELATE FROM products WHERE id_product = ?";
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setInt(1, id);
+            
+            return  stm.executeUpdate() > 0;
+        }catch(SQLException e){
+            System.out.println("Error al eliminar producto");
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
