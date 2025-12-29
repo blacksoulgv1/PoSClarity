@@ -14,7 +14,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>17</maven.compiler.release>
-        <exec.mainClass>com.gerardgv.posclarity.app.PoSApp</exec.mainClass>
+        <!--<exec.mainClass>com.gerardgv.posclarity.app.App</exec.mainClass> -->
         <javafx.version>21</javafx.version>
     </properties>
 
@@ -69,7 +69,8 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>${exec.mainClass}</mainClass>
+                    <mainClass>
+                        com.gerardgv.posclarity/com.gerardgv.posclarity.app.App</mainClass>
                 </configuration>
             </plugin>
 
