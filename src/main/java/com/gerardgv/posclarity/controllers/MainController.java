@@ -18,7 +18,7 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
          // Metodo para iniciar la ventana de ventas al abrir
-        viewVista("ventas");
+        //viewVista("ventas");
     }    
 
      // Metodo para el llamado de ventanas
