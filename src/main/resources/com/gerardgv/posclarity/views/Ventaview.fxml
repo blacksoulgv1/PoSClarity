@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="900" prefWidth="1440" stylesheets="@/com/gerardgv/posclarity/css/ventaview.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.VentasController">
+   <top>
+      <VBox prefHeight="142.0" prefWidth="1412.0" spacing="8.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets top="10.0" />
+         </padding>
+         <children>
+            <HBox prefHeight="19.0" prefWidth="1440.0" />
+            <HBox prefHeight="42.0" prefWidth="1418.0">
+               <children>
+                  <Label text="Colaborador">
+                     <HBox.margin>
+                        <Insets left="5.0" top="10.0" />
+                     </HBox.margin>
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                  </Label>
+                  <TextField maxWidth="83.0" prefHeight="25.0" prefWidth="62.0">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Label text="Nombre">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField maxWidth="197.0" prefHeight="25.0" prefWidth="197.0">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Label text="Tienda">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField maxWidth="197.0" prefHeight="25.0" prefWidth="140.0">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Label text="Fecha">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <DatePicker>
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </DatePicker>
+                  <Label text="Nota">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField maxWidth="197.0" prefHeight="25.0" prefWidth="140.0">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+               </children>
+            </HBox>
+            <HBox prefHeight="63.0" prefWidth="1440.0">
+               <children>
+                  <Label text="Cliente">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="5.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Label text="Direccion">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+                  <Label text="Telefono">
+                     <padding>
+                        <Insets right="10.0" />
+                     </padding>
+                     <HBox.margin>
+                        <Insets left="10.0" top="10.0" />
+                     </HBox.margin>
+                  </Label>
+                  <TextField maxWidth="176.0" prefHeight="25.0" prefWidth="166.0">
+                     <HBox.margin>
+                        <Insets top="5.0" />
+                     </HBox.margin>
+                  </TextField>
+               </children>
+            </HBox>
+            <VBox prefHeight="200.0" prefWidth="100.0" spacing="6.0">
+               <children>
+                  <Label text="Graduacion" textAlignment="CENTER">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets left="25.0" />
+                     </VBox.margin>
+                  </Label>
+                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                     <children>
+                        <Label prefWidth="30.0" text="OD">
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <TextField prefWidth="70.0" text="ESF" />
+                        <TextField prefWidth="70.0" text="CYL" />
+                        <TextField prefWidth="60.0" text="EJE" />
+                        <TextField prefWidth="60.0" text="ADD" />
+                     </children>
+                     <VBox.margin>
+                        <Insets left="10.0" />
+                     </VBox.margin>
+                  </HBox>
+                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
+                     <children>
+                        <Label prefWidth="30.0" text="OI">
+                           <HBox.margin>
+                              <Insets top="5.0" />
+                           </HBox.margin>
+                        </Label>
+                        <TextField prefWidth="70.0" text="ESF" />
+                        <TextField prefWidth="70.0" text="CYL" />
+                        <TextField prefWidth="60.0" text="EJE" />
+                     </children>
+                     <VBox.margin>
+                        <Insets left="10.0" />
+                     </VBox.margin>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </top>
+   <center>
+      <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <columns>
+          <TableColumn prefWidth="75.0" text="Codigo" />
+          <TableColumn prefWidth="75.0" text="Producto" />
+            <TableColumn prefWidth="75.0" text="Categoria" />
+            <TableColumn prefWidth="75.0" text="Descuento" />
+            <TableColumn prefWidth="75.0" text="Precio" />
+            <TableColumn prefWidth="75.0" text="Producto" />
+        </columns>
+      </TableView>
+   </center>
+</BorderPane>

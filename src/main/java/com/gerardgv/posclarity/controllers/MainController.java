@@ -18,17 +18,18 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
          // Metodo para iniciar la ventana de ventas al abrir
-        //viewVista("ventas");
+        viewVista("Ventaview");
     }    
 
      // Metodo para el llamado de ventanas
     private void viewVista(String vista) {
         try{
             Parent root = FXMLLoader.load(
-                getClass().getResource("/fxml/"+ vista + ".fxml"));
+                getClass().getResource(
+                        "/com/gerardgv/posclarity/views/"+ vista + ".fxml"));
             stackContent.getChildren().setAll(root);
         } catch(IOException e){
-            System.out.println("Error al cargar la vsita:" + vista);
+            System.out.println("Error al cargar la vista:" + vista);
             e.printStackTrace();
         }
     }
@@ -37,7 +38,7 @@ public class MainController implements Initializable {
     
     @FXML
     private void abrirNuevaVenta(){
-        viewVista("ventas");
+        viewVista("Ventaview");
     }
     
     @FXML
