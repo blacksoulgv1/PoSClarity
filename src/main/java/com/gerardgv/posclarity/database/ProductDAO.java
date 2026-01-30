@@ -61,6 +61,38 @@ public class ProductDAO {
         return products;
     }
     
+    //Buscar Producto por Modelo
+    public Product getByModel(String model){
+        String sql = "SELECT * FROM products WHERE modelo = ?";
+        Product product = null;
+        
+        try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setString(1, model);
+            
+            try(ResultSet rs = stm.executeQuery()){
+                
+                if(rs.next()){
+                    
+                    product = new Product();
+                    product.setId_product(rs.getInt("id_Product"));
+                    product.setModelo(rs.getString("modelo"));
+                    product.setMarca(rs.getString("marca"));
+                    product.setStock(rs.getInt("stock"));
+                    product.setCategoria(rs.getString("categoria"));
+                    product.setPrecio(rs.getDouble("precio"));
+                    product.setTipo_producto(rs.getString("tipo_producto"));
+                }
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Error al buscar el Producto");
+            e.printStackTrace();
+        }
+        return product;
+    }
+    
     //Buscar Producto por ID
     public Product getById(int id){
         

@@ -1,9 +1,14 @@
 package com.gerardgv.posclarity.controllers;
 
+//Librerias Java
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.HashMap;
+import java.util.Map;
+import com.gerardgv.posclarity.utils.ViewInf;
 
+//Librerias Java Fx
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -11,34 +16,53 @@ import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 
 public class MainController implements Initializable {
+    
+    //guardar vistas
+    private Map<String,ViewInf> Showviews= new HashMap<>();
 
     @FXML
     private StackPane stackContent;
-    
+ 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
          // Metodo para iniciar la ventana de ventas al abrir
-        viewVista("Ventaview");
+        viewVista("Saleview");
     }    
 
-     // Metodo para el llamado de ventanas
+     // Metodo para el llamado de ventanas.
     private void viewVista(String vista) {
+        
         try{
-            Parent root = FXMLLoader.load(
-                getClass().getResource(
-                        "/com/gerardgv/posclarity/views/"+ vista + ".fxml"));
+            
+            //Si la Vista ya Fue Cargada se Reutiliza.
+            if (Showviews.containsKey(vista)){
+                stackContent.getChildren().setAll(
+                        Showviews.get(vista).getView()
+                );
+                return;
+            }
+            
+            //La Vista Se Crea Por Primera Vez.
+            FXMLLoader loader = new FXMLLoader(
+                getClass().getResource("/com/gerardgv/posclarity/views/" + vista + ".fxml"));
+            
+            Parent root = loader.load();
+            Object controller = loader.getController();
+            
+            //Se Guarda Vista & Controlador.
+            Showviews.put(vista, new ViewInf(root, controller));
             stackContent.getChildren().setAll(root);
-        } catch(IOException e){
-            System.out.println("Error al cargar la vista:" + vista);
+        }catch(IOException e){
+            System.out.println("Error al Cargar la Vista:" + vista);
             e.printStackTrace();
-        }
+        }       
     }
     
     // Funcionamiento de botonos para ventanas
     
     @FXML
     private void abrirNuevaVenta(){
-        viewVista("Ventaview");
+        viewVista("Saleview");
     }
     
     @FXML
@@ -53,7 +77,7 @@ public class MainController implements Initializable {
     
     @FXML
     private void abrirProductos(){
-        viewVista("productos");
+        viewVista("Productsview");
     }
     
     @FXML

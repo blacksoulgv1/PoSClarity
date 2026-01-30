@@ -1,0 +1,137 @@
+.root{
+    -fx-font-family: "segoe UI", "Arial";
+    -fx-background-color: linear-gradient(to bottom right, #eef2f7,#dfe6ee);
+}
+
+/* HEADER*/
+.header-bar {
+    -fx-background-color: white;
+    -fx-padding: 15 25;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* PANEL IZQUIERDO*/
+
+.form-panel{
+    -fx-background-color: white;
+    -fx-padding: 20;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 6);
+}
+
+.form-title{
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #34495e;
+}
+
+.form-label{
+    -fx-text-fill: #2c3e50;
+    -fx-font-size: 13px;
+}
+
+/* INPUTS */
+.input{
+    -fx-pre-height: 36;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #dcdde1;
+    -fx-background-color: #fdfdfd;
+    -fx-padding: 0 10;
+}
+
+.input:focused{
+    -fx-border-color: #4e90e2;
+    -fx-background-color: white;
+}
+
+.txt-field,.combo-box{
+    -fx-pref-height: 34px;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+}
+
+/* CHECKBOX */
+.checkbox{
+    -fx-text-fill: #2c3e50;
+}
+
+/* BOTONES */
+
+.btn-primary{
+    -fx-background-color: #2ecc71;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6;
+    -fx-cursor: hand;
+}
+.btn-primary:hover{ -fx-background-color:#27ar60; }
+
+.btn-secundary{
+    -fx-background-color: #bdc3c7;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+}
+
+.btn-secondary:hover { -fx-background-color: #95a5a6; }
+
+.btn-danger {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+}
+.btn-danger:hover { -fx-background-color: #c0392b; }
+
+/* PANEL TABLA */
+.table-panel {
+    -fx-background-color: white;
+    -fx-padding: 15;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 6);
+}
+
+/* BUSCADOR */
+.search-field {
+    -fx-pref-height: 36;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-border-color: #dcdde1;
+    -fx-padding: 0 10;
+}
+
+/* TABLA MODERNA */
+.modern-table {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: #dcdde1;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #34495e;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-size: 38px;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #2c3e50;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell:filled:selected {
+    -fx-background-color: #4a90e2;
+    -fx-text-fill: white;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #ecf0f1;
+}

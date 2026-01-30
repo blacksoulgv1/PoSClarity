@@ -69,6 +69,9 @@
                 <version>0.0.8</version>
                 <configuration>
                     <mainClass>com.gerardgv.posclarity.app.App</mainClass>
+                    <options>
+                        <options>--enable-native-access=javafx.graphics</options>
+                    </options>
                 </configuration>
             </plugin>
 

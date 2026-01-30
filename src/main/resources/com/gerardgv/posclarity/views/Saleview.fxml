@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.DatePicker?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="900" prefWidth="1440" stylesheets="@/com/gerardgv/posclarity/css/ventaview.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.VentasController">
+<BorderPane prefHeight="900" prefWidth="1440" 
+            stylesheets="@/com/gerardgv/posclarity/css/SaleView.css" 
+            xmlns="http://javafx.com/javafx/23.0.1" 
+            xmlns:fx="http://javafx.com/fxml/1" 
+            fx:controller="com.gerardgv.posclarity.controllers.SaleController">
    <top>
       <VBox prefHeight="142.0" prefWidth="1412.0" spacing="8.0" BorderPane.alignment="CENTER">
          <padding>
@@ -29,7 +27,7 @@
                         <Insets right="10.0" />
                      </padding>
                   </Label>
-                  <TextField maxWidth="83.0" prefHeight="25.0" prefWidth="62.0">
+                  <TextField fx:id="txtColaborador" maxWidth="83.0" prefHeight="25.0" prefWidth="62.0">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
@@ -42,7 +40,7 @@
                         <Insets left="10.0" top="10.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField maxWidth="197.0" prefHeight="25.0" prefWidth="197.0">
+                  <TextField fx:id="txtNombreVendedor" maxWidth="197.0" prefHeight="25.0" prefWidth="197.0">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
@@ -55,7 +53,7 @@
                         <Insets left="10.0" top="10.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField maxWidth="197.0" prefHeight="25.0" prefWidth="140.0">
+                  <TextField fx:id="txtTienda" maxWidth="197.0" prefHeight="25.0" prefWidth="140.0">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
@@ -98,7 +96,7 @@
                         <Insets left="5.0" top="10.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
+                  <TextField fx:id="txtCliente" maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
@@ -111,7 +109,7 @@
                         <Insets left="10.0" top="10.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
+                  <TextField fx:id="txtDireccion" maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
@@ -124,7 +122,7 @@
                         <Insets left="10.0" top="10.0" />
                      </HBox.margin>
                   </Label>
-                  <TextField maxWidth="176.0" prefHeight="25.0" prefWidth="166.0">
+                  <TextField fx:id="txtTelefono" maxWidth="176.0" prefHeight="25.0" prefWidth="166.0">
                      <HBox.margin>
                         <Insets top="5.0" />
                      </HBox.margin>
@@ -148,10 +146,10 @@
                               <Insets top="5.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField prefWidth="70.0" text="ESF" />
-                        <TextField prefWidth="70.0" text="CYL" />
-                        <TextField prefWidth="60.0" text="EJE" />
-                        <TextField prefWidth="60.0" text="ADD" />
+                        <TextField fx:id="txtEsfOD" prefWidth="70.0" promptText="ESF" />
+                        <TextField fx:id="txtCylOD" prefWidth="70.0" promptText="CYL" />
+                        <TextField fx:id="txtEjeOD" prefWidth="60.0" promptText="EJE" />
+                        <TextField fx:id="txtAdd" prefWidth="60.0" promptText="ADD" />
                      </children>
                      <VBox.margin>
                         <Insets left="10.0" />
@@ -164,9 +162,9 @@
                               <Insets top="5.0" />
                            </HBox.margin>
                         </Label>
-                        <TextField prefWidth="70.0" text="ESF" />
-                        <TextField prefWidth="70.0" text="CYL" />
-                        <TextField prefWidth="60.0" text="EJE" />
+                        <TextField fx:id="txtEsfOI" prefWidth="70.0" promptText="ESF" />
+                        <TextField fx:id="txtCylOI" prefWidth="70.0" promptText="CYL" />
+                        <TextField fx:id="txtEjeOI" prefWidth="60.0" promptText="EJE" />
                      </children>
                      <VBox.margin>
                         <Insets left="10.0" />
@@ -178,15 +176,117 @@
       </VBox>
    </top>
    <center>
-      <TableView prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <columns>
-          <TableColumn prefWidth="75.0" text="Codigo" />
-          <TableColumn prefWidth="75.0" text="Producto" />
-            <TableColumn prefWidth="75.0" text="Categoria" />
-            <TableColumn prefWidth="75.0" text="Descuento" />
-            <TableColumn prefWidth="75.0" text="Precio" />
-            <TableColumn prefWidth="75.0" text="Producto" />
-        </columns>
-      </TableView>
+      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <VBox>
+               <children>
+                  <Label text="Productos" textAlignment="CENTER">
+                     <font>
+                        <Font size="15.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets left="25.0" />
+                     </VBox.margin>
+                     <padding>
+                        <Insets top="5.0" />
+                     </padding>
+                  </Label>
+                  <HBox prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <TextField promptText="MODELO">
+                           <HBox.margin>
+                              <Insets left="15.0" top="5.0" />
+                           </HBox.margin>
+                        </TextField>
+                        <TextField promptText="PRODUCTO">
+                           <HBox.margin>
+                              <Insets left="15.0" top="5.0" />
+                           </HBox.margin></TextField>
+                        <TextField promptText="CATEGORIA">
+                           <HBox.margin>
+                              <Insets left="15.0" top="5.0" />
+                           </HBox.margin></TextField>
+                        <Button mnemonicParsing="false" text="Agregar">
+                           <HBox.margin>
+                              <Insets left="15.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <TableView prefHeight="200.0" prefWidth="200.0">
+              <columns>
+                <TableColumn prefWidth="75.0" text="Codigo" />
+                <TableColumn prefWidth="250.0" text="Producto" />
+                  <TableColumn prefWidth="100.0" text="Categoria" />
+                  <TableColumn prefWidth="75.0" text="Descuento" />
+                  <TableColumn prefWidth="75.0" text="Precio" />
+                  <TableColumn prefWidth="75.0" text="Producto" />
+              </columns>
+            </TableView>
+         </children>
+      </VBox>
    </center>
+   <right>
+      <VBox maxWidth="300.0" minWidth="260.0" prefHeight="200.0" prefWidth="280.0" spacing="12.0" BorderPane.alignment="TOP_CENTER">
+         <padding>
+            <Insets top="15.0" />
+         </padding>
+         <children>
+            <Label text="TOTAL" textAlignment="CENTER">
+               <font>
+                  <Font size="15.0" />
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </Label>
+            <Label text="\$ 0.00" textAlignment="CENTER">
+               <font>
+                  <Font size="15.0" />
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </Label>
+            <Separator prefWidth="200.0" />
+            <Label text="Importe" />
+            <TextField text="\$ 0.00" />
+            <Label text="Restante" textAlignment="CENTER">
+               <font>
+                  <Font size="15.0" />
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </Label>
+            <Label text="\$ 0.00" textAlignment="CENTER">
+               <font>
+                  <Font size="15.0" />
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </Label>
+            <Label text="Cambio" textAlignment="CENTER">
+               <font>
+                  <Font size="15.0" />
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </Label>
+            <Label text="\$ 0.00" textAlignment="CENTER">
+               <font>
+                  <Font size="15.0" />
+               </font>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </Label>
+            <Button mnemonicParsing="false" text="Cobrar" />
+         </children>
+      </VBox>
+   </right>
 </BorderPane>
