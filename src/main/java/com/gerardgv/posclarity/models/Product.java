@@ -9,11 +9,12 @@ public class Product {
     private String categoria;
     private double precio;
     private String tipo_producto; // elemento fisico o bajo_pedido
+    private boolean activo;
    
     public Product(){
     }
 
-    public Product(int id_product, String modelo, String marca, int stock, String categoria, double precio, String tipo_producto) {
+    public Product(int id_product, String modelo, String marca, int stock, String categoria, double precio, String tipo_producto, boolean activo) {
         this.id_product = id_product;
         this.modelo = modelo;
         this.marca = marca;
@@ -21,6 +22,7 @@ public class Product {
         this.categoria = categoria;
         this.precio = precio;
         this.tipo_producto = tipo_producto;
+        this.activo = activo;
     }
 
     public int getId_product() {
@@ -77,6 +79,14 @@ public class Product {
 
     public void setTipo_producto(String tipo_producto) {
         this.tipo_producto = tipo_producto;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
     
     

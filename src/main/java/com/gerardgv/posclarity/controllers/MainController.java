@@ -49,6 +49,16 @@ public class MainController implements Initializable {
             Parent root = loader.load();
             Object controller = loader.getController();
             
+            //Limpiar Estilos
+            stackContent.getStylesheets().clear();
+            
+            // se Agrega el Css Correctamente
+            if(vista.equals("Productsview")){
+                root.getStylesheets().add(
+                getClass().getResource("/com/gerardgv/posclarity/css/products.css").toExternalForm()
+                );
+            }
+            
             //Se Guarda Vista & Controlador.
             Showviews.put(vista, new ViewInf(root, controller));
             stackContent.getChildren().setAll(root);
