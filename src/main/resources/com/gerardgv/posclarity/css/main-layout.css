@@ -247,3 +247,29 @@
     -fx-padding: 10 8 10 8;
     -fx-font-size: 13px;
 }
+/* CONTENEDOR DE TARJETAS*/
+.info-cards{
+    -fx-spacing: 15;
+}
+
+/* TARJETA INDIVIDUAL */
+.info-card{
+    -fx-background-color: white;
+    -fx-padding: 15;
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08),10,0,0,4);
+    -fx-min-width: 140;
+}
+
+/*NUMERO GRANDE*/
+.info-value{
+    -fx-front-size:20px;
+    -fx-front-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+/* TEXTO PEQUEÑO */
+.info-title{
+    -fx-font-size: 12px;
+    -fx-text-fill:#7f8c8d;
+}

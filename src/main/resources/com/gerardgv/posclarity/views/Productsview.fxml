@@ -16,7 +16,10 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.ProductsController">
+<BorderPane fx:id="root" 
+            xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gerardgv.posclarity.controllers.ProductsController">
    <center>
       <SplitPane fx:id="splitPane" dividerPositions="0.35" styleClass="main-split">
          <items>

@@ -53,11 +53,7 @@ public class MainController implements Initializable {
             stackContent.getStylesheets().clear();
             
             // se Agrega el Css Correctamente
-            if(vista.equals("Productsview")){
-                root.getStylesheets().add(
-                getClass().getResource("/com/gerardgv/posclarity/css/products.css").toExternalForm()
-                );
-            }
+            root.getStylesheets().add(getClass().getResource("/com/gerardgv/posclarity/css/main-layout.css").toExternalForm());
             
             //Se Guarda Vista & Controlador.
             Showviews.put(vista, new ViewInf(root, controller));
@@ -92,7 +88,7 @@ public class MainController implements Initializable {
     
     @FXML
     private void abrirClientes(){
-        viewVista("clientes");
+        viewVista("Clientsview");
     }
 
 }
