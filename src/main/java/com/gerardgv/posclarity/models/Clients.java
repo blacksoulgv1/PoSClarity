@@ -14,6 +14,12 @@ public class Clients {
     public Clients() {
     }
     
+    public String getGraduacionCompleta(){
+        return "OD: " + odEsf + " / " + odCil + " x " + odEje +
+              "\nOI: " + oiEsf + " / " + oiCil + " x " + oiEje +
+                "\nADD: " + add;
+    }
+    
     public Clients(int id, String nombre, String telefono, String direccion, String odEsf, String odCil, String odEje, String oiEsf, String oiCil, String oiEje, String add) {
         this.id = id;
         this.nombre = nombre;

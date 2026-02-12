@@ -129,7 +129,6 @@
                         <Button fx:id="btnNuevo" mnemonicParsing="false" styleClass="btn-secondary" text="Nuevo" />
                         <Button fx:id="btnGuardar" mnemonicParsing="false" styleClass="btn-primary" text="Guardar" />
                         <Button fx:id="btnLimpiar" mnemonicParsing="false" styleClass="btn-secondary" text="Limpiar" />
-                        <Button fx:id="btnGuardar1" mnemonicParsing="false" styleClass="btn-danger" text="Desactivar" />
                      </children>
                   </HBox>
                </children>

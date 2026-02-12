@@ -1,17 +1,15 @@
 package com.gerardgv.posclarity.controllers;
 
+import com.gerardgv.posclarity.database.ClientsDAO;
 import com.gerardgv.posclarity.models.Clients;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.collections.*;
+import javafx.collections.transformation.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 
 
 public class ClientsController implements Initializable {
@@ -26,11 +24,11 @@ public class ClientsController implements Initializable {
     @FXML private TextField txtOiCil;
     @FXML private TextField txtOiEje;
     @FXML private TextField txtAdd;
+    @FXML private TextField txtBuscar;
     
     @FXML private Button btnNuevo;
     @FXML private Button btnGuardar;
     @FXML private Button btnLimpiar;
-    @FXML private Button btnDescativar;
     
     @FXML private TableView<Clients> tblClientes;
     @FXML private TableColumn<Clients, Integer> colId;
@@ -39,72 +37,187 @@ public class ClientsController implements Initializable {
     @FXML private TableColumn<Clients, String> colDireccion;
     @FXML private TableColumn<Clients, String> colGraduacion;
     @FXML private TableColumn<Clients, Void> colAcciones;
+    @FXML private TableColumn<Clients,String> colEstado;
     
+    private Clients clienteSeleccionado = null;
+    private boolean  modoEdicion = false;
+    
+    private ClientsDAO clientsDAO = new ClientsDAO();
     private ObservableList<Clients> listaClientes = FXCollections.observableArrayList();
     
+     
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        configurarBusqueda();
         configurarTabla();
-        configurarSeleccion();
+        configurarSeleccion();        
+        activarguardado();
+        cargarClienteDB();
+        
+        btnGuardar.setDisable(true);
         btnNuevo.setOnAction(e -> newClient());
         btnGuardar.setOnAction(e -> saveClient());
         btnLimpiar.setOnAction(e -> clearform());
-        btnDescativar.setOnAction(e -> desactivarCliente());
     }    
 
     private void configurarTabla() {
         
         colId.setCellValueFactory(data -> 
-        new javafx.beans.property.SimpleIntegerProperty(data.getValue().getId()).asObject()
-    );
+            new javafx.beans.property.SimpleIntegerProperty(data.getValue().getId()).asObject()
+        );
 
         colNombre.setCellValueFactory(data ->
-        new SimpleStringProperty(data.getValue().getNombre())
-    );
+            new SimpleStringProperty(data.getValue().getNombre())
+        );
 
         colTelefono.setCellValueFactory(data ->
-        new SimpleStringProperty(data.getValue().getTelefono())
-    );
+            new SimpleStringProperty(data.getValue().getTelefono())
+        );
         
         colDireccion.setCellValueFactory(data ->
-        new SimpleStringProperty(data.getValue().getDireccion())
-    );
+            new SimpleStringProperty(data.getValue().getDireccion())
+        );
         
         colGraduacion.setCellValueFactory(data -> {
-        Clients c = data.getValue();
+            Clients c = data.getValue();
 
-        String grad = String.format(
+            String grad = String.format(
                 "OD: %s / %s x %s\nOI: %s / %s x %s\nADD: %s",
-                c.getOdEsf(), c.getOdCil(), c.getOdEje(),
-                c.getOiEsf(), c.getOiCil(), c.getOiEje(),
-                c.getAdd()
+                nvl(c.getOdEsf()), nvl(c.getOdCil()), nvl(c.getOdEje()),
+                nvl(c.getOiEsf()), nvl(c.getOiCil()), nvl(c.getOiEje()),
+                nvl(c.getAdd())
         );
 
         return new SimpleStringProperty(grad);
     });
+         // Permite saltos de línea en la celda
+        colGraduacion.setCellFactory(tc -> {
+        TableCell<Clients, String> cell = new TableCell<>();
+        Label label = new Label();
+        label.setWrapText(true);
+        cell.setGraphic(label);
+
+        cell.itemProperty().addListener((obs, oldText, newText) -> {
+            label.setText(newText);
+        });
+
+        return cell;
+    });
+        
+        colEstado.setCellValueFactory(cellData -> {
+            boolean activo = cellData.getValue().isActivo();
+            return new SimpleStringProperty(activo ? "Activo" : "Inactivo");
+        });
+            //Columna Acciones
+        colAcciones.setCellFactory(col -> new TableCell<Clients, Void>(){
+           private final Button btnEditar = new Button("Editar");
+           private final Button btnToggle = new Button();
+           {
+               btnEditar.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
+               btnToggle.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
+               
+               btnEditar.setOnAction(e -> {
+                   Clients cliente = getTableView().getItems().get(getIndex());
+                   seleccionarClienteDesdeTabla(cliente);
+               });
+               
+               btnToggle.setOnAction(e -> {
+                   Clients cliente = getTableView().getItems().get(getIndex());
+                   boolean nuevoEstado = !cliente.isActivo();
+                   
+                   boolean actualiado = clientsDAO.updateEstado(cliente.getId(),nuevoEstado);
+                   if(actualiado){
+                       cliente.setActivo(nuevoEstado);
+                       tblClientes.refresh();
+                   }else{
+                       mostrarError("No Se Puede Actualizar El Estado De Cliente");
+                   }
+               });
+           }
+           @Override
+           protected void updateItem(Void item, boolean empty){
+               super.updateItem(item, empty);
+               
+               if(empty){
+                   setGraphic(null);
+               } else {
+                   Clients cliente = getTableView().getItems().get(getIndex());
+                   btnToggle.setText(cliente.isActivo() ? "Desactivar" : "Activar");
+                   
+                   HBox botones = new HBox(5, btnEditar,btnToggle);
+                   setGraphic(botones);
+               }
+           }
+        });
 
     tblClientes.setItems(listaClientes);
+    
+    //Coloca en Gris los Clientes Inactivos
+    tblClientes.setRowFactory(tv -> new TableRow<>(){
+        @Override
+        protected void updateItem(Clients cliente, boolean empty){
+            super.updateItem(cliente, empty);
+            
+            if(cliente == null || empty){
+                setStyle("");
+            } else if(!cliente.isActivo()){
+                setStyle("-fx-background-color: #e0e0e0;");
+            } else {
+                setStyle("");
+            }
+        }
+    });
         
+    }
+    
+    private String nvl(Object value){
+        return value == null ? "" : value.toString();
     }
 
     private void newClient(){
         clearform();
         tblClientes.getSelectionModel().clearSelection();
+        modoEdicion = false;
+        clienteSeleccionado = null;
     }
     
     private void saveClient(){
-        Clients selecc = tblClientes.getSelectionModel().getSelectedItem();
         
-        if(selecc == null){
-            Clients nuevo = new Clients();
-            cargarDatos(nuevo);
-            listaClientes.add(nuevo);
-        } else{
-            cargarDatos(selecc);
-            tblClientes.refresh();
+        if(!validarFormulario()){
+            return;
         }
-        clearform();
-        tblClientes.getSelectionModel().clearSelection();
+        
+        Clients cliente = new Clients();
+        cargarDatos(cliente);
+        
+        boolean resultado;
+        
+        if(modoEdicion && clienteSeleccionado != null){
+           cliente.setId(clienteSeleccionado.getId());
+           cliente.setActivo(clienteSeleccionado.isActivo());
+           resultado = clientsDAO.update(cliente);
+        } else {
+            cliente.setActivo(true);
+            resultado = clientsDAO.insert(cliente);
+        }
+        
+        if(resultado){
+            mostrarInfo(modoEdicion ? "Cliente Actualizado Correctamente" :
+                    "Cliente Guardado Correctamente");
+            cargarClienteDB();
+            clearform();
+            tblClientes.getSelectionModel().clearSelection();
+            modoEdicion = false;
+            clienteSeleccionado = null;
+        } else{
+            mostrarError("Ocurrió un Error al Guardar Cliente");
+        }
+
+    }
+    
+    private void cargarClienteDB(){
+        listaClientes.clear();
+        listaClientes.addAll(clientsDAO.findAll());
     }
     
     private void cargarDatos(Clients c) {
@@ -126,8 +239,19 @@ public class ClientsController implements Initializable {
 
     private void configurarSeleccion() {
         
-         tblClientes.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, cliente) -> {
-        if (cliente != null) {
+         tblClientes.getSelectionModel().selectedItemProperty().addListener(
+                 (obs, oldSel, cliente) -> {
+                                                   
+        if (cliente == null) {
+            
+            clearform();
+            clienteSeleccionado = null;
+            modoEdicion = false;
+            deshabilitarFormulario(false);
+            return;           
+        }
+            clienteSeleccionado = cliente;
+            modoEdicion = true;
 
             txtNombre.setText(cliente.getNombre());
             txtTelefono.setText(cliente.getTelefono());
@@ -142,9 +266,9 @@ public class ClientsController implements Initializable {
             txtOiEje.setText(cliente.getOiEje());
 
             txtAdd.setText(cliente.getAdd());
-        }
-    });
-
+            
+            deshabilitarFormulario(!cliente.isActivo());
+        });
     }
 
     private void clearform() {
@@ -159,15 +283,110 @@ public class ClientsController implements Initializable {
         txtOiEje.clear();
         txtAdd.clear();
     }
+       
+    private boolean validarFormulario(){
+        
+        if (txtNombre.getText().trim().isEmpty()){
+            mostrarError("El Nombre es Obligatorio");
+            txtNombre.requestFocus();
+            return false;
+        }
+        
+        if (txtTelefono.getText().trim().isEmpty()){
+            mostrarError("El Telefono es Obligatorio");
+            txtTelefono.requestFocus();
+            return false;
+        }
+        
+        if (txtDireccion.getText().trim().isEmpty()){
+            mostrarError("La Dirección es Obligatoria");
+            txtDireccion.requestFocus();
+            return false;
+        }
+        
+        if(!txtTelefono.getText().matches("\\d+")){
+            mostrarError("El Teléfono solo debe Contener Números");
+            txtTelefono.requestFocus();
+            return false;
+        }
+        return true;
+    }
     
-    private void desactivarCliente(){
-        
-         Clients selecc = tblClientes.getSelectionModel().getSelectedItem();
-         if (selecc != null) {
-            selecc.setActivo(false);
-        listaClientes.remove(selecc);
-            clearform();
+    private void mostrarError(String mensaje){
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
+    
+    private void mostrarInfo(String mensaje){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Información");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
     }
+    
+    private void activarguardado(){
+        btnGuardar.disableProperty().bind(
+        txtNombre.textProperty().isEmpty()
+                .or(txtTelefono.textProperty().isEmpty())
+                .or(txtDireccion.textProperty().isEmpty()));
+    }
+    
+    private void configurarBusqueda(){
+        FilteredList<Clients> filtro = new FilteredList<>(listaClientes, p -> true);
         
+        txtBuscar.textProperty().addListener((obs, oldVal, newVal)->{
+            filtro.setPredicate(Cliente -> {
+                if (newVal == null || newVal.isEmpty()){
+                    return true;
+                }
+                String lower = newVal.toLowerCase();
+                return Cliente.getNombre().toLowerCase().contains(lower)
+                        || Cliente.getTelefono().toLowerCase().contains(lower);
+            });
+        }) ;
+        
+        SortedList<Clients> sorted = new SortedList<>(filtro);
+        sorted.comparatorProperty().bind(tblClientes.comparatorProperty());
+        
+        tblClientes.setItems(sorted);
+    }
+
+    private void deshabilitarFormulario(boolean estado){
+        txtNombre.setDisable(estado);
+        txtTelefono.setDisable(estado);
+        txtDireccion.setDisable(estado);
+        txtOdEsf.setDisable(estado);
+        txtOdCil.setDisable(estado);
+        txtOdEje.setDisable(estado);
+        txtOiEsf.setDisable(estado);
+        txtOiCil.setDisable(estado);
+        txtOiEje.setDisable(estado);
+        txtAdd.setDisable(estado);
+        btnGuardar.setDisable(estado);
+    }
+
+    private void seleccionarClienteDesdeTabla(Clients cliente){
+        clienteSeleccionado = cliente;
+        modoEdicion = true;
+        txtNombre.setText(cliente.getNombre());
+        txtTelefono.setText(cliente.getTelefono());
+        txtDireccion.setText(cliente.getDireccion());
+
+        txtOdEsf.setText(cliente.getOdEsf());
+        txtOdCil.setText(cliente.getOdCil());
+        txtOdEje.setText(cliente.getOdEje());
+
+        txtOiEsf.setText(cliente.getOiEsf());
+        txtOiCil.setText(cliente.getOiCil());
+        txtOiEje.setText(cliente.getOiEje());
+
+        txtAdd.setText(cliente.getAdd());
+
+        deshabilitarFormulario(!cliente.isActivo());
+        
+    }
 }
