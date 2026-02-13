@@ -54,14 +54,13 @@ public class ClientsController implements Initializable {
         activarguardado();
         cargarClienteDB();
         
-        btnGuardar.setDisable(true);
         btnNuevo.setOnAction(e -> newClient());
         btnGuardar.setOnAction(e -> saveClient());
         btnLimpiar.setOnAction(e -> clearform());
     }    
 
     private void configurarTabla() {
-        
+
         colId.setCellValueFactory(data -> 
             new javafx.beans.property.SimpleIntegerProperty(data.getValue().getId()).asObject()
         );
@@ -167,6 +166,20 @@ public class ClientsController implements Initializable {
             }
         }
     });
+    
+        tblClientes.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        colId.setMaxWidth(60);
+        colNombre.setPrefWidth(180);
+        colTelefono.setPrefWidth(120);
+        colDireccion.setPrefWidth(220);
+        colGraduacion.setPrefWidth(260);
+        colEstado.setMaxWidth(90);
+        colAcciones.setMaxWidth(120);
+
+        colId.setStyle("-fx-alignment: CENTER;");
+        colEstado.setStyle("-fx-alignment: CENTER;");
+        tblClientes.setFixedCellSize(-1);
+
         
     }
     

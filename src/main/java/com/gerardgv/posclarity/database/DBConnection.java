@@ -9,25 +9,16 @@ public class DBConnection {
     
     public static final String HOST = "localhost"; //Direccion de servidor.
     public static final String PORT = "3306"; //puertoMySQL
-    public static final String DATABASE = "posclarity"; //Nombre de Base de Datos.
+    public static final String DATABASE = "clarity"; //Nombre de Base de Datos.
     public static final String USER = "root"; //Usuario.
-    public static final String PASSWORD = ""; //Contraseña.
+    public static final String PASSWORD = "clarity2524"; //Contraseña.
     
     public static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE 
                                      + "?useSSL=false&serverTimezone=UTC";
     
-    private static Connection connection;
-    
-    public static Connection getConnection(){
-        if(connection == null){
-            try{
-                connection = DriverManager.getConnection(URL,USER,PASSWORD);
-                System.out.println("Conexión Correcta" + URL);
-            } catch(SQLException e){
-                System.out.println("Error con la Conexión" + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        return connection;
+        
+    public static Connection getConnection() throws SQLException{
+        return DriverManager.getConnection(URL,USER,PASSWORD);
+        
     }
 }

@@ -148,6 +148,7 @@
                         <TableColumn fx:id="colTelefono" prefWidth="75.0" text="Telefono" />
                         <TableColumn fx:id="colDireccion" prefWidth="75.0" text="Dirección" />
                         <TableColumn fx:id="colGraduacion" prefWidth="75.0" text="Graduacion" />
+                        <TableColumn fx:id="colEstado" prefWidth="75.0" text="Estado" />
                         <TableColumn fx:id="colAcciones" prefWidth="75.0" text="Acciones" />
                     </columns>
                   </TableView>
