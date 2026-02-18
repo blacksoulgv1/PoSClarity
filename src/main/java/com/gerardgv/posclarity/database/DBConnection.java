@@ -13,8 +13,10 @@ public class DBConnection {
     public static final String USER = "root"; //Usuario.
     public static final String PASSWORD = "clarity2524"; //Contraseña.
     
-    public static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE 
-                                     + "?useSSL=false&serverTimezone=UTC";
+    public static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE
+        + "?useSSL=false"
+        + "&allowPublicKeyRetrieval=true"
+        + "&serverTimezone=UTC";
     
         
     public static Connection getConnection() throws SQLException{

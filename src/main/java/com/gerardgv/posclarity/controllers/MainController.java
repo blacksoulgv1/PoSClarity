@@ -90,5 +90,10 @@ public class MainController implements Initializable {
     private void abrirClientes(){
         viewVista("Clientsview");
     }
+    
+    @FXML
+    private void abrirSucursales(){
+        viewVista("Branch");
+    }
 
 }
