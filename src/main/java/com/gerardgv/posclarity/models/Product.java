@@ -5,22 +5,26 @@ public class Product {
     private int id_product;
     private String modelo;
     private String marca;
-    private int stock;
     private String categoria;
     private double precio;
+    private boolean manejaStock;
+    private int stock;
+    private boolean micaBase;
     private String tipo_producto; // elemento fisico o bajo_pedido
     private boolean activo;
    
     public Product(){
     }
 
-    public Product(int id_product, String modelo, String marca, int stock, String categoria, double precio, String tipo_producto, boolean activo) {
+    public Product(int id_product, String modelo, String marca, String categoria, double precio, boolean manejaStock, int stock, boolean micaBase, String tipo_producto, boolean activo) {
         this.id_product = id_product;
         this.modelo = modelo;
         this.marca = marca;
-        this.stock = stock;
         this.categoria = categoria;
         this.precio = precio;
+        this.manejaStock = manejaStock;
+        this.stock = stock;
+        this.micaBase = micaBase;
         this.tipo_producto = tipo_producto;
         this.activo = activo;
     }
@@ -49,14 +53,6 @@ public class Product {
         this.marca = marca;
     }
 
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
     public String getCategoria() {
         return categoria;
     }
@@ -71,6 +67,30 @@ public class Product {
 
     public void setPrecio(double precio) {
         this.precio = precio;
+    }
+
+    public boolean isManejaStock() {
+        return manejaStock;
+    }
+
+    public void setManejaStock(boolean manejaStock) {
+        this.manejaStock = manejaStock;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public boolean isMicaBase() {
+        return micaBase;
+    }
+
+    public void setMicaBase(boolean micaBase) {
+        this.micaBase = micaBase;
     }
 
     public String getTipo_producto() {
@@ -90,5 +110,5 @@ public class Product {
     }
     
     
-    
+
 }

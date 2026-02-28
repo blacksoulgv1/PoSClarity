@@ -1,7 +1,7 @@
 .root{
     -fx-font-family: "segoe UI", "Arial";
-    /*-fx-background-color: linear-gradient(to bottom right, #eef2f7,#dfe6ee);*/
-    -fx-background-color: red;
+    -fx-background-color: linear-gradient(to bottom right, #eef2f7,#dfe6ee);
+
 }
 
 /* HEADER*/
@@ -263,8 +263,8 @@
 
 /*NUMERO GRANDE*/
 .info-value{
-    -fx-front-size:20px;
-    -fx-front-weight: bold;
+    -fx-font-size:20px;
+    -fx-font-weight: bold;
     -fx-text-fill: #2c3e50;
 }
 
@@ -272,4 +272,12 @@
 .info-title{
     -fx-font-size: 12px;
     -fx-text-fill:#7f8c8d;
+}
+
+.table-row-cell:filled:selected .table-cell{
+    -fx-text-fill: #2c3e50;
+}
+
+.table-row-cell:hover .table-cell{
+    -fx-text-fill: #2c3e50
 }

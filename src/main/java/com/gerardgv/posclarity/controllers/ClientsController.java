@@ -4,6 +4,8 @@ import com.gerardgv.posclarity.database.ClientsDAO;
 import com.gerardgv.posclarity.models.Clients;
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.*;
 import javafx.collections.transformation.*;
@@ -44,6 +46,7 @@ public class ClientsController implements Initializable {
     
     private ClientsDAO clientsDAO = new ClientsDAO();
     private ObservableList<Clients> listaClientes = FXCollections.observableArrayList();
+    private BooleanProperty formularioDesabilitado = new SimpleBooleanProperty(false);
     
      
     @Override
@@ -192,6 +195,8 @@ public class ClientsController implements Initializable {
         tblClientes.getSelectionModel().clearSelection();
         modoEdicion = false;
         clienteSeleccionado = null;
+        deshabilitarFormulario(false);
+        txtNombre.requestFocus();
     }
     
     private void saveClient(){
@@ -343,9 +348,11 @@ public class ClientsController implements Initializable {
     
     private void activarguardado(){
         btnGuardar.disableProperty().bind(
-        txtNombre.textProperty().isEmpty()
-                .or(txtTelefono.textProperty().isEmpty())
-                .or(txtDireccion.textProperty().isEmpty()));
+            formularioDesabilitado
+                    .or(txtNombre.textProperty().isEmpty())
+                    .or(txtTelefono.textProperty().isEmpty())
+                    .or(txtDireccion.textProperty().isEmpty())
+                    );
     }
     
     private void configurarBusqueda(){
@@ -379,7 +386,7 @@ public class ClientsController implements Initializable {
         txtOiCil.setDisable(estado);
         txtOiEje.setDisable(estado);
         txtAdd.setDisable(estado);
-        btnGuardar.setDisable(estado);
+        formularioDesabilitado.set(estado);
     }
 
     private void seleccionarClienteDesdeTabla(Clients cliente){

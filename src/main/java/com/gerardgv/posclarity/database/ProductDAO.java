@@ -7,64 +7,72 @@ import java.util.List;
 
 public class ProductDAO {
     
-    //Insertar Producto
+    //Insertar Producto TERMINADO
     public boolean insert(Product p){
-        String sql = "INSERT INTO products (modelo,marca,stock,categoria,precio,tipo_producto)"
-                + "VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO products "
+            + "(modelo,marca,categoria,precio,maneja_stock,mica_base,tipo_producto,activo)"
+            + "VALUES (?,?,?,?,?,?,?,?)";
         
         try(Connection conn =DBConnection.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)){
             
             stm.setString(1, p.getModelo());
             stm.setString(2, p.getMarca());
-            stm.setInt(3, p.getStock());
-            stm.setString(4, p.getCategoria());
-            stm.setDouble(5, p.getPrecio());
-            stm.setString(6, p.getTipo_producto());
+            stm.setString(3, p.getCategoria());
+            stm.setDouble(4, p.getPrecio());
+            stm.setBoolean(5, p.isManejaStock());
+            stm.setBoolean(6, p.isMicaBase());
+            stm.setString(7, p.getTipo_producto());
+            stm.setBoolean(8, p.isActivo());
             
             return stm.executeUpdate() > 0;
             
         }catch(SQLException e){
-            System.out.println("Errot al insertar Producto");
+            System.out.println();
             e.printStackTrace();
             return false;
         }
     }
     
-    //Lista de Productos    
+    //Lista de Productos TERMINADO
     public List<Product> getAll(){
-        List<Product> products = new ArrayList<>();
-        String sql = "SELECT * FROM products";
+        
+        List<Product> lista = new ArrayList<>();
+        
+        String sql ="SELECT * FROM products";        
         
         try(Connection conn = DBConnection.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql);
                 ResultSet rs = stm.executeQuery()){
             
             while (rs.next()) {                
-                Product product = new Product();
+                Product p = new Product();
                 
-                product.setId_product(rs.getInt("id_product"));
-                product.setModelo(rs.getString("modelo"));
-                product.setMarca(rs.getString("marca"));
-                product.setStock(rs.getInt("stock"));
-                product.setCategoria(rs.getString("categoria"));
-                product.setPrecio(rs.getDouble("precio"));              
-                product.setTipo_producto(rs.getString("tipo_producto"));
+                p.setId_product(rs.getInt("id_product"));
+                p.setModelo(rs.getString("modelo"));
+                p.setMarca(rs.getString("marca"));
+                p.setCategoria(rs.getString("categoria"));
+                p.setPrecio(rs.getDouble("precio"));
+                p.setManejaStock(rs.getBoolean("maneja_stock"));
+                p.setMicaBase(rs.getBoolean("mica_base"));
+                p.setTipo_producto(rs.getString("tipo_producto"));
+                p.setActivo(rs.getBoolean("activo"));
+
                 
-                products.add(product);
+                lista.add(p);
             }
             
         }catch(SQLException e){
-            System.out.println("Error al obtener lista de productos");
             e.printStackTrace();
         }
-        return products;
+        return lista;
     }
     
-    //Buscar Producto por Modelo
+    //Buscar Producto por Modelo TERMINADO
     public Product getByModel(String model){
-        String sql = "SELECT * FROM products WHERE modelo = ?";
-        Product product = null;
+        
+        String sql =" SELECT * FROM products WHERE modelo=?";
+        Product p = null;
         
         try (Connection conn = DBConnection.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)){
@@ -75,28 +83,32 @@ public class ProductDAO {
                 
                 if(rs.next()){
                     
-                    product = new Product();
-                    product.setId_product(rs.getInt("id_Product"));
-                    product.setModelo(rs.getString("modelo"));
-                    product.setMarca(rs.getString("marca"));
-                    product.setStock(rs.getInt("stock"));
-                    product.setCategoria(rs.getString("categoria"));
-                    product.setPrecio(rs.getDouble("precio"));
-                    product.setTipo_producto(rs.getString("tipo_producto"));
+                    p = new Product();
+                    
+                p.setId_product(rs.getInt("id_product"));
+                p.setModelo(rs.getString("modelo"));
+                p.setMarca(rs.getString("marca"));
+                p.setCategoria(rs.getString("categoria"));
+                p.setPrecio(rs.getDouble("precio"));
+                p.setManejaStock(rs.getBoolean("maneja_stock"));
+                p.setMicaBase(rs.getBoolean("mica_base"));
+                p.setTipo_producto(rs.getString("tipo_producto"));
+                p.setActivo(rs.getBoolean("activo"));
+                    
                 }
             }
             
         } catch (Exception e) {
-            System.out.println("Error al buscar el Producto");
             e.printStackTrace();
         }
-        return product;
+        return p;
     }
     
-    //Buscar Producto por ID
+    //Buscar Producto por ID TERMINADO
     public Product getById(int id){
         
-        String sql = "SELECT * FROM products WHERE id_product = ?";
+        String sql ="SELECT * FRON products WHERE id_product=?";
+        
         Product product = null;
         
         try(Connection conn = DBConnection.getConnection();
@@ -112,56 +124,70 @@ public class ProductDAO {
                     product.setId_product(rs.getInt("id_product"));
                     product.setModelo(rs.getString("modelo"));
                     product.setMarca(rs.getString("marca"));
-                    product.setStock(rs.getInt("stock"));
                     product.setCategoria(rs.getString("categoria"));
                     product.setPrecio(rs.getDouble("precio"));
+                    product.setManejaStock(rs.getBoolean("maneja_stock"));
+                    product.setMicaBase(rs.getBoolean("mica_base"));
                     product.setTipo_producto(rs.getString("tipo_producto"));
+                    product.setActivo(rs.getBoolean("activo"));
                 }
             }
         }catch(SQLException e){
-            System.out.println("Error al buscar producto");
             e.printStackTrace();
         }
         return product;
     }
     
-    //Actualizar Producto
-    public boolean update(Product product){
+    //Actualizar Producto TERMINADO
+    public boolean update(Product p){
         
-        String sql = "UPDATE products SET modelo=?, marca=?, stock=?, categoria=?, precio=?, tipo_producto=?"
-                + " WHERE id_product=?";
+        String sql ="""
+        UPDATE products SET
+        modelo=?,
+        marca=?,
+        categoria=?,
+        precio=?,
+        maneja_stock=?,
+        mica_base=?,
+        tipo_producto=?,
+        activo=?
+        WHERE id_product=?
+        """;
         
         try(Connection conn = DBConnection.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)){
             
-            stm.setString(1,product.getModelo());
-            stm.setString(2,product.getMarca());
-            stm.setInt(3, product.getStock());
-            stm.setString(4,product.getCategoria());
-            stm.setDouble(5,product.getPrecio());
-            stm.setInt(7,product.getId_product());
+            stm.setString(1, p.getModelo());
+            stm.setString(2, p.getMarca());
+            stm.setString(3, p.getCategoria());
+            stm.setDouble(4, p.getPrecio());
+            stm.setBoolean(5, p.isManejaStock());
+            stm.setBoolean(6, p.isMicaBase());
+            stm.setString(7, p.getTipo_producto());
+            stm.setBoolean(8, p.isActivo());
+            stm.setInt(9, p.getId_product());
             
             return stm.executeUpdate() > 0;
             
         } catch (SQLException e) {
-            System.out.println("Error al actualizar producto");
             e.printStackTrace();
             return false;
         }
     }
     
-    //Eliminar producto
-    public boolean delete(int id){
-        String sql = "DELATE FROM products WHERE id_product = ?";
+    //Eliminar producto TERMINADO
+    public boolean cambiarEstado(int id, boolean estado){
+        
+        String sql = "UPDATE products SET activo=? WHERE id_product=?";
         
         try(Connection conn = DBConnection.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)){
             
-            stm.setInt(1, id);
-            
+            stm.setBoolean(1, estado);
+            stm.setInt(2, id);
+                        
             return  stm.executeUpdate() > 0;
         }catch(SQLException e){
-            System.out.println("Error al eliminar producto");
             e.printStackTrace();
             return false;
         }
