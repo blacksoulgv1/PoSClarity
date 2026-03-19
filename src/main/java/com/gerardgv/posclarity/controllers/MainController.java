@@ -95,5 +95,14 @@ public class MainController implements Initializable {
     private void abrirSucursales(){
         viewVista("Branch");
     }
+    @FXML
+    private void abrirTraspaso(){
+        viewVista("Traspaso");
+    }
+    
+    @FXML
+    private void abrirDescuento(){
+        viewVista("Descuento");
+    }
 
 }

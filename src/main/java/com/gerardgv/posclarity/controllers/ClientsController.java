@@ -2,6 +2,8 @@ package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.database.ClientsDAO;
 import com.gerardgv.posclarity.models.Clients;
+import com.gerardgv.posclarity.utils.SearchUtils;
+import com.gerardgv.posclarity.utils.TableUtils;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.BooleanProperty;
@@ -28,7 +30,6 @@ public class ClientsController implements Initializable {
     @FXML private TextField txtAdd;
     @FXML private TextField txtBuscar;
     
-    @FXML private Button btnNuevo;
     @FXML private Button btnGuardar;
     @FXML private Button btnLimpiar;
     
@@ -39,7 +40,7 @@ public class ClientsController implements Initializable {
     @FXML private TableColumn<Clients, String> colDireccion;
     @FXML private TableColumn<Clients, String> colGraduacion;
     @FXML private TableColumn<Clients, Void> colAcciones;
-    @FXML private TableColumn<Clients,String> colEstado;
+    @FXML private TableColumn<Clients,Boolean> colEstado;
     
     private Clients clienteSeleccionado = null;
     private boolean  modoEdicion = false;
@@ -51,15 +52,38 @@ public class ClientsController implements Initializable {
      
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        configurarBusqueda();
+        
+        txtBuscar.requestFocus();
+        tblClientes.setSelectionModel(null);
+        
+        SearchUtils.setupSearch(txtBuscar, tblClientes, listaClientes,
+                c-> c.getNombre(),
+                c-> c.getTelefono(),
+                c-> c.getDireccion());
+        
         configurarTabla();
-        configurarSeleccion();        
         activarguardado();
         cargarClienteDB();
         
-        btnNuevo.setOnAction(e -> newClient());
+         colEstado.setCellFactory(column ->
+                TableUtils.createActiveToggle(
+                        Clients::getId,
+                        clientsDAO::updateEstado));
+         colAcciones.setCellFactory(param ->
+            TableUtils.createEditButton(this::seleccionarClienteDesdeTabla));
+        
         btnGuardar.setOnAction(e -> saveClient());
         btnLimpiar.setOnAction(e -> clearform());
+        
+        txtBuscar.sceneProperty().addListener((obs,oldScene,scene)->{
+            if(scene != null){
+                scene.setOnKeyPressed(e->{
+                    if(e.getCode().toString().equals("ESCAPE")){
+                        clearform();
+                    }
+                });
+            }
+        });
     }    
 
     private void configurarTabla() {
@@ -106,54 +130,9 @@ public class ClientsController implements Initializable {
         return cell;
     });
         
-        colEstado.setCellValueFactory(cellData -> {
-            boolean activo = cellData.getValue().isActivo();
-            return new SimpleStringProperty(activo ? "Activo" : "Inactivo");
-        });
-            //Columna Acciones
-        colAcciones.setCellFactory(col -> new TableCell<Clients, Void>(){
-           private final Button btnEditar = new Button("Editar");
-           private final Button btnToggle = new Button();
-           {
-               btnEditar.setStyle("-fx-background-color: #3498db; -fx-text-fill: white;");
-               btnToggle.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white;");
-               
-               btnEditar.setOnAction(e -> {
-                   Clients cliente = getTableView().getItems().get(getIndex());
-                   seleccionarClienteDesdeTabla(cliente);
-               });
-               
-               btnToggle.setOnAction(e -> {
-                   Clients cliente = getTableView().getItems().get(getIndex());
-                   boolean nuevoEstado = !cliente.isActivo();
-                   
-                   boolean actualiado = clientsDAO.updateEstado(cliente.getId(),nuevoEstado);
-                   if(actualiado){
-                       cliente.setActivo(nuevoEstado);
-                       tblClientes.refresh();
-                   }else{
-                       mostrarError("No Se Puede Actualizar El Estado De Cliente");
-                   }
-               });
-           }
-           @Override
-           protected void updateItem(Void item, boolean empty){
-               super.updateItem(item, empty);
-               
-               if(empty){
-                   setGraphic(null);
-               } else {
-                   Clients cliente = getTableView().getItems().get(getIndex());
-                   btnToggle.setText(cliente.isActivo() ? "Desactivar" : "Activar");
-                   
-                   HBox botones = new HBox(5, btnEditar,btnToggle);
-                   setGraphic(botones);
-               }
-           }
-        });
-
-    tblClientes.setItems(listaClientes);
-    
+        colEstado.setCellValueFactory(data ->
+            new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
+   
     //Coloca en Gris los Clientes Inactivos
     tblClientes.setRowFactory(tv -> new TableRow<>(){
         @Override
@@ -190,14 +169,6 @@ public class ClientsController implements Initializable {
         return value == null ? "" : value.toString();
     }
 
-    private void newClient(){
-        clearform();
-        tblClientes.getSelectionModel().clearSelection();
-        modoEdicion = false;
-        clienteSeleccionado = null;
-        deshabilitarFormulario(false);
-        txtNombre.requestFocus();
-    }
     
     private void saveClient(){
         
@@ -255,40 +226,6 @@ public class ClientsController implements Initializable {
         
     }
 
-    private void configurarSeleccion() {
-        
-         tblClientes.getSelectionModel().selectedItemProperty().addListener(
-                 (obs, oldSel, cliente) -> {
-                                                   
-        if (cliente == null) {
-            
-            clearform();
-            clienteSeleccionado = null;
-            modoEdicion = false;
-            deshabilitarFormulario(false);
-            return;           
-        }
-            clienteSeleccionado = cliente;
-            modoEdicion = true;
-
-            txtNombre.setText(cliente.getNombre());
-            txtTelefono.setText(cliente.getTelefono());
-            txtDireccion.setText(cliente.getDireccion());
-
-            txtOdEsf.setText(cliente.getOdEsf());
-            txtOdCil.setText(cliente.getOdCil());
-            txtOdEje.setText(cliente.getOdEje());
-
-            txtOiEsf.setText(cliente.getOiEsf());
-            txtOiCil.setText(cliente.getOiCil());
-            txtOiEje.setText(cliente.getOiEje());
-
-            txtAdd.setText(cliente.getAdd());
-            
-            deshabilitarFormulario(!cliente.isActivo());
-        });
-    }
-
     private void clearform() {
         txtNombre.clear();
         txtTelefono.clear();
@@ -300,6 +237,11 @@ public class ClientsController implements Initializable {
         txtOiCil.clear();
         txtOiEje.clear();
         txtAdd.clear();
+        
+        clienteSeleccionado = null;
+        modoEdicion = false;
+        deshabilitarFormulario(false);
+        txtNombre.requestFocus();
     }
        
     private boolean validarFormulario(){
@@ -355,26 +297,6 @@ public class ClientsController implements Initializable {
                     );
     }
     
-    private void configurarBusqueda(){
-        FilteredList<Clients> filtro = new FilteredList<>(listaClientes, p -> true);
-        
-        txtBuscar.textProperty().addListener((obs, oldVal, newVal)->{
-            filtro.setPredicate(Cliente -> {
-                if (newVal == null || newVal.isEmpty()){
-                    return true;
-                }
-                String lower = newVal.toLowerCase();
-                return Cliente.getNombre().toLowerCase().contains(lower)
-                        || Cliente.getTelefono().toLowerCase().contains(lower);
-            });
-        }) ;
-        
-        SortedList<Clients> sorted = new SortedList<>(filtro);
-        sorted.comparatorProperty().bind(tblClientes.comparatorProperty());
-        
-        tblClientes.setItems(sorted);
-    }
-
     private void deshabilitarFormulario(boolean estado){
         txtNombre.setDisable(estado);
         txtTelefono.setDisable(estado);

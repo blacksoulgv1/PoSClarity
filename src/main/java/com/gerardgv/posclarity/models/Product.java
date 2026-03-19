@@ -11,12 +11,12 @@ public class Product {
     private int stock;
     private boolean micaBase;
     private String tipo_producto; // elemento fisico o bajo_pedido
-    private boolean activo;
+    private boolean activo = true;
    
     public Product(){
     }
 
-    public Product(int id_product, String modelo, String marca, String categoria, double precio, boolean manejaStock, int stock, boolean micaBase, String tipo_producto, boolean activo) {
+    public Product(int id_product, String modelo, String marca, String categoria, double precio, boolean manejaStock, int stock, boolean micaBase, String tipo_producto) {
         this.id_product = id_product;
         this.modelo = modelo;
         this.marca = marca;
@@ -26,7 +26,6 @@ public class Product {
         this.stock = stock;
         this.micaBase = micaBase;
         this.tipo_producto = tipo_producto;
-        this.activo = activo;
     }
 
     public int getId_product() {
@@ -111,4 +110,4 @@ public class Product {
     
     
 
-}
+ }

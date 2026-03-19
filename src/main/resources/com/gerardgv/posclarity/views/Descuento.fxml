@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -15,7 +16,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.ProductsController">
+<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.DescuentoController">
    <center>
       <SplitPane fx:id="splitPane" dividerPositions="0.35" styleClass="main-split">
          <items>
@@ -24,9 +25,9 @@
                   <Insets top="10.0" />
                </padding>
                <children>
-                  <Label styleClass="form-title" text="Alta / Edición de Productos" />
+                  <Label styleClass="form-title" text="Alta / Edición de Categorias" />
                   
-                  <GridPane hgap="15.0" prefHeight="144.0" prefWidth="406.0" vgap="18">
+                  <GridPane hgap="15.0" prefHeight="144.0" prefWidth="406.0" vgap="18" VBox.vgrow="NEVER">
                     <columnConstraints>
                       <ColumnConstraints hgrow="SOMETIMES" maxWidth="202.0" minWidth="10.0" prefWidth="86.0" />
                       <ColumnConstraints hgrow="SOMETIMES" maxWidth="322.0" minWidth="10.0" prefWidth="322.0" />
@@ -39,20 +40,28 @@
                         <RowConstraints minHeight="50.0" vgrow="NEVER" />
                         <RowConstraints minHeight="50.0" vgrow="NEVER" />
                         <RowConstraints minHeight="50.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
+                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
                     </rowConstraints>
                      <children>
-                        <Label styleClass="form-label" text="Modelo" />
-                        <TextField fx:id="txtModelo" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
-                        <Label styleClass="form-label" text="Marca" GridPane.rowIndex="1" />
-                        <TextField fx:id="txtMarca" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
-                        <Label styleClass="form-label" text="Categoría" GridPane.rowIndex="2" />
-                     <ComboBox fx:id="cbCategoria" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-                        <Label styleClass="form-label" text="Tipo" GridPane.rowIndex="3" />
-                        <ComboBox fx:id="cbTipo" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="3" />
-                        <Label styleClass="form-label" text="Precio" GridPane.rowIndex="4" />
-                        <TextField fx:id="txtPrecio" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="4" />
-                        <Label styleClass="form-label" text="Stock" GridPane.rowIndex="5" />
-                        <TextField fx:id="txtStock" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="5" />
+                        <Label styleClass="form-label" text="Nombre" />
+                        <TextField fx:id="txtNombre" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
+                        <Label styleClass="form-label" text="Tipo Aplicación" GridPane.rowIndex="1" />
+                        <ComboBox fx:id="cbTipoAplicacion" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                        <Label styleClass="form-label" text="Tipo Valor" GridPane.rowIndex="2" />
+                     <ComboBox fx:id="cbTipoValor" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
+                        <Label styleClass="form-label" text="Valor" GridPane.rowIndex="3" />
+                        <TextField fx:id="txtValor" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        <Label styleClass="form-label" text="Cupón" GridPane.rowIndex="4" />
+                        <TextField fx:id="txtCupon" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        <Label styleClass="form-label" text="Categoría" GridPane.rowIndex="5" />
+                        <ComboBox fx:id="cbCategoria" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+                        <Label styleClass="form-label" text="Fecha Inicio" GridPane.rowIndex="6" />
+                        <DatePicker fx:id="dpInicio" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+                        <Label text="Fecha Fin" GridPane.rowIndex="7" />
+                        <DatePicker fx:id="dpFin" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                        <Label text="Prioridad" GridPane.rowIndex="8" />
+                        <TextField fx:id="txtPrioridad" GridPane.columnIndex="1" GridPane.rowIndex="8" />
                      </children>
                      <VBox.margin>
                         <Insets left="10.0" right="15.0" />
@@ -63,7 +72,7 @@
                   </GridPane>
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                      <children>
-                        <Button fx:id="btnGuardar" mnemonicParsing="false" styleClass="btn-primary" text="Guardar" />
+                        <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#guardar" styleClass="btn-primary" text="Guardar" />
                         <Button fx:id="btnClear" mnemonicParsing="false" text="Limpiar" />
                      </children>
                   </HBox>
@@ -76,17 +85,20 @@
                         <TextField fx:id="txtBuscar" promptText="Buscar por código o nombre" styleClass="search-field" />
                      </children>
                   </HBox>
-                  <TableView fx:id="tblProductos" prefHeight="252.0" prefWidth="776.0">
+                  <TableView fx:id="tabla" prefHeight="252.0" prefWidth="776.0">
                     <columns>
                       <TableColumn fx:id="colId" prefWidth="75.0" text="Id" />
-                      <TableColumn fx:id="colModelo" prefWidth="75.0" text="Modelo" />
-                        <TableColumn fx:id="colMarca" prefWidth="75.0" text="Marca" />
+                      <TableColumn fx:id="colNombre" prefWidth="75.0" text="Promocion" />
+                        <TableColumn fx:id="colTAplicacion" prefWidth="75.0" text="Aplicacion" />
+                        <TableColumn fx:id="colTValor" prefWidth="75.0" text="Tipo Valor" />
+                        <TableColumn fx:id="colValor" prefWidth="75.0" text="Valor" />
+                        <TableColumn fx:id="colcupon" prefWidth="75.0" text="Cupon" />
                         <TableColumn fx:id="colCategoria" prefWidth="75.0" text="Categoria" />
-                        <TableColumn fx:id="colTipo" prefWidth="75.0" text="Tipo" />
-                        <TableColumn fx:id="colPrecio" prefWidth="75.0" text="Precio" />
-                        <TableColumn fx:id="colStock" prefWidth="75.0" text="Stock" />
-                        <TableColumn fx:id="colActivo" prefWidth="75.0" text="Estado" />
-                        <TableColumn fx:id="colAcciones" prefWidth="75.0" text="Acciones" />
+                        <TableColumn fx:id="colFi" prefWidth="75.0" text="Fecha Inicio" />
+                        <TableColumn fx:id="colFf" prefWidth="75.0" text="Fecha Final" />
+                        <TableColumn fx:id="colPrioridad" prefWidth="75.0" text="Prioridad" />
+                        <TableColumn fx:id="colActivo" prefWidth="75.0" text="Activo" />
+                        <TableColumn fx:id="colAccion" prefWidth="75.0" text="Accion" />
                     </columns>
                   </TableView>
                </children>
@@ -103,7 +115,7 @@
             <Insets left="25" right="25" />
          </padding>
          <children>
-            <Label styleClass="header-title" text="Productos" />
+            <Label styleClass="header-title" text="Gestión de Promociones" />
          </children>
       </HBox>
    </top>

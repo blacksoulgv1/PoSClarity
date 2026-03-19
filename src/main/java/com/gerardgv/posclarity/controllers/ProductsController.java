@@ -2,26 +2,30 @@ package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.database.ProductDAO;
 import com.gerardgv.posclarity.models.Product;
+import com.gerardgv.posclarity.utils.SearchUtils;
+import com.gerardgv.posclarity.utils.TableUtils;
 import java.io.IOException;
-
 import java.net.URL;
 import java.util.ResourceBundle;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 
 public class ProductsController implements Initializable {
@@ -33,20 +37,15 @@ public class ProductsController implements Initializable {
     @FXML private TextField txtBuscar;
     @FXML private TextField txtStock;
     
-    // ===== Box =====
-    @FXML private CheckBox chkActivo;
-    
+    // ===== Box =====  
     @FXML private ComboBox<String> cbCategoria;
     @FXML private ComboBox<String> cbTipo;
  
     private ProductDAO productDAO = new ProductDAO(); 
     
     // ===== Buttons =====
-    @FXML private Button btnNuevo;
     @FXML private Button btnGuardar;
-    @FXML private Button btnLimpiar;
-    @FXML private Button btnBuscar;
-    @FXML private Button btnNuevaCategoria;
+    @FXML private Button btnClear;
     
     // ===== Tabla =====
     @FXML private TableView<Product> tblProductos;    
@@ -57,13 +56,15 @@ public class ProductsController implements Initializable {
     @FXML private TableColumn<Product,String> colTipo;
     @FXML private TableColumn<Product,Double> colPrecio;
     @FXML private TableColumn<Product,Integer> colStock;
-    @FXML private TableColumn<Product,String> colEstatus;
+    @FXML private TableColumn<Product,Boolean> colActivo;
     @FXML private TableColumn<Product, Void> colAcciones;
     
     @FXML private SplitPane splitPane;
     
     private boolean modoEdicion = false;
     private Product productoSeleccionado;
+    private ObservableList<Product> listaProductos = FXCollections.observableArrayList();
+
 
     /**
      * Initializes the controller class.
@@ -72,14 +73,25 @@ public class ProductsController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
         panel();
-        buttonAccion();
         configurarColumnas();        
         cargarCombos();
         cargarProductos();
         formatearCombos();
         
+        SearchUtils.setupSearch(txtBuscar, tblProductos, listaProductos,
+                p -> p.getModelo(),
+                p -> p.getMarca());
+        
+        btnClear.setOnAction(e-> limpiarFormulario());
+        
+        colActivo.setCellFactory(column ->
+                TableUtils.createActiveToggle(
+                        Product::getId_product,
+                        productDAO::cambiarEstado));
+        colAcciones.setCellFactory(param ->
+            TableUtils.createEditButton(this::editarProducto));
+        
         btnGuardar.setOnAction(e -> saveProduct());
-        btnNuevo.setOnAction(e -> limpiarFormulario());
         
         cbCategoria.valueProperty().addListener((obs,oldVal,newVal)-> {
             if(newVal !=null){
@@ -101,6 +113,8 @@ public class ProductsController implements Initializable {
                 }
             }
         });
+        
+        tblProductos.setSelectionModel(null);
     }
     
     private void panel(){
@@ -112,57 +126,29 @@ public class ProductsController implements Initializable {
     }
     
 //terminado 26-02
-        private void configurarColumnas(){
+    private void configurarColumnas(){
         
-    colId.setCellValueFactory(data -> new SimpleStringProperty(String.valueOf(data.getValue().getId_product())));
-    colModelo.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getModelo()));
-    colMarca.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getMarca()));
-    colCategoria.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCategoria()));
-    colTipo.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTipo_producto()));
-    colPrecio.setCellValueFactory(data -> new SimpleDoubleProperty(data.getValue().getPrecio()).asObject());
+    colId.setCellValueFactory(data ->
+            new SimpleStringProperty(String.valueOf(data.getValue().getId_product())));
+    colModelo.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getModelo()));
+    colMarca.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getMarca()));
+    colCategoria.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getCategoria()));
+    colTipo.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getTipo_producto()));
+    colPrecio.setCellValueFactory(data ->
+            new SimpleDoubleProperty(data.getValue().getPrecio()).asObject());
     colStock.setCellValueFactory(data ->
         new SimpleIntegerProperty(
         data.getValue().isManejaStock() ? 1 : 0
         ).asObject()
     );
-    colEstatus.setCellValueFactory(data -> {
-        boolean activo = data.getValue().isActivo();
-        return new SimpleObjectProperty(activo ? "Activo": "Inactivo");
-    });
+    colActivo.setCellValueFactory(data ->
+        new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
     }
-    
-    private void buttonAccion(){
-        colAcciones.setCellFactory(param -> new TableCell<Product, Void>(){
-            
-            private final Button btnEditar = new Button("✏");
-            private final Button btnDesactivar = new Button("🗑");
-            private final HBox contenedor = new HBox(8,btnEditar,btnDesactivar);
-            
-            {
-                contenedor.setAlignment(Pos.CENTER)
-                        ;
-                btnEditar.getStyleClass().add("btn-table-edit");
-                btnDesactivar.getStyleClass().add("btn-table-delete");
-                
-                btnEditar.setOnAction(e ->{
-                    Product p = getTableView().getItems().get(getIndex());
-                    editarProducto(p);
-                });
-                btnDesactivar.setOnAction(e -> {
-                    Product p = getTableView().getItems().get(getIndex());
-                    desactivarProducto(p);
-                });              
-            }
- 
-            @Override
-            protected void updateItem(Void item, boolean empty){
-                super.updateItem(item, empty);
-                setGraphic(empty ? null: contenedor);
-            }
-            
-        });
-    }
-    
+
     //terminado 26-02
     private void editarProducto( Product p){
         
@@ -174,7 +160,6 @@ public class ProductsController implements Initializable {
         txtPrecio.setText(String.valueOf(p.getPrecio()));
         cbCategoria.setValue(p.getCategoria());
         cbTipo.setValue(p.getTipo_producto());
-        chkActivo.setSelected(p.isActivo());
         btnGuardar.setText("Actualizar");
         aplicarComportamientoCategoria(p.getCategoria());
  
@@ -234,7 +219,7 @@ public class ProductsController implements Initializable {
 
         p.setMicaBase(cbCategoria.getValue().equals("mica"));
        
-        p.setActivo(chkActivo.isSelected());
+        p.setActivo(true);
 
         boolean resultado;
 
@@ -261,7 +246,6 @@ public class ProductsController implements Initializable {
         txtPrecio.clear();
         cbCategoria.getSelectionModel().clearSelection();
         cbTipo.getSelectionModel().clearSelection();
-        chkActivo.setSelected(true);
         cbTipo.setDisable(false);
         txtStock.setDisable(false);
         txtStock.clear();
@@ -271,9 +255,9 @@ public class ProductsController implements Initializable {
     }
 
     private void cargarProductos() {
-        tblProductos.setItems(
-            FXCollections.observableArrayList(
-                    productDAO.getAll()));
+        listaProductos.clear();
+        listaProductos.addAll(productDAO.getAll());
+        tblProductos.setItems(listaProductos);
     }
     
     //Corecto

@@ -52,7 +52,6 @@
                   </GridPane>
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                      <children>
-                        <Button fx:id="btnNuevo" mnemonicParsing="false" onAction="#nuevoRegistro" styleClass="btn-secondary" text="Nuevo" />
                         <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#saveBranch" styleClass="btn-primary" text="Guardar" />
                         <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearform" styleClass="btn-secondary" text="Limpiar" />
                      </children>

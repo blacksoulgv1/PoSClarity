@@ -5,288 +5,138 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="900" prefWidth="1440" 
-            stylesheets="@/com/gerardgv/posclarity/css/SaleView.css" 
-            xmlns="http://javafx.com/javafx/23.0.1" 
-            xmlns:fx="http://javafx.com/fxml/1" 
+<BorderPane prefHeight="900" prefWidth="1440"
+            stylesheets="@/com/gerardgv/posclarity/css/SaleView.css"
+            xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.gerardgv.posclarity.controllers.SaleController">
+
+   <!-- 🔝 HEADER -->
    <top>
-      <VBox prefHeight="142.0" prefWidth="1412.0" spacing="8.0" BorderPane.alignment="CENTER">
-         <padding>
-            <Insets top="10.0" />
-         </padding>
+      <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
          <children>
-            <HBox prefHeight="19.0" prefWidth="1440.0" />
-            <HBox prefHeight="42.0" prefWidth="1418.0">
+
+            <Label text="Venta">
+               <font><Font size="16"/></font>
+            </Label>
+
+            <GridPane hgap="10" vgap="10">
+               <columnConstraints>
+                  <ColumnConstraints percentWidth="15"/>
+                  <ColumnConstraints percentWidth="35"/>
+                  <ColumnConstraints percentWidth="15"/>
+                  <ColumnConstraints percentWidth="35"/>
+               </columnConstraints>
+
                <children>
-                  <Label text="Colaborador">
-                     <HBox.margin>
-                        <Insets left="5.0" top="10.0" />
-                     </HBox.margin>
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                  </Label>
-                  <TextField fx:id="txtColaborador" maxWidth="83.0" prefHeight="25.0" prefWidth="62.0">
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Label text="Nombre">
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField fx:id="txtNombreVendedor" maxWidth="197.0" prefHeight="25.0" prefWidth="197.0">
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Label text="Tienda">
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField fx:id="txtTienda" maxWidth="197.0" prefHeight="25.0" prefWidth="140.0">
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Label text="Fecha">
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <DatePicker>
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </DatePicker>
-                  <Label text="Nota">
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField maxWidth="197.0" prefHeight="25.0" prefWidth="140.0">
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
+                  <Label text="Colaborador"/>
+                  <TextField fx:id="txtColaborador" GridPane.columnIndex="1"/>
+
+                  <Label text="Fecha" GridPane.columnIndex="2"/>
+                  <TextField fx:id="txtDate" GridPane.columnIndex="3"/>
+
+                  <Label text="Sucursal" GridPane.rowIndex="1"/>
+                  <TextField fx:id="txtSucursal" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                  <Label text="Nota" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                  <TextField fx:id="txtNote" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+                  <Label text="Cliente" GridPane.rowIndex="2"/>
+                  <TextField fx:id="txtCliente" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+
+                  <Label text="Teléfono" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                  <TextField fx:id="txtTelefonoClient" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
                </children>
-            </HBox>
-            <HBox prefHeight="63.0" prefWidth="1440.0">
-               <children>
-                  <Label text="Cliente">
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="5.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField fx:id="txtCliente" maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Label text="Direccion">
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField fx:id="txtDireccion" maxWidth="176.0" prefHeight="25.0" prefWidth="176.0">
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
-                  <Label text="Telefono">
-                     <padding>
-                        <Insets right="10.0" />
-                     </padding>
-                     <HBox.margin>
-                        <Insets left="10.0" top="10.0" />
-                     </HBox.margin>
-                  </Label>
-                  <TextField fx:id="txtTelefono" maxWidth="176.0" prefHeight="25.0" prefWidth="166.0">
-                     <HBox.margin>
-                        <Insets top="5.0" />
-                     </HBox.margin>
-                  </TextField>
-               </children>
-            </HBox>
-            <VBox prefHeight="200.0" prefWidth="100.0" spacing="6.0">
-               <children>
-                  <Label text="Graduacion" textAlignment="CENTER">
-                     <font>
-                        <Font size="15.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets left="25.0" />
-                     </VBox.margin>
-                  </Label>
-                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
-                     <children>
-                        <Label prefWidth="30.0" text="OD">
-                           <HBox.margin>
-                              <Insets top="5.0" />
-                           </HBox.margin>
-                        </Label>
-                        <TextField fx:id="txtEsfOD" prefWidth="70.0" promptText="ESF" />
-                        <TextField fx:id="txtCylOD" prefWidth="70.0" promptText="CYL" />
-                        <TextField fx:id="txtEjeOD" prefWidth="60.0" promptText="EJE" />
-                        <TextField fx:id="txtAdd" prefWidth="60.0" promptText="ADD" />
-                     </children>
-                     <VBox.margin>
-                        <Insets left="10.0" />
-                     </VBox.margin>
-                  </HBox>
-                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="5.0">
-                     <children>
-                        <Label prefWidth="30.0" text="OI">
-                           <HBox.margin>
-                              <Insets top="5.0" />
-                           </HBox.margin>
-                        </Label>
-                        <TextField fx:id="txtEsfOI" prefWidth="70.0" promptText="ESF" />
-                        <TextField fx:id="txtCylOI" prefWidth="70.0" promptText="CYL" />
-                        <TextField fx:id="txtEjeOI" prefWidth="60.0" promptText="EJE" />
-                     </children>
-                     <VBox.margin>
-                        <Insets left="10.0" />
-                     </VBox.margin>
-                  </HBox>
-               </children>
-            </VBox>
+            </GridPane>
+
          </children>
       </VBox>
    </top>
+
+   <!-- 🧾 CENTER -->
    <center>
-      <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
-         <children>
-            <VBox>
-               <children>
-                  <Label text="Productos" textAlignment="CENTER">
-                     <font>
-                        <Font size="15.0" />
-                     </font>
-                     <VBox.margin>
-                        <Insets left="25.0" />
-                     </VBox.margin>
-                     <padding>
-                        <Insets top="5.0" />
-                     </padding>
-                  </Label>
-                  <HBox prefHeight="100.0" prefWidth="200.0">
-                     <children>
-                        <TextField promptText="MODELO">
-                           <HBox.margin>
-                              <Insets left="15.0" top="5.0" />
-                           </HBox.margin>
-                        </TextField>
-                        <TextField promptText="PRODUCTO">
-                           <HBox.margin>
-                              <Insets left="15.0" top="5.0" />
-                           </HBox.margin></TextField>
-                        <TextField promptText="CATEGORIA">
-                           <HBox.margin>
-                              <Insets left="15.0" top="5.0" />
-                           </HBox.margin></TextField>
-                        <Button mnemonicParsing="false" text="Agregar">
-                           <HBox.margin>
-                              <Insets left="15.0" top="5.0" />
-                           </HBox.margin>
-                        </Button>
-                     </children>
-                  </HBox>
-               </children>
-            </VBox>
-            <TableView prefHeight="200.0" prefWidth="200.0">
-              <columns>
-                <TableColumn prefWidth="75.0" text="Codigo" />
-                <TableColumn prefWidth="250.0" text="Producto" />
-                  <TableColumn prefWidth="100.0" text="Categoria" />
-                  <TableColumn prefWidth="75.0" text="Descuento" />
-                  <TableColumn prefWidth="75.0" text="Precio" />
-                  <TableColumn prefWidth="75.0" text="Producto" />
-              </columns>
-            </TableView>
-         </children>
+      <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
+
+         <!-- 👓 GRADUACIÓN -->
+         <Label text="Graduación">
+            <font><Font size="15"/></font>
+         </Label>
+
+         <GridPane hgap="10" vgap="10">
+            <columnConstraints>
+               <ColumnConstraints percentWidth="20.0"/>
+               <ColumnConstraints percentWidth="20.0"/>
+               <ColumnConstraints percentWidth="20.0"/>
+               <ColumnConstraints percentWidth="20.0"/>
+               <ColumnConstraints percentWidth="20.0"/>
+            </columnConstraints>
+
+            <children>
+               <Label text=""/>
+               <Label text="ESFERA" GridPane.columnIndex="1"/>
+               <Label text="CILINDRO" GridPane.columnIndex="2"/>
+               <Label text="EJE" GridPane.columnIndex="3"/>
+               <Label text="ADD" GridPane.columnIndex="4"/>
+
+               <Label text="OD" GridPane.rowIndex="1"/>
+               <TextField fx:id="txtEsfOD" maxWidth="80" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+               <TextField fx:id="txtCylOD" maxWidth="80" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+               <TextField fx:id="txtEjeOD" maxWidth="80" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+               <TextField fx:id="txtAdd" maxWidth="80" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+
+               <Label text="OI" GridPane.rowIndex="2"/>
+               <TextField fx:id="txtEsfOI" maxWidth="80" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+               <TextField fx:id="txtCylOI" maxWidth="80" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+               <TextField fx:id="txtEjeOI" maxWidth="80" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+            </children>
+         </GridPane>
+
+         <!-- 📦 PRODUCTOS -->
+         <Label text="Productos"/>
+
+         <HBox spacing="10" alignment="CENTER_LEFT">
+            <TextField promptText="Modelo / Producto" HBox.hgrow="ALWAYS"/>
+            <Button text="Agregar"/>
+         </HBox>
+
+         <!-- 📊 TABLA -->
+         <TableView VBox.vgrow="ALWAYS">
+            <columns>
+               <TableColumn text="Cantidad"/>
+               <TableColumn text="Modelo"/>
+               <TableColumn text="Marca"/>
+               <TableColumn text="Categoría"/>
+               <TableColumn text="Descuento"/>
+               <TableColumn text="Precio"/>
+            </columns>
+         </TableView>
+
       </VBox>
    </center>
+
+   <!-- 💳 RIGHT -->
    <right>
-      <VBox maxWidth="300.0" minWidth="260.0" prefHeight="200.0" prefWidth="280.0" spacing="12.0" BorderPane.alignment="TOP_CENTER">
-         <padding>
-            <Insets top="15.0" />
-         </padding>
-         <children>
-            <Label text="TOTAL" textAlignment="CENTER">
-               <font>
-                  <Font size="15.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
-            </Label>
-            <Label text="\$ 0.00" textAlignment="CENTER">
-               <font>
-                  <Font size="15.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
-            </Label>
-            <Separator prefWidth="200.0" />
-            <Label text="Importe" />
-            <TextField text="\$ 0.00" />
-            <Label text="Restante" textAlignment="CENTER">
-               <font>
-                  <Font size="15.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
-            </Label>
-            <Label text="\$ 0.00" textAlignment="CENTER">
-               <font>
-                  <Font size="15.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
-            </Label>
-            <Label text="Cambio" textAlignment="CENTER">
-               <font>
-                  <Font size="15.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
-            </Label>
-            <Label text="\$ 0.00" textAlignment="CENTER">
-               <font>
-                  <Font size="15.0" />
-               </font>
-               <padding>
-                  <Insets top="5.0" />
-               </padding>
-            </Label>
-            <Button mnemonicParsing="false" text="Cobrar" />
-         </children>
+      <VBox alignment="CENTER" spacing="20"
+            prefWidth="300"
+            style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
+
+         <Label text="TOTAL" style="-fx-text-fill: #2ecc71; -fx-font-weight: bold;"/>
+         <Label text="\$0.00" style="-fx-font-size: 28px; -fx-font-weight: bold;"/>
+
+         <Separator/>
+
+         <Label text="IMPORTE"/>
+         <TextField maxWidth="200"/>
+
+         <Label text="RESTANTE"/>
+         <Label text="\$0.00"/>
+
+         <Label text="CAMBIO"/>
+         <Label text="\$0.00"/>
+
+         <Button text="COBRAR"
+                 style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;"/>
       </VBox>
    </right>
+
 </BorderPane>

@@ -13,11 +13,14 @@ public class SaleController implements Initializable {
     
     // ====== DATOS GENERALES ======
     @FXML private TextField txtColaborador;
-    @FXML private TextField txtNombreVendedor;
-    @FXML private TextField txtTienda;
+    @FXML private TextField txtSucursal;
+    @FXML private TextField txtDireccionSuc;
+    @FXML private TextField txtTelefonoSuc;
+    @FXML private TextField txtDate;
+    @FXML private TextField txtNote;
     @FXML private TextField txtCliente;
-    @FXML private TextField txtDireccion;
-    @FXML private TextField txtTelefono;
+    @FXML private TextField txtDireccionClient;
+    @FXML private TextField txtTelefonoClient;
     
     // ====== GRADUACIÓN ======
     @FXML private TextField txtEsfOD;
@@ -42,11 +45,11 @@ public class SaleController implements Initializable {
         
         /*Limpiar Campos de Texto*/
         configurarAutoLimpieza(txtColaborador);
-        configurarAutoLimpieza(txtNombreVendedor);
-        configurarAutoLimpieza(txtTienda);
+        //configurarAutoLimpieza(txtNombreVendedor);
+        //configurarAutoLimpieza(txtTienda);
         configurarAutoLimpieza(txtCliente);
-        configurarAutoLimpieza(txtDireccion);
-        configurarAutoLimpieza(txtTelefono);
+        //configurarAutoLimpieza(txtDireccion);
+        //configurarAutoLimpieza(txtTelefono);
         
         /*Valida que solo acepte numeracion Enteros y Decimales*/
         NumericalValidation(txtEsfOD);
