@@ -104,5 +104,14 @@ public class MainController implements Initializable {
     private void abrirDescuento(){
         viewVista("Descuento");
     }
+    @FXML
+    private void abrirAbono(){
+        viewVista("Pending");
+    }
+    
+    @FXML
+    private void abrirEmpleados(){
+        viewVista("Empleados");
+    }
 
 }

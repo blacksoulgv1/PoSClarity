@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<StackPane xmlns="http://javafx.com/javafx/21" 
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.gerardgv.posclarity.controllers.SelectBranchController">
+
+    <children>
+        <VBox alignment="CENTER" spacing="20"
+              maxWidth="350"
+              style="-fx-background-color: white; -fx-padding: 25; -fx-background-radius: 12; -fx-border-radius: 12; -fx-border-color: #e0e0e0;">
+
+            <children>
+                <Label text="Seleccionar Sucursal">
+                    <font>
+                        <Font size="18"/>
+                    </font>
+                </Label>
+
+                <ComboBox fx:id="cbBranch" prefWidth="250"/>
+
+                <Button text="INICIAR"
+                        onAction="#handleSeleccionar"
+                        style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8;"
+                        prefWidth="200"/>
+            </children>
+
+            <padding>
+                <Insets/>
+            </padding>
+        </VBox>
+    </children>
+</StackPane>

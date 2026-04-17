@@ -195,7 +195,7 @@ public class DescuentoDAO {
     }
     
     public boolean actualizarActivo(int id, boolean activo){
-        String sql = "UPDATE descuentos SET activo =? WHERE id=?";
+        String sql = "UPDATE descuento SET activo =? WHERE id_descuento=?";
         try(Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setBoolean(1, activo);

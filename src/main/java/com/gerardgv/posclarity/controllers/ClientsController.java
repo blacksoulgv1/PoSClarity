@@ -54,7 +54,6 @@ public class ClientsController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         
         txtBuscar.requestFocus();
-        tblClientes.setSelectionModel(null);
         
         SearchUtils.setupSearch(txtBuscar, tblClientes, listaClientes,
                 c-> c.getNombre(),

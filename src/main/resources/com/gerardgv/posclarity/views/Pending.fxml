@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" 
+            xmlns="http://javafx.com/javafx/23.0.1" 
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gerardgv.posclarity.controllers.PendingController">
+   <top>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <TextField fx:id="txtBuscarVenta" promptText="Buscar Por Cliente o Nota" />
+         </children>
+         <padding>
+            <Insets left="5.0" top="5.0" />
+         </padding>
+      </HBox>
+   </top>
+   <center>
+      <TableView fx:id="tblVentas" prefHeight="280.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <columns>
+          <TableColumn fx:id="colId" prefWidth="75.0" text="ID" />
+          <TableColumn fx:id="colCliente" prefWidth="75.0" text="Cliente" />
+            <TableColumn fx:id="colFecha" prefWidth="75.0" text="Fecha" />
+            <TableColumn fx:id="colTotal" prefWidth="75.0" text="Total" />
+            <TableColumn fx:id="colPagado" prefWidth="75.0" text="Pagado" />
+            <TableColumn fx:id="colRestante" prefWidth="75.0" text="Restante" />
+            <TableColumn fx:id="colEstadoPago" prefWidth="75.0" text="Pago" />
+            <TableColumn fx:id="colEstadoTrabajo" prefWidth="75.0" text="Trabajo" />
+            <TableColumn fx:id="colAcciones" prefWidth="75.0" text="Acciones" />
+        </columns>
+      </TableView>
+   </center>
+   <bottom>
+    <HBox spacing="10" alignment="CENTER_LEFT" BorderPane.alignment="CENTER">
+        <children>
+
+            <TextField fx:id="txtCliente" promptText="Cliente" editable="false" prefWidth="120"/>
+            <TextField fx:id="txtTotal" promptText="Total" editable="false" prefWidth="80"/>
+            <TextField fx:id="txtPagado" promptText="Pagado" editable="false" prefWidth="80"/>
+            <TextField fx:id="txtRestante" promptText="Restante" editable="false" prefWidth="80"/>
+            <TextField fx:id="txtEstado" promptText="Estado" editable="false" prefWidth="100"/>
+
+            <TextField fx:id="txtAbono" promptText="Abono" prefWidth="80"/>
+
+            <HBox spacing="5">
+                <children>
+                    <Button text="Abonar" fx:id="btnAbonar"/>
+                    <Button text="Pagar" fx:id="btnPagar"/>
+                    <Button text="Entregar" fx:id="btnEntregar"/>
+                </children>
+            </HBox>
+
+        </children>
+
+        <padding>
+            <Insets top="10" bottom="10" left="10"/>
+        </padding>
+    </HBox>
+</bottom>
+</BorderPane>

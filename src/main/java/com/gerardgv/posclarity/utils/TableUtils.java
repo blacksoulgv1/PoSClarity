@@ -1,7 +1,6 @@
 package com.gerardgv.posclarity.utils;
 
-import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.*;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
@@ -13,7 +12,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
 public class TableUtils {
     
     // Funcion Button Edit
-    public static <T> TableCell <T,Void> createEditButton(java.util.function.Consumer<T> action){
+    public static <T> TableCell <T,Void> createEditButton(
+            Consumer<T> action){
         
         return new TableCell<>(){
              private final FontIcon iconEdit = new FontIcon("fas-edit");
@@ -45,6 +45,53 @@ public class TableUtils {
              }
         };
     }
+    
+    //funcion de Abonos
+    public static <T> TableCell <T,Void>createVentaAcions(
+            Consumer<T> onAbonar,
+            Consumer<T> onEntregar){
+        
+        return new TableCell<>(){
+            
+            private final FontIcon iconAbonar = new FontIcon("fas-dollar-sign");
+            private final FontIcon iconEntregar = new FontIcon("fas-box");            
+            private final Button btnAbonar = new Button();
+            private final Button btnEntregar = new Button();            
+            private final HBox box = new HBox(8, btnAbonar, btnEntregar);
+            
+            {
+                iconAbonar.setIconSize(16);
+                iconAbonar.setIconColor(Color.GREEN);
+                iconEntregar.setIconSize(16);
+                iconEntregar.setIconColor(Color.DODGERBLUE);
+                
+                btnAbonar.setGraphic(iconAbonar);
+                btnAbonar.setStyle("-fx-background-color: transparent;");
+                btnEntregar.setGraphic(iconEntregar);
+                btnEntregar.setStyle("-fx-background-color: transparent;");
+                box.setAlignment(Pos.CENTER);
+                btnAbonar.setOnAction(e -> {
+                T item = getTableView().getItems().get(getIndex());
+                onAbonar.accept(item);
+            });
+
+            btnEntregar.setOnAction(e -> {
+                T item = getTableView().getItems().get(getIndex());
+                onEntregar.accept(item);
+            });
+        }
+            @Override
+        protected void updateItem(Void item, boolean empty){
+            super.updateItem(item, empty);
+
+            if(empty){
+                setGraphic(null);
+            } else {
+                setGraphic(box);
+            }
+        }
+    };
+}
     
     //Funcion Button Active
     public static <T> TableCell <T,Boolean> createActiveToggle(

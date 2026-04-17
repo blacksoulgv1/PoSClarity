@@ -1,5 +1,9 @@
 package com.gerardgv.posclarity.app;
 
+import com.gerardgv.posclarity.database.BranchDAO;
+import com.gerardgv.posclarity.models.Branch;
+import com.gerardgv.posclarity.utils.Configuracion;
+import com.gerardgv.posclarity.utils.Session;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -7,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import javafx.stage.Modality;
 
 /**
  * JavaFX App
@@ -17,15 +22,24 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("main"));
+        
+        Integer idSucursal = Configuracion.obtenerSucursal();
+        Parent root;
+        
+        if(idSucursal == null){
+            root = loadFXML("SelectBranch");
+        }else{
+            Branch sucursal = BranchDAO.obtenerPorId(idSucursal);
+            Session.setSucursal(sucursal);
+            root = loadFXML("main");
+        }
+        scene = new Scene(root);
         stage.setScene(scene);
         stage.setMaximized(true);
-        stage.setMinWidth(1024);
-        stage.setMinHeight(768);
         stage.show();
     }
 
-    static void setRoot(String fxml) throws IOException {
+    public static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }
 

@@ -90,7 +90,6 @@ public class ClientsDAO {
     }
     
     //Lista Producto
-
     public List<Clients> findAll(){
 
     List<Clients> lista = new ArrayList<>();
@@ -130,6 +129,46 @@ public class ClientsDAO {
 
     return lista;
 }    
+    
+    //Busqueda Por Nombre
+    public List<Clients> buscarPorNombre(String nombre){
+        
+        List<Clients> lista = new ArrayList<>();
+        
+        String sql = "SELECT * FROM cliente WHERE  nombre LIKE ? AND activo = true";
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setString(1, "%" + nombre + "%");
+            ResultSet rs = stm.executeQuery();
+            
+            while(rs.next()){
+                
+                Clients c = new Clients();
+                
+                c.setId(rs.getInt("id_cliente"));
+                c.setNombre(rs.getString("nombre"));
+                c.setTelefono(rs.getString("telefono"));
+                c.setDireccion(rs.getString("direccion"));
+
+                c.setOdEsf(rs.getString("od_esf"));
+                c.setOdCil(rs.getString("od_cil"));
+                c.setOdEje(rs.getString("od_eje"));
+                
+                c.setOiEsf(rs.getString("oi_esf"));
+                c.setOiCil(rs.getString("oi_cil"));
+                c.setOiEje(rs.getString("oi_eje"));
+                
+                c.setAdd(rs.getString("add_lente"));
+                
+                lista.add(c);                
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return lista;
+    }
     
     
 }

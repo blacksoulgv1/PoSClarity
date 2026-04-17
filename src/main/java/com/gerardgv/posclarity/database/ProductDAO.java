@@ -8,27 +8,54 @@ import java.util.List;
 public class ProductDAO {
     
     //Insertar Producto TERMINADO
-    public boolean insert(Product p){
-        String sql = "INSERT INTO products "
+    public boolean insert(Product p, int idSucursal, int stockInicial){
+                
+        String sqlProducto = "INSERT INTO products "
             + "(modelo,marca,categoria,precio,maneja_stock,mica_base,tipo_producto,activo)"
             + "VALUES (?,?,?,?,?,?,?,?)";
         
-        try(Connection conn =DBConnection.getConnection();
-                PreparedStatement stm = conn.prepareStatement(sql)){
+        String sqlInventario = "INSERT INTO inventario_sucursal (id_sucursal,id_product,stock)"
+                + "VALUES (?,?,?)";
+        
+        try(Connection conn =DBConnection.getConnection()){
             
-            stm.setString(1, p.getModelo());
-            stm.setString(2, p.getMarca());
-            stm.setString(3, p.getCategoria());
-            stm.setDouble(4, p.getPrecio());
-            stm.setBoolean(5, p.isManejaStock());
-            stm.setBoolean(6, p.isMicaBase());
-            stm.setString(7, p.getTipo_producto());
-            stm.setBoolean(8, p.isActivo());
+            conn.setAutoCommit(false);
             
-            return stm.executeUpdate() > 0;
+            //Insert Producto
+            
+            PreparedStatement stmProd = conn.prepareStatement(
+                    sqlProducto, Statement.RETURN_GENERATED_KEYS);
+            
+            stmProd.setString(1, p.getModelo());
+            stmProd.setString(2, p.getMarca());
+            stmProd.setString(3, p.getCategoria());
+            stmProd.setDouble(4, p.getPrecio());
+            stmProd.setBoolean(5, p.isManejaStock());
+            stmProd.setBoolean(6, p.isMicaBase());
+            stmProd.setString(7, p.getTipo_producto());
+            stmProd.setBoolean(8, p.isActivo());
+            
+            stmProd.executeUpdate();
+            
+            ResultSet rs = stmProd.getGeneratedKeys();
+            
+            if(rs.next()){
+                
+                int idProducto= rs.getInt(1);
+                
+                //Insert Inventario
+                PreparedStatement stmInv = conn.prepareStatement(sqlInventario);
+                stmInv.setInt(1, idSucursal);
+                stmInv.setInt(2, idProducto);
+                stmInv.setInt(3, stockInicial);
+                
+                stmInv.executeUpdate();                
+            }
+            
+            conn.commit();
+            return true;
             
         }catch(SQLException e){
-            System.out.println();
             e.printStackTrace();
             return false;
         }
@@ -107,7 +134,7 @@ public class ProductDAO {
     //Buscar Producto por ID TERMINADO
     public Product getById(int id){
         
-        String sql ="SELECT * FRON products WHERE id_product=?";
+        String sql ="SELECT * FROM products WHERE id_product=?";
         
         Product product = null;
         
@@ -191,5 +218,93 @@ public class ProductDAO {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    public List<Product> buscarPorNombre(String texto, int idSucursal){
+        
+        List<Product> lista = new ArrayList<>();
+        String sql = """
+            SELECT p.*, i.stock
+            FROM products p
+            JOIN inventario_sucursal i 
+                ON p.id_product = i.id_product
+            WHERE i.id_sucursal = ?
+            AND (p.modelo LIKE ? OR p.marca LIKE ?)
+            AND p.activo = true
+            """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setInt(1, idSucursal);
+            stm.setString(2, "%" + texto + "%");
+            stm.setString(3, "%" + texto + "%");
+            
+            ResultSet rs = stm.executeQuery();
+            
+            while(rs.next()){
+                Product p = new Product();
+                p.setId_product(rs.getInt("id_product"));
+                p.setModelo(rs.getString("modelo"));
+                p.setMarca(rs.getString("marca"));
+                p.setCategoria(rs.getString("categoria"));
+                p.setPrecio(rs.getDouble("precio"));
+                p.setStock(rs.getInt("stock"));
+                lista.add(p);
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return lista;
+    }
+    
+    public boolean actulizarStock(int idProducto, int idSucursal, int cantidad){
+        
+        String sql = "UPDATE inventario_sucursal SET stock = stock -? WHERE id_product = ? AND id_sucursal = ?";
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            stm.setInt(1, cantidad);
+            stm.setInt(2, idProducto);
+            stm.setInt(3, idSucursal);
+            
+            return stm.executeUpdate()>0;
+        } catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public List<Product> getBySucursal(int idSucursal){
+        
+        List<Product> lista = new ArrayList<>();
+        
+        String sql = " SELECT p.*, i.stock FROM products p "
+                + "JOIN inventario_sucursal i ON p.id_product = i.id_product "
+                + "WHERE i.id_sucursal =?";
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setInt(1, idSucursal);
+            
+            ResultSet rs = stm.executeQuery();
+            
+            while (rs.next()){
+                Product p = new Product();
+                
+                p.setId_product(rs.getInt("id_product"));
+                p.setModelo(rs.getString("modelo"));
+                p.setMarca(rs.getString("marca"));
+                p.setCategoria(rs.getString("categoria"));
+                p.setPrecio(rs.getDouble("precio"));
+                p.setStock(rs.getInt("stock"));
+                p.setActivo(rs.getBoolean("activo"));
+                lista.add(p);
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return lista;
     }
 }

@@ -36,12 +36,7 @@
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>
                   </Button>
-                  <Button mnemonicParsing="false" onAction="#abrirEntregados" prefHeight="46.0" prefWidth="118.0" text="Entregas">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
-                     </graphic>
-                  </Button>
-                  <Button mnemonicParsing="false" onAction="#abrirPendintes" prefHeight="46.0" prefWidth="118.0" text="Abonos">
+                  <Button mnemonicParsing="false" onAction="#abrirAbono" prefHeight="46.0" prefWidth="118.0" text="Ventas Pendientes">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>
@@ -97,6 +92,11 @@
                      </graphic>
                   </Button>
                   <Button mnemonicParsing="false" onAction="#abrirSucursales" prefHeight="46.0" prefWidth="118.0" text="Sucursales">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#abrirEmpleados" prefHeight="46.0" prefWidth="118.0" text="Colaboradores">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>

@@ -10,6 +10,7 @@ public class BranchDAO {
     
             //INSERT
     public boolean insert(Branch b){
+        
         String sql ="Insert INTO sucursal (sucursal,telefono,direccion,activo) "
                 + "VALUES (?,?,?,?)";
         
@@ -94,6 +95,30 @@ public class BranchDAO {
             e.printStackTrace();
             return false;
         }
+    }
+    
+    public static Branch obtenerPorId(int id){
+        Branch sucursal = null;
+        
+        String sql = "SELECT * FROM sucursal WHERE id_sucursal = ?";
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setInt(1, id);
+            ResultSet rs = stm.executeQuery();
+            
+            if(rs.next()){
+                sucursal = new Branch();
+                sucursal.setId(rs.getInt("id_sucursal"));
+                sucursal.setSucursal(rs.getString("sucursal"));
+                sucursal.setDireccion(rs.getString("direccion"));
+                sucursal.setTelefono(rs.getString("telefono"));
+            }
+            
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return sucursal;
     }
     
 }

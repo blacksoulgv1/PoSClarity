@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.AbonosController">
+    <top>
+        <Label style="-fx-font-size:18px; -fx-padding:10;" text="Abonos de Venta" />
+    </top>
+    
+   <center>
+       <VBox spacing="10" style="-fx-padding:15;">
+
+            <!-- INFO -->
+            <HBox spacing="20">
+                <Label fx:id="lblCliente" text="Cliente: -" />
+                <Label fx:id="lblTotal" text="Total: $0" />
+                <Label fx:id="lblPagado" text="Pagado: $0" />
+                <Label fx:id="lblRestante" text="Restante: $0" />
+            </HBox>
+
+            <!-- ABONO -->
+            <HBox spacing="10">
+                <TextField fx:id="txtMonto" promptText="Monto a abonar" />
+                <ComboBox fx:id="cbMetodo" />
+                <Button onAction="#handleAbonar" text="Abonar" />
+            </HBox>
+
+            <!-- HISTORIAL -->
+            <TableView fx:id="tblPagos">
+                <columns>
+                    <TableColumn fx:id="colFecha" prefWidth="150" text="Fecha" />
+                    <TableColumn fx:id="colMetodo" text="Método" />
+                    <TableColumn fx:id="colMonto" text="Monto" />
+                </columns>
+            </TableView>
+
+        </VBox>
+   </center>
+</BorderPane>

@@ -1,5 +1,6 @@
 package com.gerardgv.posclarity.controllers;
 
+import com.gerardgv.posclarity.utils.Session;
 import com.gerardgv.posclarity.database.ProductDAO;
 import com.gerardgv.posclarity.models.Product;
 import com.gerardgv.posclarity.utils.SearchUtils;
@@ -114,7 +115,6 @@ public class ProductsController implements Initializable {
             }
         });
         
-        tblProductos.setSelectionModel(null);
     }
     
     private void panel(){
@@ -140,11 +140,8 @@ public class ProductsController implements Initializable {
             new SimpleStringProperty(data.getValue().getTipo_producto()));
     colPrecio.setCellValueFactory(data ->
             new SimpleDoubleProperty(data.getValue().getPrecio()).asObject());
-    colStock.setCellValueFactory(data ->
-        new SimpleIntegerProperty(
-        data.getValue().isManejaStock() ? 1 : 0
-        ).asObject()
-    );
+    colStock.setCellValueFactory( data -> 
+            new SimpleIntegerProperty(data.getValue().getStock()).asObject());
     colActivo.setCellValueFactory(data ->
         new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
     }
@@ -213,7 +210,12 @@ public class ProductsController implements Initializable {
         p.setMarca(txtMarca.getText());
         p.setPrecio(precio);
         p.setCategoria(cbCategoria.getValue());
-        p.setTipo_producto(cbTipo.getValue());
+        String tipo = cbTipo.getValue();
+        
+        if(tipo != null) {
+            tipo = tipo.toLowerCase().replace(" ", "_");
+        }
+        p.setTipo_producto(tipo);
 
         p.setManejaStock(cbCategoria.getValue().equals("producto")||cbCategoria.getValue().equals("mica"));
 
@@ -227,7 +229,7 @@ public class ProductsController implements Initializable {
                 p.setId_product(productoSeleccionado.getId_product());
                 resultado = productDAO.update(p);
             }else{
-                resultado = productDAO.insert(p);
+                resultado = productDAO.insert(p, Session.getSucursal().getId(),stock);
             }
 
             if(resultado){
@@ -256,7 +258,7 @@ public class ProductsController implements Initializable {
 
     private void cargarProductos() {
         listaProductos.clear();
-        listaProductos.addAll(productDAO.getAll());
+        listaProductos.addAll(productDAO.getBySucursal(Session.getSucursal().getId()));
         tblProductos.setItems(listaProductos);
     }
     
@@ -296,7 +298,7 @@ public class ProductsController implements Initializable {
                 txtStock.setDisable(true);
             }
             case "tratamiento" -> {
-                cbTipo.setValue("servicio");
+                cbTipo.setValue("bajo_pedido");
                 cbTipo.setDisable(true);
                 txtStock.setText("0");
                 txtStock.setDisable(true);
