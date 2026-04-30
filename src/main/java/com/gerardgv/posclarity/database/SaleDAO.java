@@ -11,6 +11,8 @@ import java.util.List;
 
 public class SaleDAO {
     
+    
+    
     public int guardarVenta(
             List<SaleItem> carrito,
             List<Pago> pagos,
@@ -20,7 +22,10 @@ public class SaleDAO {
             String estadoPago,
             String estadoTrabajo,
             int idCliente,
-            int idUsuario){
+            int idUsuario,
+            String odEsf, String odCil, String odEje,
+            String oiEsf, String oiCil, String oiEje,
+            String add){
         
         Connection conn = null;
         
@@ -33,8 +38,12 @@ public class SaleDAO {
             //==============
             //INSERTAR VENTA
             //==============
-            String sqlVenta = "INSERT INTO ventas (id_sucursal,id_cliente,id_vendedor,nombre_promocion,total_bruto,descuento_total,total_final,estado_pago,estado_trabajo)"
-                    + "VALUES(?,?,?,?,?,?,?,?,?)";
+            String sqlVenta = "INSERT INTO ventas ("
+                    + "id_sucursal,id_cliente,id_vendedor,nombre_promocion,total_bruto,"
+                    + "descuento_total,total_final,estado_pago,estado_trabajo,"
+                    + "od_esf,od_cil,od_eje,"
+                    + "oi_esf,oi_cil,oi_eje,add_lente)"
+                    + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             
             PreparedStatement psVenta = conn.prepareStatement(sqlVenta, PreparedStatement.RETURN_GENERATED_KEYS);
                                     
@@ -46,7 +55,14 @@ public class SaleDAO {
             psVenta.setDouble(6, descuento);
             psVenta.setDouble(7, totalFinal);
             psVenta.setString(8, estadoPago);
-            psVenta.setString(9,estadoTrabajo);            
+            psVenta.setString(9,estadoTrabajo);
+            psVenta.setString(10, odEsf);
+            psVenta.setString(11, odCil);
+            psVenta.setString(12, odEje);
+            psVenta.setString(13, oiEsf);
+            psVenta.setString(14, oiCil);
+            psVenta.setString(15, oiEje);
+            psVenta.setString(16, add);
             psVenta.executeUpdate();
             
             ResultSet rs = psVenta.getGeneratedKeys();
@@ -58,8 +74,8 @@ public class SaleDAO {
             //==============
             //DETALLE VENTA
             //==============            
-            String sqlDetalle = "INSERT INTO detalle_venta(id_venta,id_product,cantidad,precio_unitario,descuento_aplicado,subtotal)"
-                    + "VALUES (?,?,?,?,?,?)";            
+            String sqlDetalle = "INSERT INTO detalle_venta(id_venta,id_product,cantidad,precio_unitario,descuento_aplicado,subtotal,nombre_descuento)"
+                    + "VALUES (?,?,?,?,?,?,?)";            
             PreparedStatement psDetalle = conn.prepareStatement(sqlDetalle);
             
             String sqlStock = "UPDATE inventario_sucursal SET stock = stock -? WHERE id_sucursal=? AND id_product =?";
@@ -72,12 +88,14 @@ public class SaleDAO {
                 psDetalle.setDouble(4, item.getProducto().getPrecio());
                 psDetalle.setDouble(5, item.getDescuento());
                 psDetalle.setDouble(6, item.getSubtotal());
-                psDetalle.addBatch();
+                psDetalle.setString(7, item.getNombreDescuento());
+                psDetalle.addBatch();               
                 
                 //==============
                 //Actualizar Inventario
                 //=============              
-                if(item.getProducto().isManejaStock()){                 
+                if(item.getProducto().isManejaStock()){
+                    System.out.println("Si Entre a actualizar stock");
                     psStock.setInt(1, item.getCantidad());
                     psStock.setInt(2, Session.getSucursal().getId());
                     psStock.setInt(3, item.getProducto().getId_product());
@@ -169,6 +187,7 @@ public class SaleDAO {
         JOIN cliente c ON v.id_cliente = c.id_cliente
         LEFT JOIN pagos p ON v.id_ventas = p.id_venta
         WHERE v.estado_pago = 'PENDIENTE'
+                   OR v.estado_trabajo ='PROCESO'
         GROUP BY v.id_ventas
     """;
       
@@ -216,7 +235,8 @@ public class SaleDAO {
         FROM ventas v
         JOIN cliente c ON v.id_cliente = c.id_cliente
         LEFT JOIN pagos p ON v.id_ventas = p.id_venta
-        WHERE v.estado_pago = 'PENDIENTE'
+        WHERE (v.estado_pago = 'PENDIENTE'
+                   OR v.estado_trabajo = 'PROCESO')
         AND (c.nombre LIKE ? OR c.telefono LIKE ?)
         GROUP BY v.id_ventas
     """;
@@ -289,8 +309,10 @@ public class SaleDAO {
         ps.setInt(1, idVenta);
         ps.setString(2, metodo);
         ps.setDouble(3, monto);
-
+        
         ps.executeUpdate();
+        
+        actualizarEstadoPago(idVenta,conn);
         return true;
 
     }catch(Exception e){
@@ -310,11 +332,19 @@ public class SaleDAO {
             v.total_final,
             v.estado_pago,
             v.estado_trabajo,
+            v.od_esf,
+            v.od_cil,
+            v.od_eje,
+            v.oi_esf,
+            v.oi_cil,
+            v.oi_eje,
+            v.add_lente,
 
             c.id_cliente,
             c.nombre AS cliente_nombre,
             c.telefono AS cliente_tel,
             c.direccion AS cliente_dir,
+
 
             e.id_vendedor,
             e.nombre AS vendedor_nombre,
@@ -369,6 +399,13 @@ public class SaleDAO {
             venta.setTotal(rs.getDouble("total_final"));
             venta.setEstadoPago(rs.getString("estado_pago"));
             venta.setEstadoTrabajo(rs.getString("estado_trabajo"));
+            venta.setOdEsf(rs.getString("od_esf"));
+            venta.setOdCil(rs.getString("od_cil"));
+            venta.setOdEje(rs.getString("od_eje"));
+            venta.setOiEsf(rs.getString("oi_esf"));
+            venta.setOiCil(rs.getString("oi_cil"));
+            venta.setOiEje(rs.getString("oi_eje"));
+            venta.setAdd(rs.getString("add_lente"));            
 
             venta.setSucursal(sucursal);
             venta.setCliente(cliente);
@@ -388,8 +425,10 @@ public class SaleDAO {
     String sql = """
         SELECT 
             dv.cantidad,
-            CONCAT(p.marca,' ',p.modelo) AS descripcion,
-            dv.precio_unitario
+            p.modelo,
+            p.categoria,
+            dv.precio_unitario,
+            dv.nombre_descuento
         FROM detalle_venta dv
         JOIN products p ON dv.id_product = p.id_product
         WHERE dv.id_venta = ?
@@ -406,20 +445,97 @@ public class SaleDAO {
             Product p = new Product();
             SaleItem item = new SaleItem();
             
-            p.setModelo(rs.getString("descripcion"));
-            p.setPrecio(rs.getDouble("precio_unitario"));           
+            p.setModelo(rs.getString("modelo"));
+            p.setCategoria(rs.getString("categoria"));
+            p.setPrecio(rs.getDouble("precio_unitario"));
             item.setProducto(p);
             item.setCantidad(rs.getInt("cantidad"));
+            item.setNombreDescuento(rs.getString("nombre_descuento"));
 
             lista.add(item);
-        }
-
+            }
     } catch (Exception e) {
         e.printStackTrace();
     }
-
+    
     return lista;
   }
     
-}
+  public ClientStats obtenerEstadisticasCliente(int idClient){
+      
+      ClientStats stats = new ClientStats();
+      
+      String sql ="""
+        SELECT 
+            COUNT(v.id_ventas) AS total_compras,
+            IFNULL(SUM(v.total_final), 0) AS total_gastado,
+            MAX(v.fecha_venta) AS ultima_visita,
+            MIN(v.fecha_venta) AS cliente_desde
+        FROM ventas v
+        WHERE v.id_cliente = ?
+    """;
+      
+      try(Connection conn = DBConnection.getConnection();
+              PreparedStatement ps = conn.prepareStatement(sql)){
+          
+          ps.setInt(1, idClient);
+          ResultSet rs = ps.executeQuery();
+          
+          if(rs.next()){
+              stats.setTotalCompras(rs.getInt("total_compras"));
+              stats.setTotalGastado(rs.getDouble("total_gastado"));
+              
+              if(rs.getTimestamp("ultima_visita") != null){
+                  stats.setUltimavisita(
+                          rs.getTimestamp("ultima_visita").toLocalDateTime());
+              }
+              if(rs.getTimestamp("cliente_desde") != null){
+                  stats.setUltimavisita(
+                          rs.getTimestamp("cliente_desde").toLocalDateTime());
+              }              
+          }
+      } catch(Exception e){
+          e.printStackTrace();
+      }
+      return stats;
+  }
 
+    private void actualizarEstadoPago(int idVenta, Connection conn) {
+        
+        String sql = """
+        UPDATE ventas v
+        SET estado_pago = (
+            CASE 
+                WHEN (
+                    SELECT IFNULL(SUM(monto),0)
+                    FROM pagos
+                    WHERE id_venta = v.id_ventas
+                ) >= v.total_final
+                THEN 'COMPLETA'
+                ELSE 'PENDIENTE'
+            END
+        )
+        WHERE v.id_ventas = ?
+    """;
+        try(PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, idVenta);
+            ps.executeUpdate();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public boolean entregarVenta(int idVenta){
+        String sql = "UPDATE ventas SET estado_trabajo ='ENTREGADO' WHERE id_ventas =?";
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, idVenta);
+            return ps.executeUpdate()>0;
+        } catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+}

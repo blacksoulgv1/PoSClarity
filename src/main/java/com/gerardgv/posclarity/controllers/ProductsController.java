@@ -3,10 +3,12 @@ package com.gerardgv.posclarity.controllers;
 import com.gerardgv.posclarity.utils.Session;
 import com.gerardgv.posclarity.database.ProductDAO;
 import com.gerardgv.posclarity.models.Product;
+import com.gerardgv.posclarity.utils.EventBus;
 import com.gerardgv.posclarity.utils.SearchUtils;
 import com.gerardgv.posclarity.utils.TableUtils;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -72,11 +74,15 @@ public class ProductsController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+                       
         panel();
         configurarColumnas();        
         cargarCombos();
         cargarProductos();
+        EventBus.subscribeStock(ids -> {
+            refrescarInventario(ids);
+        });
+        
         formatearCombos();
         
         SearchUtils.setupSearch(txtBuscar, tblProductos, listaProductos,
@@ -149,6 +155,9 @@ public class ProductsController implements Initializable {
     //terminado 26-02
     private void editarProducto( Product p){
         
+        Product actualizado = productDAO.getById(p.getId_product(),
+                Session.getSucursal().getId());
+        
         productoSeleccionado = p;
         modoEdicion = true;
         
@@ -157,6 +166,13 @@ public class ProductsController implements Initializable {
         txtPrecio.setText(String.valueOf(p.getPrecio()));
         cbCategoria.setValue(p.getCategoria());
         cbTipo.setValue(p.getTipo_producto());
+        
+        if(actualizado.isManejaStock()){
+            txtStock.setText(String.valueOf(actualizado.getStock()));
+        } else {
+            txtStock.setText("0");
+        }
+        
         btnGuardar.setText("Actualizar");
         aplicarComportamientoCategoria(p.getCategoria());
  
@@ -217,7 +233,8 @@ public class ProductsController implements Initializable {
         }
         p.setTipo_producto(tipo);
 
-        p.setManejaStock(cbCategoria.getValue().equals("producto")||cbCategoria.getValue().equals("mica"));
+        p.setManejaStock(cbCategoria.getValue().equals("producto")||
+                cbCategoria.getValue().equals("armazon"));
 
         p.setMicaBase(cbCategoria.getValue().equals("mica"));
        
@@ -285,14 +302,18 @@ public class ProductsController implements Initializable {
         
         switch (categoria) {
             
+            case "armazon" ->{
+                cbTipo.setValue("fisico");
+                cbTipo.setDisable(true);
+                txtStock.setDisable(false);
+            }
             case "producto" -> {
                 cbTipo.setValue("fisico");
                 cbTipo.setDisable(true);                
                 txtStock.setDisable(false);
-                txtStock.clear();
             }
             case "mica" -> {
-                cbTipo.setValue("fisico");
+                cbTipo.setValue("bajo_pedido");
                 cbTipo.setDisable(true);
                 txtStock.setText("0");
                 txtStock.setDisable(true);
@@ -303,6 +324,14 @@ public class ProductsController implements Initializable {
                 txtStock.setText("0");
                 txtStock.setDisable(true);
             }
+            
+            case "lente_contacto" -> {
+                cbTipo.setValue("bajo_pedido");
+                cbTipo.setDisable(true);
+                txtStock.setText("0");
+                txtStock.setDisable(true);
+            }
+            
         }
     }
     
@@ -350,6 +379,25 @@ public class ProductsController implements Initializable {
         case "tratamiento" -> "Tratamiento";
         default -> valor;
     };
+    }
+
+    private void refrescarInventario(List<Integer> ids) {
+        for(Integer id : ids){
+            
+            Product actualizado = productDAO.getById(id, Session.getSucursal().getId());
+            
+            if(actualizado == null || !actualizado.isManejaStock()){
+                continue;
+            }
+            
+            for(Product p : listaProductos){
+                if(p.getId_product() == id){
+                    p.setStock(actualizado.getStock());
+                    break;
+                }
+            }
+        }
+        tblProductos.refresh();
     }
     
 }

@@ -1,7 +1,10 @@
 package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.database.ClientsDAO;
+import com.gerardgv.posclarity.database.SaleDAO;
+import com.gerardgv.posclarity.models.ClientStats;
 import com.gerardgv.posclarity.models.Clients;
+import com.gerardgv.posclarity.utils.EventBus;
 import com.gerardgv.posclarity.utils.SearchUtils;
 import com.gerardgv.posclarity.utils.TableUtils;
 import java.net.URL;
@@ -17,7 +20,11 @@ import javafx.scene.layout.HBox;
 
 
 public class ClientsController implements Initializable {
-
+    
+    @FXML private Label lblCompras;
+    @FXML private Label lblTotalGastado;
+    @FXML private Label lblUltimaVisita;
+    @FXML private Label lblClienteDesde;
     @FXML private TextField txtNombre;
     @FXML private TextField txtTelefono;
     @FXML private TextField txtDireccion;
@@ -45,6 +52,8 @@ public class ClientsController implements Initializable {
     private Clients clienteSeleccionado = null;
     private boolean  modoEdicion = false;
     
+    private SaleDAO saleDAO = new SaleDAO();
+    
     private ClientsDAO clientsDAO = new ClientsDAO();
     private ObservableList<Clients> listaClientes = FXCollections.observableArrayList();
     private BooleanProperty formularioDesabilitado = new SimpleBooleanProperty(false);
@@ -52,6 +61,12 @@ public class ClientsController implements Initializable {
      
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        
+        EventBus.subscribeVenta(idCliente -> {
+            if(clienteSeleccionado != null && clienteSeleccionado.getId() == idCliente){
+                cargarEstadisticasCliente(idCliente);
+            }
+        });
         
         txtBuscar.requestFocus();
         
@@ -327,7 +342,30 @@ public class ClientsController implements Initializable {
 
         txtAdd.setText(cliente.getAdd());
 
-        deshabilitarFormulario(!cliente.isActivo());
+        deshabilitarFormulario(!cliente.isActivo()); 
+        cargarEstadisticasCliente(cliente.getId());
+    }
+    
+    private void cargarEstadisticasCliente(int idClient){
         
+        ClientStats stats = saleDAO.obtenerEstadisticasCliente(idClient);
+        
+        lblCompras.setText(String.valueOf(stats.getTotalCompras()));
+        lblTotalGastado.setText(String.format("%.2f", stats.getTotalGastado()));
+        
+        if(stats.getUltimavisita() != null){
+            lblUltimaVisita.setText(stats.getUltimavisita().toLocalDate().toString());
+        } else {
+            lblUltimaVisita.setText("-");
+        }
+        if(stats.getClienteDesde() != null){
+            lblClienteDesde.setText(stats.getClienteDesde().toLocalDate().toString());
+        } else {
+            lblClienteDesde.setText("-");
+        }
+    }
+    
+    public void refrescarStats(int idCliente){
+        cargarEstadisticasCliente(idCliente);
     }
 }

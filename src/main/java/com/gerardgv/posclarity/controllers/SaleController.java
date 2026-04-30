@@ -3,6 +3,7 @@ package com.gerardgv.posclarity.controllers;
 import com.gerardgv.posclarity.database.*;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.service.TicketService;
+import com.gerardgv.posclarity.utils.EventBus;
 import com.gerardgv.posclarity.utils.Session;
 import java.net.URL;
 import java.time.LocalDate;
@@ -373,28 +374,40 @@ public class SaleController implements Initializable {
     
     private void agregarProducto(Product p){
         
-        if(p.isManejaStock() && p.getStock() <=0){
-            mostrarAlerta("Sin Stock");
+        Product productDB = productDAO.getById(p.getId_product(),
+                Session.getSucursal().getId());
+        
+        if(productDB == null){
+            mostrarAlerta("Error al obtener producto");
             return;
         }
         
+        productDB.setStock(p.getStock());
+        
+        if(productDB.isManejaStock() && productDB.getStock()<=0){
+            mostrarAlerta("Sin Stock");
+            return;
+        }
+
+        
         for(SaleItem item : carrito){
-            if(item.getProducto().getId_product() == p.getId_product()){
-                if(p.isManejaStock() && item.getCantidad() >= p.getStock()){
+            if(item.getProducto().getId_product() == productDB.getId_product()){
+                if(productDB.isManejaStock() && item.getCantidad() >= productDB.getStock()){
                   mostrarAlerta("Stock Máximo");
                     return;  
                 }
                 item.setCantidad(item.getCantidad()+1);
                 tableProduct.refresh();
                 actualizarTotal();
+                return;
             }            
         }       
         
-        double descuento = calcularDescuento(p);        
-        Descuento dCategoria = descuentoDAO.obtenerPorCategoria(p.getCategoria());
+        double descuento = calcularDescuento(productDB);        
+        Descuento dCategoria = descuentoDAO.obtenerPorCategoria(productDB.getCategoria());
         String nombreDescuento = (dCategoria != null) ? dCategoria.getNombre() : "Sin Descuento";
         
-        carrito.add(new SaleItem(p,nombreDescuento,descuento));
+        carrito.add(new SaleItem(productDB,nombreDescuento,descuento));
         tableProduct.setItems(carrito);
         actualizarTotal();
         txtBuscarProductos.clear();
@@ -486,8 +499,8 @@ public class SaleController implements Initializable {
         txtEsfOI.setText(c.getOiEsf());
         txtCylOI.setText(c.getOiCil());
         txtEjeOI.setText(c.getOiEje());
-        txtAdd.setText(c.getAdd());
-        
+        txtAdd.setText(c.getAdd());        
+       
         popupClientes.hide();
     }
 
@@ -623,7 +636,14 @@ public class SaleController implements Initializable {
                 estadoPago,
                 estadoTrabajo,
                 clienteSeleccionado.getId(),
-                vendedorSeleccionado.getId_vendedor());
+                vendedorSeleccionado.getId_vendedor(),
+                txtEsfOD.getText(),
+                txtCylOD.getText(),
+                txtEjeOD.getText(),
+                txtEsfOI.getText(),
+                txtCylOI.getText(),
+                txtEjeOI.getText(),
+                txtAdd.getText());
         
         if(idVenta > 0){
             //double cambio = monto - totalFinal;
@@ -634,6 +654,11 @@ public class SaleController implements Initializable {
             
             TicketService ticketService = new TicketService();
             ticketService.imprimirTicket(venta, items);
+            ticketService.imprimirOrdenLaboratorio(venta,items);
+            EventBus.publishVenta(clienteSeleccionado.getId());
+            List<Integer> productosIds = carrito.stream()
+                    .map(item -> item.getProducto().getId_product()).toList();
+            EventBus.publishStock(productosIds);
             mostrarAlerta("Venta Realizada Correctamente");
             limpiarVenta();
         } else{

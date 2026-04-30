@@ -6,15 +6,17 @@ public class TicketItem {
     private String descripcion;
     private double precio;
     private double monto;
+    private String promo;
 
     public TicketItem() {
     }
 
-    public TicketItem(int cantidad, String descripcion, double precio, double monto) {
+    public TicketItem(int cantidad, String descripcion, double precio, double monto, String promo) {
         this.cantidad = cantidad;
         this.descripcion = descripcion;
         this.precio = precio;
         this.monto = monto;
+        this.promo = promo;
     }
 
     public int getCantidad() {
@@ -48,7 +50,13 @@ public class TicketItem {
     public void setMonto(double monto) {
         this.monto = monto;
     }
-    
-    
+
+    public String getPromo() {
+        return promo;
+    }
+
+    public void setPromo(String promo) {
+        this.promo = promo;
+    }        
     
 }

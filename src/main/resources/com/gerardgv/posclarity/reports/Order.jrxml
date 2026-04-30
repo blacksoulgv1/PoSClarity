@@ -1,0 +1,87 @@
+<!-- Created with Jaspersoft Studio version 7.0.6.final using JasperReports Library version 7.0.6-5d2a603fdc6b3db8f842a83383e594f41891534d  -->
+<jasperReport name="Order" language="java" columnCount="1" pageWidth="200" pageHeight="170" columnWidth="190" leftMargin="5" rightMargin="5" topMargin="5" bottomMargin="5" uuid="ce6f89d2-e328-4f1e-aa3b-f45fd223a150" ignorePagination="true">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="cliente" class="java.lang.String"/>
+	<parameter name="tipo_lente" class="java.lang.String"/>
+	<parameter name="od_esf" class="java.lang.String"/>
+	<parameter name="od_cil" class="java.lang.String"/>
+	<parameter name="od_eje" class="java.lang.String"/>
+	<parameter name="oi_esf" class="java.lang.String"/>
+	<parameter name="oi_cil" class="java.lang.String"/>
+	<parameter name="oi_eje" class="java.lang.String"/>
+	<parameter name="add" class="java.lang.String"/>
+	<parameter name="sucursal" class="java.lang.String"/>
+	<parameter name="vendedor" class="java.lang.String"/>
+	<parameter name="logo" class="java.io.InputStream"/>
+	<query language="sql"><![CDATA[]]></query>
+	<background splitType="Stretch"/>
+	<title height="160" splitType="Stretch">
+		<element kind="frame" uuid="bee501a8-45ba-4a25-93b3-6a0d52bdca3b" x="0" y="0" width="190" height="160">
+			<element kind="image" uuid="18e46b3e-5e6b-42a6-8535-3a2ee287b836" x="0" y="0" width="40" height="40">
+				<expression><![CDATA[$P{logo}]]></expression>
+			</element>
+			<element kind="staticText" uuid="355309f4-93cd-48d7-a329-73dd01d10c5f" x="50" y="0" width="92" height="14" hTextAlign="Center">
+				<text><![CDATA[OPTICAS CLARITY]]></text>
+				<property name="com.jaspersoft.studio.unit.x" value="px"/>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
+			</element>
+			<element kind="staticText" uuid="8a0ee8d2-6367-458a-9bca-2f8315ea3b3a" x="50" y="19" width="22" height="22">
+				<text><![CDATA[Suc:]]></text>
+			</element>
+			<element kind="textField" uuid="d834c65a-acf4-4993-83b2-acfb629a0830" x="80" y="20" width="70" height="20">
+				<expression><![CDATA[$P{sucursal}]]></expression>
+			</element>
+			<element kind="staticText" uuid="b0f04827-d62b-4189-b699-5ea6f18d16a7" x="21" y="41" width="38" height="19">
+				<text><![CDATA[Cliente:]]></text>
+			</element>
+			<element kind="textField" uuid="d3e59470-8b16-4f30-96d8-635d3103b8d6" x="60" y="41" width="100" height="19">
+				<expression><![CDATA[$P{cliente}]]></expression>
+			</element>
+			<element kind="staticText" uuid="bc0cf33a-b4b8-4f78-9b20-ea9afb5ffed8" x="10" y="90" width="20" height="20">
+				<text><![CDATA[OD]]></text>
+			</element>
+			<element kind="staticText" uuid="ef21639d-060f-4ebe-a0d6-41d59e0efcbc" x="10" y="110" width="20" height="20">
+				<text><![CDATA[OI]]></text>
+			</element>
+			<element kind="textField" uuid="75a3b539-5abe-4497-85b5-bcbe9d01ba5e" x="40" y="90" width="32" height="20">
+				<expression><![CDATA[$P{od_esf}]]></expression>
+			</element>
+			<element kind="textField" uuid="7bbac8cf-ebeb-4135-a103-e3108c5a242a" x="72" y="90" width="32" height="20">
+				<expression><![CDATA[$P{od_cil}]]></expression>
+			</element>
+			<element kind="textField" uuid="eb430164-9d57-4d8a-9748-8d447f84d391" x="104" y="90" width="32" height="20">
+				<expression><![CDATA[$P{od_eje}]]></expression>
+			</element>
+			<element kind="textField" uuid="af8f801a-705f-492f-bdb1-97ba8c938ee4" x="104" y="110" width="32" height="20">
+				<expression><![CDATA[$P{oi_eje}]]></expression>
+			</element>
+			<element kind="textField" uuid="cee67301-7f7b-4269-a9cb-13c5564e5a96" x="40" y="110" width="32" height="20">
+				<expression><![CDATA[$P{oi_esf}]]></expression>
+			</element>
+			<element kind="textField" uuid="723147ad-21a7-4b90-810e-5eda34aa6a62" x="72" y="110" width="32" height="20">
+				<expression><![CDATA[$P{oi_cil}]]></expression>
+			</element>
+			<element kind="staticText" uuid="071b9179-7d06-4550-91d9-2d3873919bb8" x="46" y="70" width="20" height="20">
+				<text><![CDATA[ESF]]></text>
+			</element>
+			<element kind="staticText" uuid="9a55d3ed-98a9-48d5-8081-c4a694a84bd1" x="78" y="70" width="20" height="20">
+				<text><![CDATA[CIL]]></text>
+			</element>
+			<element kind="staticText" uuid="8ab9447d-a213-4e6a-a478-dda983e58612" x="110" y="70" width="20" height="20">
+				<text><![CDATA[EJE]]></text>
+			</element>
+			<element kind="staticText" uuid="1c3a6fa2-e28e-4a91-9fd7-fac93f77a282" x="146" y="70" width="26" height="20">
+				<text><![CDATA[ADD]]></text>
+			</element>
+			<element kind="textField" uuid="d0494b93-eda7-410a-8b2d-dbcb481d91b6" x="140" y="90" width="32" height="20">
+				<expression><![CDATA[$P{add}]]></expression>
+			</element>
+			<element kind="staticText" uuid="966e3a20-6626-4eed-9874-c74b4da8408f" x="8" y="135" width="58" height="19">
+				<text><![CDATA[Tratamiento]]></text>
+			</element>
+			<element kind="textField" uuid="251151c9-f2b5-438a-b781-529306d8fa94" x="66" y="135" width="124" height="19">
+				<expression><![CDATA[$P{tipo_lente}]]></expression>
+			</element>
+		</element>
+	</title>
+</jasperReport>

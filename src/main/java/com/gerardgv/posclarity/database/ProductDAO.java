@@ -132,16 +132,25 @@ public class ProductDAO {
     }
     
     //Buscar Producto por ID TERMINADO
-    public Product getById(int id){
+    public Product getById(int idProducto, int idSucursal){
         
-        String sql ="SELECT * FROM products WHERE id_product=?";
+        String sql = """
+        SELECT p.*, 
+               IFNULL(i.stock, 0) AS stock
+        FROM products p
+        LEFT JOIN inventario_sucursal i 
+            ON p.id_product = i.id_product 
+            AND i.id_sucursal = ?
+        WHERE p.id_product = ?
+    """;
         
         Product product = null;
         
         try(Connection conn = DBConnection.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)){
             
-            stm.setInt(1, id);
+            stm.setInt(1, idSucursal);
+            stm.setInt(2, idProducto);
             
             try(ResultSet rs = stm.executeQuery()){
                 
@@ -157,6 +166,7 @@ public class ProductDAO {
                     product.setMicaBase(rs.getBoolean("mica_base"));
                     product.setTipo_producto(rs.getString("tipo_producto"));
                     product.setActivo(rs.getBoolean("activo"));
+                    product.setStock(rs.getInt("stock"));
                 }
             }
         }catch(SQLException e){

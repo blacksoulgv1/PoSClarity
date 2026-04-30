@@ -15,7 +15,7 @@ public class Descuento {
     private LocalDate fechaFin;
     private int prioridad;
     private boolean activo = true;
-
+        
     public Descuento() {
     }
 
@@ -118,8 +118,6 @@ public class Descuento {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
-    }
-    
-    
+    }    
    
 }

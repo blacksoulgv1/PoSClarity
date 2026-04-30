@@ -6,6 +6,7 @@ package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.database.SaleDAO;
 import com.gerardgv.posclarity.models.*;
+import com.gerardgv.posclarity.utils.EventBus;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
@@ -84,6 +85,7 @@ public class AbonosController implements Initializable {
         );
 
         if(ok){
+            EventBus.publishVenta(venta.getId());
             mostrarAlerta("Abono realizado");
             txtMonto.clear();
             cargarDatos(); // refresca todo

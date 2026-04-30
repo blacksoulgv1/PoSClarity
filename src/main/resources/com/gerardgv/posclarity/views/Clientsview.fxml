@@ -29,25 +29,25 @@
                      <children>
                         <VBox prefHeight="200.0" prefWidth="100.0" styleClass="info-card">
                            <children>
-                              <Label styleClass="info-value" text="0" />
+                              <Label fx:id="lblCompras" styleClass="info-value" text="0" />
                               <Label styleClass="info-title" text="Compras" />
                            </children>
                         </VBox>
                         <VBox prefHeight="200.0" prefWidth="100.0" styleClass="info-card">
                            <children>
-                              <Label styleClass="info-value" text="0" />
+                              <Label fx:id="lblTotalGastado" styleClass="info-value" text="0" />
                               <Label styleClass="info-title" text="Total Gastado" />
                            </children>
                         </VBox>
                         <VBox prefHeight="200.0" prefWidth="100.0" styleClass="info-card">
                            <children>
-                              <Label styleClass="info-value" text="0" />
+                              <Label fx:id="lblUltimaVisita" styleClass="info-value" text="0" />
                               <Label styleClass="info-title" text="Última Visita" />
                            </children>
                         </VBox>
                         <VBox prefHeight="200.0" prefWidth="100.0" styleClass="info-card">
                            <children>
-                              <Label styleClass="info-value" text="0" />
+                              <Label fx:id="lblClienteDesde" styleClass="info-value" text="0" />
                               <Label styleClass="info-title" text="Cliente Desde" />
                            </children>
                         </VBox>

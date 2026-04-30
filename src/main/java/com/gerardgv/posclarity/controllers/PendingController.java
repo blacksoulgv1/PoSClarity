@@ -3,6 +3,7 @@ package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.database.SaleDAO;
 import com.gerardgv.posclarity.models.Venta;
+import com.gerardgv.posclarity.utils.EventBus;
 import com.gerardgv.posclarity.utils.TableUtils;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -18,6 +19,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -51,6 +53,10 @@ public class PendingController implements Initializable {
                 this::abonarVenta,
                 this::entregarVenta)
         );
+        
+        EventBus.subscribeVenta(id -> {
+        cargarVentasPendientes();
+        });
     }    
 
     private void configurarColumnas(){
@@ -103,7 +109,22 @@ public class PendingController implements Initializable {
     }
         
     private void entregarVenta(Venta v){
-        System.out.println("Entregar Venta" +v.getId());
+        
+        if(!v.getEstadoPago().equalsIgnoreCase("COMPLETA")){
+            mostrarAlerta("No puedes Entregar un Venta No Liquidada");
+            return;
+        }
+        
+        boolean ok = new SaleDAO().entregarVenta(v.getId());
+        
+        if(ok){
+            EventBus.publishVenta(v.getId());
+            mostrarAlerta("Venta Entregada Correctamente");
+        }else{
+            mostrarAlerta("Error Al Entregar Venta");
+        }
+        
+        
     }
     
     private void abonarVenta(Venta v){
@@ -120,10 +141,20 @@ public class PendingController implements Initializable {
         Stage stage = new Stage();
         stage.setScene(new Scene(root));
         stage.setTitle("Abonos");
+        stage.setOnHidden(e ->{
+            cargarVentasPendientes();
+        });
         stage.show();
 
     }catch(Exception e){
         e.printStackTrace();
     }
 }
+
+        private void mostrarAlerta(String msg){
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
+    }
 }
