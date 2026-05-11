@@ -5,14 +5,16 @@ import com.gerardgv.posclarity.utils.Session;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class SaleDAO {
     
-    
-    
+                
     public int guardarVenta(
             List<SaleItem> carrito,
             List<Pago> pagos,
@@ -20,7 +22,6 @@ public class SaleDAO {
             double descuento,
             double totalFinal,
             String estadoPago,
-            String estadoTrabajo,
             int idCliente,
             int idUsuario,
             String odEsf, String odCil, String odEje,
@@ -34,7 +35,8 @@ public class SaleDAO {
             conn = DBConnection.getConnection();
             conn.setAutoCommit(false);
             
-            boolean esBajoPedido = contieneBajoPedido(carrito);           
+            boolean esBajoPedido = contieneBajoPedido(carrito); 
+            String estadoTrabajo = determinarEstadoTrabajo(carrito);
             //==============
             //INSERTAR VENTA
             //==============
@@ -169,12 +171,12 @@ public class SaleDAO {
         return carrito.stream()
                 .anyMatch(i-> "bajo_pedido".equals(i.getProducto().getTipo_producto()));
     }
+    
+    private List<Venta> obtenerVentasPorCondicion(String condicion){
+    
+    List<Venta> lista = new ArrayList<>();
 
-  public List<Venta> obtenerVentasPendientes(){
-      
-      List<Venta> lista = new ArrayList<>();
-
-      String sql = """
+    String sql = """
         SELECT
             v.id_ventas,
             v.fecha_venta,
@@ -186,38 +188,106 @@ public class SaleDAO {
         FROM ventas v
         JOIN cliente c ON v.id_cliente = c.id_cliente
         LEFT JOIN pagos p ON v.id_ventas = p.id_venta
-        WHERE v.estado_pago = 'PENDIENTE'
-                   OR v.estado_trabajo ='PROCESO'
+        WHERE """ + condicion + """
         GROUP BY v.id_ventas
     """;
-      
+
     try(Connection conn = DBConnection.getConnection();
-              PreparedStatement ps = conn.prepareStatement(sql);
-              ResultSet rs = ps.executeQuery()){
-             
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery()){
+
         while(rs.next()){
-            
+
             Venta v = new Venta();
             Clients c = new Clients();
-            
+
             v.setId(rs.getInt("id_ventas"));
             v.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
             v.setTotal(rs.getDouble("total_final"));
+
             double pagado = rs.getDouble("pagado");
+
             v.setPagado(pagado);
             v.setRestante(v.getTotal() - pagado);
+
             v.setEstadoPago(rs.getString("estado_pago"));
             v.setEstadoTrabajo(rs.getString("estado_trabajo"));
+
             c.setNombre(rs.getString("cliente_nombre"));
+
             v.setCliente(c);
 
             lista.add(v);
         }
+
     }catch(Exception e){
         e.printStackTrace();
     }
-        return lista;
+
+    return lista;
+}
+
+  public List<Venta> obtenerTrabajosActivos(){
+      
+      return obtenerVentasPorCondicion("""
+        v.estado_pago = 'PENDIENTE'
+        OR v.estado_trabajo IN ('PROCESO','RECIBIDO')
+    """);
   }
+  
+  public List<Venta> obtenerTrabajosProceso(){
+
+    return obtenerVentasPorCondicion("""
+        v.estado_trabajo = 'PROCESO'
+    """);
+}
+  
+  public List<Venta> obtenerTrabajosListos(){
+
+    return obtenerVentasPorCondicion("""
+        v.estado_trabajo = 'LISTO'
+    """);
+}
+  
+  public List<Venta> obtenerSaldosPendientes(){
+
+    return obtenerVentasPorCondicion("""
+        v.estado_pago = 'PENDIENTE'
+    """);
+}
+  
+  public List<Venta> obtenerTrabajosAtrasados(){
+
+    return obtenerVentasPorCondicion("""
+        v.estado_trabajo = 'PROCESO'
+        AND v.fecha_venta < NOW() - INTERVAL 5 DAY
+    """);
+}
+  
+  private String determinarEstadoTrabajo(List<SaleItem> carrito){
+
+    boolean requiereProceso = carrito.stream().anyMatch(item -> {
+
+        Product p = item.getProducto();
+
+        String categoria = p.getCategoria() != null
+                ? p.getCategoria().toLowerCase()
+                : "";
+
+        String tipo = p.getTipo_producto() != null
+                ? p.getTipo_producto().toLowerCase()
+                : "";
+
+        return categoria.contains("lente")
+                || categoria.contains("mica")
+                || categoria.contains("tratamiento")
+                || tipo.equals("bajo_pedido");
+    });
+
+    return requiereProceso
+            ? "PROCESO"
+            : "ENTREGADO";
+}
   
   public List<Venta> buscarVentasPendientesPorCliente(String filtro){
       
@@ -537,5 +607,339 @@ public class SaleDAO {
             return false;
         }
     }
+    
+    public ReporteVentas obtenerReporteMensual(int idSucursal, int mes, int anio){
+        String sql = """
+            SELECT
+                IFNULL (SUM(v.total_final),0) AS total,
+                     
+                IFNULL ((
+                    SELECT SUM(p.monto)
+                    FROM pagos p
+                    WHERE p.id_venta IN (
+                        SELECT id_ventas
+                        FROM ventas
+                        WHERE id_sucursal = ?
+                        AND MONTH (fecha_venta) = ?
+                        AND YEAR (fecha_venta) = ?
+                    )),0) AS pagado,
+                IFNULL((
+                    SELECT SUM(v2.total_final - IFNULL((
+                        SELECT SUM(p2.monto)
+                        FROM pagos p2
+                        WHERE p2.id_venta = v2.id_ventas),0))
+                        FROM ventas v2
+                        WHERE v2.id_sucursal = ?
+                        AND MONTH(v2.fecha_venta) = ?
+                        AND YEAR(v2.fecha_venta) = ?
+                        AND v2.estado_pago = 'PENDIENTE'
+                        ), 0) AS pendiente
+                FROM ventas v
+                    WHERE v.id_sucursal = ?
+                    AND MONTH (v.fecha_venta) = ?
+                    AND YEAR (v.fecha_venta) = ?
+            """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)){
+            
+            ps.setInt(1, idSucursal);
+            ps.setInt(2, mes);
+            ps.setInt(3, anio);
+            
+            ps.setInt(4, idSucursal);
+            ps.setInt(5, mes);
+            ps.setInt(6, anio);
+            
+            ps.setInt(7, idSucursal);
+            ps.setInt(8, mes);
+            ps.setInt(9, anio);
+            
+            ResultSet rs = ps.executeQuery();
+            
+            if(rs.next()){
+                 double total = rs.getDouble("total");
+                 double pagado = rs.getDouble("pagado");
+                 double pendiente = rs.getDouble("pendiente");
+                 
+                 return new ReporteVentas(total,pagado,pendiente);
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return new ReporteVentas(0,0,0);
+    }
 
+    public Map<Integer,Double>obtenerVentasporDia(int idSucursal, int mes, int anio){
+        
+        Map<Integer,Double> datos = new HashMap<>();
+        
+        String sql = """
+                SELECT 
+                    DAY(fecha_venta) AS dia,
+                    SUM(total_final) AS total
+                FROM ventas
+                WHERE id_sucursal = ?
+                AND MONTH (fecha_venta) = ?
+                AND YEAR (fecha_venta) = ?
+                GROUP BY dia
+                ORDER BY dia
+                     """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, idSucursal);
+            ps.setInt(2, mes);
+            ps.setInt(3, anio);
+            
+            ResultSet rs = ps.executeQuery();
+            
+            while(rs.next()){
+                datos.put(
+                    rs.getInt("dia"),
+                    rs.getDouble("total"));
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return datos;
+    }
+    
+    public boolean recepcionarVenta(int idVenta){
+        
+        String sql = """
+        UPDATE ventas
+        SET estado_trabajo = 'RECIBIDO'
+        WHERE id_ventas = ?
+    """;
+
+    try(Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)){
+
+        ps.setInt(1, idVenta);
+
+        return ps.executeUpdate() > 0;
+
+    }catch(Exception e){
+        e.printStackTrace();
+        return false;
+    }
+    }
+    
+    public boolean cancelarVenta(int idVenta){
+        
+        String sql = """
+        UPDATE ventas
+        SET estado_pago = 'CANCELADA',
+            estado_trabajo = 'CANCELADO'
+        WHERE id_ventas = ?
+    """;
+
+    try(Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)){
+
+        ps.setInt(1, idVenta);
+
+        return ps.executeUpdate() > 0;
+        } catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public ReportPendientes obtenerResumenPendientes(int idSucursal){
+        
+        ReportPendientes r = new ReportPendientes();
+        
+        String sql = """
+        SELECT
+
+        SUM(
+            CASE
+                WHEN estado_trabajo = 'PROCESO'
+                THEN 1
+                ELSE 0
+            END
+        ) AS trabajos_realizar,
+
+        SUM(
+            CASE
+                WHEN estado_trabajo = 'RECIBIDO'
+                THEN 1
+                ELSE 0
+            END
+        ) AS trabajos_entregar,
+
+        SUM(
+            CASE
+                WHEN estado_trabajo = 'PROCESO'
+                THEN (
+                    total_final -
+                    IFNULL((
+                        SELECT SUM(monto)
+                        FROM pagos p
+                        WHERE p.id_venta = v.id_ventas
+                    ),0)
+                )
+                ELSE 0
+            END
+        ) AS saldo_realizar,
+
+        SUM(
+            CASE
+                WHEN estado_trabajo = 'RECIBIDO'
+                THEN (
+                    total_final -
+                    IFNULL((
+                        SELECT SUM(monto)
+                        FROM pagos p
+                        WHERE p.id_venta = v.id_ventas
+                    ),0)
+                )
+                ELSE 0
+            END
+        ) AS saldo_entregar
+
+        FROM ventas v
+        WHERE estado_trabajo != 'ENTREGADO'
+        AND estado_trabajo != 'CANCELADO'
+        AND v.id_sucursal = ?
+    """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)){
+            
+            ps.setInt(1, Session.getSucursal().getId());
+            
+            ResultSet rs = ps.executeQuery();
+            
+            if(rs.next()){
+                r.setTrabajosRealizar(rs.getInt("trabajos_realizar"));
+                r.setTrabajosEntregar(rs.getInt("trabajos_entregar"));
+                r.setSaldoRealizar(rs.getDouble("saldo_realizar"));
+                r.setSaldoEntregar(rs.getDouble("saldo_entregar"));
+            }           
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return r;
+    }
+    
+    public List<Venta> obtenerTrabajosPorRealizar(){
+        
+         List<Venta> lista = new ArrayList<>();
+
+    String sql = """
+        SELECT
+            v.id_ventas,
+            v.fecha_venta,
+            v.total_final,
+            v.estado_pago,
+            v.estado_trabajo,
+
+            c.nombre AS cliente_nombre,
+
+            IFNULL(SUM(p.monto),0) AS pagado
+
+        FROM ventas v
+
+        JOIN cliente c
+            ON v.id_cliente = c.id_cliente
+
+        LEFT JOIN pagos p
+            ON v.id_ventas = p.id_venta
+
+        WHERE v.estado_trabajo = 'PROCESO'
+        AND v.id_sucursal = ?
+
+        GROUP BY v.id_ventas
+
+        ORDER BY v.fecha_venta ASC
+    """;
+
+    try(Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+        
+            ps.setInt(1, Session.getSucursal().getId());
+            
+            ResultSet rs = ps.executeQuery();
+        
+        while(rs.next()){
+            
+            Venta v = new Venta();
+            Clients c = new Clients();
+            
+            v.setId(rs.getInt("id_ventas"));
+            v.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
+            v.setTotal(rs.getDouble("total_final"));            
+            double pagado = rs.getDouble("pagado");
+            v.setPagado(pagado);
+            v.setRestante(v.getTotal()- pagado);
+            v.setEstadoPago(rs.getString("estado_pago"));
+            v.setEstadoTrabajo(rs.getString("estado_trabajo"));
+            c.setNombre(rs.getString("cliente_nombre"));
+            v.setCliente(c);
+            
+            lista.add(v);            
+        }
+    } catch(Exception e){
+        e.printStackTrace();
+    }
+    return lista;
+    }
+    
+    public List<Venta> obtenerTrabajosPorEntregar(){
+        
+        List<Venta> lista = new ArrayList<>();
+        
+        String sql = """
+                     SELECT
+                        v.id_ventas,
+                        v.fecha_venta,
+                        v.total_final,
+                        v.estado_pago,
+                        v.estado_trabajo,
+                        c.nombre AS cliente_nombre,
+                    IFNULL(SUM(p.monto),0) AS pagado
+                    FROM ventas v
+                    JOIN cliente c
+                    ON v.id_cliente = c.id_cliente
+                    LEFT JOIN pagos p
+                    ON v.id_ventas = p.id_venta
+                    WHERE v.estado_trabajo = 'RECIBIDO'
+                    AND v.id_sucursal = ?
+                    GROUP BY v.id_ventas
+                    ORDER BY v.fecha_venta ASC
+                    """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)){
+            
+            ps.setInt(1, Session.getSucursal().getId());
+            
+            ResultSet rs = ps.executeQuery();
+            
+            while(rs.next()){
+                
+                Venta v = new Venta();
+                Clients c = new Clients();
+                
+                v.setId(rs.getInt("id_ventas"));
+                v.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
+                v.setTotal(rs.getDouble("total_final"));
+                double pagado = rs.getDouble("pagado");
+                v.setPagado(pagado);
+                v.setRestante(v.getTotal() - pagado);
+                v.setEstadoPago(rs.getString("estado_pago"));
+                v.setEstadoTrabajo(rs.getString("estado_trabajo"));
+                c.setNombre(rs.getString("cliente_nombre"));
+                v.setCliente(c);
+                
+                lista.add(v);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        return lista;
+    }
 }

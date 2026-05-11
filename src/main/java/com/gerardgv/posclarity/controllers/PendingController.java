@@ -51,7 +51,9 @@ public class PendingController implements Initializable {
         
         colAcciones.setCellFactory(param -> TableUtils.createVentaAcions(
                 this::abonarVenta,
-                this::entregarVenta)
+                this::recepcionarVenta,
+                this::entregarVenta,
+                this::cancelarVenta)
         );
         
         EventBus.subscribeVenta(id -> {
@@ -87,7 +89,7 @@ public class PendingController implements Initializable {
         SaleDAO dao = new SaleDAO();
         
         listaVentas.clear();
-        listaVentas.addAll(dao.obtenerVentasPendientes());
+        listaVentas.addAll(dao.obtenerTrabajosActivos());
         System.out.println("ventas cargadas" + listaVentas.size());
 
         listaFiltrada.setAll(listaVentas);
@@ -151,7 +153,31 @@ public class PendingController implements Initializable {
     }
 }
 
-        private void mostrarAlerta(String msg){
+    private void recepcionarVenta(Venta v){
+        
+        boolean ok = new SaleDAO().recepcionarVenta(v.getId());
+        
+        if(ok){
+            EventBus.publishVenta(v.getId());
+            mostrarAlerta("Producto Recibido en Óptica");
+        } else {
+            mostrarAlerta("Error al Actualizar Recepción");
+        }        
+    }
+    
+    private void cancelarVenta(Venta v){
+        
+        boolean ok = new SaleDAO().cancelarVenta(v.getId());
+        
+        if(ok){
+            EventBus.publishVenta(v.getId());
+            mostrarAlerta("Venta Cancelada");
+        } else {
+            mostrarAlerta("Error al Cancelar Venta");
+        }   
+    }
+    
+    private void mostrarAlerta(String msg){
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setHeaderText(null);
         alert.setContentText(msg);

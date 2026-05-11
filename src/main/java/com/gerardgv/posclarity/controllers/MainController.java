@@ -113,5 +113,9 @@ public class MainController implements Initializable {
     private void abrirEmpleados(){
         viewVista("Empleados");
     }
+    @FXML
+    private void abrirReportes(){
+        viewVista("Reports");
+    }
 
 }

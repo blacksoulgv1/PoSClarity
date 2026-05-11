@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.MetasController">
+    
+    <children>
+
+        <VBox spacing="15" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
+
+            <Label text="Configuración de Metas"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold;" />
+
+            <HBox spacing="10">
+                <ComboBox fx:id="cbSucursal" prefWidth="180"/>
+                <ComboBox fx:id="cbMes" prefWidth="140"/>
+                <Spinner fx:id="spAnio" prefWidth="90"/>
+                <TextField fx:id="txtMeta" promptText="Meta $"/>
+                <Button text="Guardar" onAction="#handleGuardar"/>
+            </HBox>
+
+            <TableView fx:id="tblMetas">
+                <columns>
+                    <TableColumn fx:id="colSucursal" text="Sucursal"/>
+                    <TableColumn fx:id="colMes" text="Mes"/>
+                    <TableColumn fx:id="colAnio" text="Año"/>
+                    <TableColumn fx:id="colMeta" text="Meta"/>
+                </columns>
+            </TableView>
+
+        </VBox>
+
+    </children>
+</AnchorPane>

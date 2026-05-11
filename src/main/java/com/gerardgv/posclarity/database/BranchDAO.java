@@ -33,7 +33,7 @@ public class BranchDAO {
             //UPDATE
     public boolean update(Branch b){
         
-        String sql = "UPDATE sucursal SET nombre=?, telefono=?, direccion=? WHERE id_sucursal=? ";
+        String sql = "UPDATE sucursal SET sucursal=?, telefono=?, direccion=? WHERE id_sucursal=? ";
        
         try(Connection conn = DBConnection.getConnection();
                 PreparedStatement stm = conn.prepareStatement(sql)){

@@ -107,23 +107,16 @@
                <font>
                   <Font name="Bodoni MT" size="14.0" />
                </font>
+               <VBox.margin>
+                  <Insets left="15.0" />
+               </VBox.margin>
             </Label>
             <VBox prefHeight="85.0" prefWidth="148.0" spacing="8.0">
                <padding>
                   <Insets left="15.0" />
                </padding>
                <children>
-                  <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="118.0" text="Ventas Mes">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
-                     </graphic>
-                  </Button>
-                  <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="118.0" text="Saldos">
-                     <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
-                     </graphic>
-                  </Button>
-                  <Button mnemonicParsing="false" prefHeight="46.0" prefWidth="118.0" text="Material">
+                  <Button mnemonicParsing="false" onAction="#abrirReportes" prefHeight="46.0" prefWidth="118.0" text="Reportes">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>

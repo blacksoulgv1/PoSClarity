@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.ReportsController">
+   
+    <children>
+      <HBox prefHeight="100.0" prefWidth="200.0" spacing="20.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+         <children>
+              
+              <VBox prefWidth="450.0" spacing="15">
+                  <Label style="-fx-font-size: 22px; -fx-font-weight: bold;" text="Reportes" />
+                  <HBox spacing="10">
+                  <children>
+                     <Label fx:id="lblSucursalActual" style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Label" />
+                     <Label fx:id="lblPeriodo" style="-fx-text-fill: #666666;" text="Label" />
+                  </children>
+                  </HBox>
+      
+                  <HBox spacing="15">
+                      <VBox style="-fx-background-color: #f4f4f4; -fx-padding: 10; -fx-border-radius: 8;">
+                          <Label text="Total Ventas" />
+                          <Label fx:id="lblTotalVentas" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="0.00" />
+                      </VBox>
+                      <VBox style="-fx-background-color: #f4f4f4; -fx-padding: 10;">
+                          <Label text="Pagado" />
+                          <Label fx:id="lblPagado" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="0.00" />
+                      </VBox>
+                      <VBox style="-fx-background-color: #f4f4f4; -fx-padding: 10;">
+                          <Label text="Pendiente" />
+                          <Label fx:id="lblPendiente" style="-fx-font-size: 16px; -fx-font-weight: bold;" text="0.00" />
+                      </VBox>
+                  </HBox>
+                  <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Catálogo de Reportes" />
+      
+                  <GridPane hgap="15" vgap="15">
+                      <VBox onMouseClicked="#openVentasMes" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc;" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Ventas por Mes" />
+                          <Label text="Resumen mensual de ingresos" />
+                      </VBox>
+                      <VBox onMouseClicked="#openVentasDetalle" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Ventas Detalladas" />
+                          <Label text="Listado completo de ventas" />
+                      </VBox>
+      
+                      <VBox onMouseClicked="#openSaldos" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc;" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Saldos Pendientes" />
+                          <Label text="Clientes con deuda" />
+                      </VBox>
+                      <VBox onMouseClicked="#openInventario" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc;" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Inventario" />
+                            <Label text="Stock actual por producto" />
+                      </VBox>
+                      <VBox onMouseClicked="#openMetas" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc; -fx-cursor: hand;" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                            <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Metas" />
+                            <Label text="Configurar objetivos mensuales" />
+                        </VBox>
+                        <VBox alignment="CENTER_LEFT" onMouseClicked="#generarReportePendientes" spacing="5" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc; -fx-cursor: hand;" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                            <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Saldos Pendientes" />
+                            <Label text="Trabajos Por Realizar y Entregar" />
+                            <Separator />
+                            <Label fx:id="lblTrabajosEntregar" text="0 trabajos" />
+                            <Label fx:id="lblSaldoEntregar" text="0.00" />
+                            <Separator />
+                            <Label fx:id="lblTrabajosRealizar" text="0 trabajos" />
+                            <Label fx:id="lblSaldoRealizar" text="0.00" />
+                        </VBox>
+                  <columnConstraints>
+                     <ColumnConstraints />
+                     <ColumnConstraints />
+                  </columnConstraints>
+                  <rowConstraints>
+                     <RowConstraints />
+                     <RowConstraints />
+                     <RowConstraints />
+                  </rowConstraints>
+      
+                  </GridPane>
+      
+              </VBox>
+            <VBox prefWidth="500.0" spacing="15.0">
+               <children>
+                  <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Ventas Graficas" />
+                  <LineChart fx:id="chartVentas">
+                    <xAxis>
+                      <CategoryAxis label="Día" side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis label="Ventas" side="LEFT" />
+                    </yAxis>
+                  </LineChart>
+                  <PieChart fx:id="chartMeta" prefHeight="250.0" />
+               </children></VBox>
+         </children>
+      </HBox>
+
+    </children>
+</AnchorPane>

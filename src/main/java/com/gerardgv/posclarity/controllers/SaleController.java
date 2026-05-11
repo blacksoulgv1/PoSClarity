@@ -634,7 +634,6 @@ public class SaleController implements Initializable {
                 descuentoTotal,
                 totalFinal,
                 estadoPago,
-                estadoTrabajo,
                 clienteSeleccionado.getId(),
                 vendedorSeleccionado.getId_vendedor(),
                 txtEsfOD.getText(),

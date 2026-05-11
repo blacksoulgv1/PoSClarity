@@ -1,5 +1,6 @@
 package com.gerardgv.posclarity.utils;
 
+import com.gerardgv.posclarity.models.Venta;
 import java.util.function.*;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -49,36 +50,67 @@ public class TableUtils {
     //funcion de Abonos
     public static <T> TableCell <T,Void>createVentaAcions(
             Consumer<T> onAbonar,
-            Consumer<T> onEntregar){
+            Consumer<T> onRecepcion,
+            Consumer<T> onEntregar,
+            Consumer<T> onCancelar){
         
         return new TableCell<>(){
             
             private final FontIcon iconAbonar = new FontIcon("fas-dollar-sign");
-            private final FontIcon iconEntregar = new FontIcon("fas-box");            
+            private final FontIcon iconRecepcion = new FontIcon("fas-box-open");
+            private final FontIcon iconEntregar = new FontIcon("fas-box");
+            private final FontIcon iconCancelar = new FontIcon("fas-times-circle"); 
+            
             private final Button btnAbonar = new Button();
-            private final Button btnEntregar = new Button();            
-            private final HBox box = new HBox(8, btnAbonar, btnEntregar);
+            private final Button btnRecepcion = new Button();
+            private final Button btnEntregar = new Button();
+            private final Button btnCancelar = new Button();              
+            private final HBox box = new HBox(8, btnAbonar,btnRecepcion, btnEntregar,btnCancelar);
             
             {
                 iconAbonar.setIconSize(16);
                 iconAbonar.setIconColor(Color.GREEN);
+                iconRecepcion.setIconSize(16);
+                iconRecepcion.setIconColor(Color.ORANGE);
                 iconEntregar.setIconSize(16);
                 iconEntregar.setIconColor(Color.DODGERBLUE);
+                iconCancelar.setIconSize(16);
+                iconCancelar.setIconColor(Color.RED);
                 
                 btnAbonar.setGraphic(iconAbonar);
                 btnAbonar.setStyle("-fx-background-color: transparent;");
+                btnRecepcion.setGraphic(iconRecepcion);
+                btnRecepcion.setStyle("-fx-background-color: transparent;");
                 btnEntregar.setGraphic(iconEntregar);
                 btnEntregar.setStyle("-fx-background-color: transparent;");
-                box.setAlignment(Pos.CENTER);
+                btnCancelar.setGraphic(iconCancelar);
+                btnCancelar.setStyle("-fx-background-color: transparent;");
+                                
+                btnAbonar.setTooltip(new javafx.scene.control.Tooltip("Registrar Abono"));
+                btnRecepcion.setTooltip(
+                    new javafx.scene.control.Tooltip("Producto recibido en óptica"));
+                btnEntregar.setTooltip(
+                    new javafx.scene.control.Tooltip("Entregar producto"));
+                btnCancelar.setTooltip(
+                    new javafx.scene.control.Tooltip("Cancelar venta"));
+                
                 btnAbonar.setOnAction(e -> {
                 T item = getTableView().getItems().get(getIndex());
                 onAbonar.accept(item);
-            });
-
-            btnEntregar.setOnAction(e -> {
+                });
+                btnRecepcion.setOnAction(e -> {
+                T item = getTableView().getItems().get(getIndex());
+                onRecepcion.accept(item);
+                });
+                btnEntregar.setOnAction(e -> {
                 T item = getTableView().getItems().get(getIndex());
                 onEntregar.accept(item);
-            });
+                });
+                btnCancelar.setOnAction(e -> {
+                T item = getTableView().getItems().get(getIndex());
+                onCancelar.accept(item);
+                });
+                box.setAlignment(Pos.CENTER);
         }
             @Override
         protected void updateItem(Void item, boolean empty){
@@ -87,6 +119,19 @@ public class TableUtils {
             if(empty){
                 setGraphic(null);
             } else {
+                
+                T itemTable = getTableView().getItems().get(getIndex());
+                Venta v = (Venta) itemTable;
+                
+                btnAbonar.setVisible(
+                    !v.getEstadoPago().equalsIgnoreCase("COMPLETA"));
+                btnRecepcion.setVisible(
+                    v.getEstadoTrabajo().equalsIgnoreCase("PROCESO"));
+                btnEntregar.setVisible(
+                    v.getEstadoTrabajo().equalsIgnoreCase("RECIBIDO"));
+                btnCancelar.setVisible(
+                    !v.getEstadoTrabajo().equalsIgnoreCase("ENTREGADO"));
+                
                 setGraphic(box);
             }
         }

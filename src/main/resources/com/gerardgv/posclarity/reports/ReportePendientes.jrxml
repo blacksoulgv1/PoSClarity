@@ -1,0 +1,61 @@
+<!-- Created with Jaspersoft Studio version 7.0.6.final using JasperReports Library version 7.0.6-5d2a603fdc6b3db8f842a83383e594f41891534d  -->
+<jasperReport name="ReportePendientes" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="47e1be03-33ac-4a97-91b1-43539550e524">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="TOTAL_REALIZAR" class="java.lang.Integer"/>
+	<parameter name="TOTAL_ENTREGAR" class="java.lang.Integer"/>
+	<parameter name="SALDO_REALIZAR" class="java.lang.Double"/>
+	<parameter name="SALDO_ENTREGAR" class="java.lang.Double"/>
+	<query language="sql"><![CDATA[]]></query>
+	<field name="entregarTexto" class="java.lang.String"/>
+	<field name="realizarTexto" class="java.lang.String"/>
+	<background splitType="Stretch"/>
+	<title height="87" splitType="Stretch">
+		<element kind="staticText" uuid="6b0d886e-82ef-4300-bef3-ff44a6947655" x="0" y="0" width="550" height="40" fontSize="19.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[REPORTE DE SALDOS PENDIENTES]]></text>
+		</element>
+		<element kind="staticText" uuid="4956112d-08d5-4dc5-a782-a4849565b09d" x="0" y="40" width="550" height="40" fontSize="13.0" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[TRABAJOS POR ENTREGAR Y REALIZAR]]></text>
+		</element>
+	</title>
+	<detail>
+		<band height="170" splitType="Stretch">
+			<element kind="staticText" uuid="c7b7d9aa-8000-4a50-97e1-eb2b09e1fdc5" x="20" y="0" width="220" height="25" fontSize="14.0" bold="true">
+				<text><![CDATA[TRABAJOS POR ENTREGAR]]></text>
+			</element>
+			<element kind="staticText" uuid="643ad0c7-255f-4a05-b0cd-67be695017f1" x="310" y="0" width="220" height="25" fontSize="14.0" bold="true">
+				<text><![CDATA[TRABAJOS POR REALIZAR]]></text>
+			</element>
+			<element kind="line" uuid="3b0a0633-8141-43af-a8c4-e53de100a532" x="20" y="28" width="510" height="1"/>
+			<element kind="textField" uuid="2e94235b-d7a7-45e1-bb4d-81a606339bf4" x="20" y="40" width="220" height="25">
+				<expression><![CDATA[$F{entregarTexto}]]></expression>
+			</element>
+			<element kind="textField" uuid="1f42b3c6-2aa4-41ee-8ce3-ddbf8247eda6" x="310" y="40" width="220" height="25">
+				<expression><![CDATA[$F{realizarTexto}]]></expression>
+			</element>
+			<element kind="staticText" uuid="b8afc42a-0128-4579-b17e-492f55cd3d0c" x="20" y="100" width="100" height="25" bold="true">
+				<text><![CDATA[TOTAL:]]></text>
+			</element>
+			<element kind="textField" uuid="4464b850-b3a8-4e20-aa58-901e68ae84bf" x="90" y="100" width="120" height="25" bold="true">
+				<expression><![CDATA["$ " + $P{SALDO_ENTREGAR}]]></expression>
+			</element>
+			<element kind="staticText" uuid="8a87cdae-254c-4859-b177-ffd1d7d5d20c" x="310" y="100" width="100" height="25" bold="true">
+				<text><![CDATA[TOTAL:]]></text>
+			</element>
+			<element kind="textField" uuid="909f3ee5-1376-47f1-86b6-aad697dbc525" x="380" y="100" width="120" height="25" bold="true">
+				<expression><![CDATA["$ " + $P{SALDO_REALIZAR}]]></expression>
+			</element>
+			<element kind="line" uuid="07213949-6422-4ea9-b3fb-a79d1e0e9cb4" x="20" y="135" width="510" height="1"/>
+			<element kind="staticText" uuid="c1c70a4c-3e56-433e-b6c0-aa04b276ac20" x="170" y="145" width="150" height="25" fontSize="14.0" bold="true">
+				<text><![CDATA[TOTAL GENERAL]]></text>
+			</element>
+			<element kind="textField" uuid="ee9e5f80-f622-4597-a3a4-0f4bbc4439d7" x="320" y="145" width="120" height="25" fontSize="14.0" bold="true">
+				<expression><![CDATA[
+                "$ " + ($P{SALDO_ENTREGAR} + $P{SALDO_REALIZAR})
+            ]]></expression>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="45" splitType="Stretch"/>
+	<pageFooter height="54" splitType="Stretch"/>
+	<summary height="42" splitType="Stretch"/>
+</jasperReport>
