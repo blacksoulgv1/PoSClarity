@@ -89,6 +89,7 @@ public class SaleController implements Initializable {
         aplicarComportamientos();
         cargarSucursal();
         cargarFecha();
+        cargarSiguienteNota();
         configurarTabla();
         configurarPopupProductos();
         configurarPopupClientes();
@@ -126,6 +127,10 @@ public class SaleController implements Initializable {
                 setGraphic(empty ? null : btnEliminar);
             }
         });               
+    }
+    
+    private void cargarSiguienteNota(){
+        txtNote.setText(String.valueOf(saleDAO.obtenerSiguienteiDVenta()));
     }
     
     private void actualizarPago(){
@@ -671,12 +676,40 @@ public class SaleController implements Initializable {
     }
     
     private void limpiarVenta(){
+        
+        //==== CLIENTE ====
+        clienteSeleccionado = null;
+        txtCliente.clear();
+        txtTelefonoClient.clear();
+        txtDireccionClient.clear();
+        
+        //==== GRADUACIÓN ====
+        txtEsfOD.clear();
+        txtCylOD.clear();
+        txtEjeOD.clear();
+        txtEsfOI.clear();
+        txtCylOI.clear();
+        txtEjeOI.clear();
+        txtAdd.clear();
+        
+        //==== PRODUCTOS ====
         carrito.clear();
         tableProduct.refresh();
+        tableProduct.refresh();
+        txtBuscarProductos.clear();
+        
+        //==== PAGO ====
         txtMonto.clear();
+        cbMetodoPago.setValue("EFECTIVO");
+        
+        //==== PAGO ====
+        lblTotalBruto.setText("$0.00");
+        lblDescuento.setText("$0.00");
+        lblTotal.setText("$0.00");
         lblRestante.setText("$0.00");
         lblCambio.setText("$0.00");
         actualizarTotal();
+        cargarSiguienteNota();
     }
     
     private void mostrarAlerta(String msg){
@@ -694,7 +727,7 @@ public class SaleController implements Initializable {
 
     private double calcularDescuento(){
         return carrito.stream()
-            .mapToDouble(SaleItem::getDescuento)
+            .mapToDouble(item -> item.getDescuento() * item.getCantidad())
             .sum();
     }
 

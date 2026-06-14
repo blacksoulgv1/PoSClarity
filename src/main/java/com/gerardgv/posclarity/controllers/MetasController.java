@@ -106,7 +106,7 @@ public class MetasController implements Initializable {
         }
         
         int idSucursal = cbSucursal.getValue().getId();
-        int mes = cbMes.getSelectionModel().getSelectedIndex();
+        int mes = cbMes.getSelectionModel().getSelectedIndex()+1;
         int anio = spAnio.getValue();
         
         boolean ok = metaDAO.saveMeta(idSucursal, mes, anio, monto);

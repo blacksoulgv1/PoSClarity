@@ -970,4 +970,24 @@ public class SaleDAO {
         }
         return lista;
     }
+    
+    public int obtenerSiguienteiDVenta(){
+        
+        String sql = "SELECT IFNULL(MAX(id_ventas),0) + 1 AS siguiente FROM ventas";
+
+    try(Connection conn = DBConnection.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery()){
+
+        if(rs.next()){
+            return rs.getInt("siguiente");
+        }
+
+    }catch(Exception e){
+        e.printStackTrace();
+    }
+
+    return 1;
+    }
+    
 }
