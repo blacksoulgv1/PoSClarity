@@ -22,16 +22,20 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        
-        Integer idSucursal = Configuracion.obtenerSucursal();
         Parent root;
         
-        if(idSucursal == null){
+        if(!Configuracion.existeSucursal()){
             root = loadFXML("SelectBranch");
         }else{
+            Integer idSucursal = Configuracion.obtenerSucursal();
             Branch sucursal = BranchDAO.obtenerPorId(idSucursal);
-            Session.setSucursal(sucursal);
-            root = loadFXML("main");
+            if(sucursal == null){
+                Configuracion.guardarSucursal(-1);
+                root = loadFXML("SelectBranch");
+            } else {
+               Session.setSucursal(sucursal);
+                root = loadFXML("main"); 
+            }
         }
         scene = new Scene(root);
         stage.setScene(scene);

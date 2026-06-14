@@ -129,6 +129,7 @@ public class InventarioSucursalDAO {
                 psUpdate.setInt(1, cantidad);
                 psUpdate.setInt(2, idSucursal);
                 psUpdate.setInt(3, idProducto);
+                
 
                 return psUpdate.executeUpdate() > 0;
 
@@ -205,4 +206,29 @@ public class InventarioSucursalDAO {
         return psInsert.executeUpdate() > 0;
     }
 }
+    
+    public boolean actualizarStock(int idSucursal, int idProducto, int stockNuevo){
+        
+        String sqlStock = """
+                          UPDATE inventario_sucursal
+                          SET stock = ?
+                          WHERE id_sucursal = ?
+                          AND id_product = ?
+                          """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sqlStock)){
+            
+            ps.setInt(1, stockNuevo);
+            ps.setInt(2, idSucursal);
+            ps.setInt(3, idProducto);
+            
+            return ps.executeUpdate()> 0;
+            
+        } catch(SQLException e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
 }

@@ -6,38 +6,35 @@ import java.util.*;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.view.JasperViewer;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 
 
-public class JasperReportGenerator {
+public class SaldosService {
 
     public static void generarReportePendientes(
             List<Venta> realizar, List<Venta> entregar) {
         
         try{
             
-            List<ReportePendienteRow> rows = new ArrayList<>();
-            
-            int max = Math.max(realizar.size(),entregar.size());
-            
-            for(int i = 0; i < max; i++){
-                
-                String textoEntregar = "";
-                String textoRealizar = "";
-                
-                if(i < entregar.size()){
-                    
-                    Venta v = entregar.get(i);                    
-                    textoEntregar = "Nota #" + v.getId() + " - $" + String.format("%.2f", v.getRestante());
-                }
-                
-                if( i < realizar.size()){
-                    
-                    Venta v = realizar.get(i);                    
-                    textoRealizar = "Nota #" + v.getId() + " - $" + String.format("%.2f", v.getRestante());
-                }
-                rows.add(new ReportePendienteRow(textoEntregar,textoRealizar));
+            StringBuilder entregarTexto = new StringBuilder();
+            StringBuilder realizarTexto = new StringBuilder();
+
+            for(Venta v : entregar){
+                entregarTexto.append("Nota #")
+                .append(v.getId())
+                .append(" - $")
+                .append(String.format("%.2f", v.getRestante()))
+                .append("\n");
             }
-            
+
+            for(Venta v : realizar){
+                realizarTexto.append("Nota #")
+                .append(v.getId())
+                .append(" - $")
+                .append(String.format("%.2f", v.getRestante()))
+                .append("\n");
+                }
+                        
             double saldoEntregar = entregar.stream().mapToDouble(Venta::getRestante).sum();
             double saldoRealizar = realizar.stream().mapToDouble(Venta::getRestante).sum();
             
@@ -47,10 +44,12 @@ public class JasperReportGenerator {
             params.put("TOTAL_REALIZAR", realizar.size());
             params.put("SALDO_ENTREGAR", saldoEntregar);
             params.put("SALDO_REALIZAR", saldoRealizar);
+            params.put("ENTREGAR_TEXTO", entregarTexto.toString());
+            params.put("REALIZAR_TEXTO", realizarTexto.toString());
             
-            JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(rows);
+            JREmptyDataSource ds = new JREmptyDataSource(1);
             
-            InputStream reportStream = JasperReportGenerator.class.getResourceAsStream("/com/gerardgv/posclarity/reports/ReportePendientes.jrxml");
+            InputStream reportStream = SaldosService.class.getResourceAsStream("/com/gerardgv/posclarity/reports/ReportePendientes.jrxml");
             
             JasperReport report = JasperCompileManager.compileReport(reportStream);
             

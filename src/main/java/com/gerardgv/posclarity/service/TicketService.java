@@ -1,8 +1,7 @@
 package com.gerardgv.posclarity.service;
 
-import com.gerardgv.posclarity.models.SaleItem;
-import com.gerardgv.posclarity.models.TicketItem;
-import com.gerardgv.posclarity.models.Venta;
+import com.gerardgv.posclarity.database.SaleDAO;
+import com.gerardgv.posclarity.models.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +13,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javafx.scene.control.Alert;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.view.JasperViewer;
@@ -50,11 +50,21 @@ public class TicketService {
             
             JasperPrint print = JasperFillManager.fillReport(report,params,dataSource);
             
+            try{
+                JasperPrintManager.printReport(print, false);
+            } catch (Exception e){
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Impresión");
+                alert.setHeaderText(null);
+                alert.setContentText("No se pudo imprimir el ticket. Verifica la impresora.");
+                alert.showAndWait();
+            }
+            
             JasperViewer.viewReport(print,false);
             
-            JasperExportManager.exportReportToPdfFile(
+            /*JasperExportManager.exportReportToPdfFile(
                 print,
-                "ticket_" + venta.getId() + ".pdf");
+                "ticket_" + venta.getId() + ".pdf");*/
             
         } catch(Exception e){
             e.printStackTrace();
@@ -78,22 +88,26 @@ public class TicketService {
         params.put("fecha", venta.getFecha().
                 format(DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm")));
         params.put("nota", String.valueOf(venta.getId()));
+        //Totales & Descuentos
+        double subtotal = venta.getTotalBruto();        
+        double descuento = venta.getDescuentoTotal();        
+        double total = venta.getTotalFinal();
         
-        double subtotal = items.stream()
-                .mapToDouble(i -> i.getPrecio()*i.getCantidad()).sum();
+        SaleDAO saleDAO = new SaleDAO();
         
-        double descuento = items.stream()
-                .mapToDouble(i -> i.getDescuento()*i.getCantidad()).sum();
+        List<Pago> pagos = saleDAO.obtenerPagosPorVenta(venta.getId());
+        double pagado = pagos.stream().mapToDouble(Pago::getMonto).sum();
+        double pendiente = total - pagado;
         
-        double total = subtotal - descuento;
-        
-        double pago = total;
-        double pendiente = 0;
+        if(pendiente < 0){
+            pendiente = 0;
+        }
+
         
         params.put("subtotal", subtotal);
         params.put("descuento", descuento);
         params.put("total", total);
-        params.put("pago", pago);
+        params.put("pago", pagado);
         params.put("pendiente", pendiente);
         params.put("logo", getClass().getResourceAsStream(
                 "/com/gerardgv/posclarity/img/logo-removebg.png"));
@@ -134,9 +148,9 @@ public class TicketService {
             
             JasperViewer.viewReport(print,false);
             
-            JasperExportManager.exportReportToPdfFile(
+            /*JasperExportManager.exportReportToPdfFile(
                 print,
-                "orden_" + venta.getId() + ".pdf");            
+                "orden_" + venta.getId() + ".pdf");  */          
         } catch (Exception e){
             e.printStackTrace();
         }

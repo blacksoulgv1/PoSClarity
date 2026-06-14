@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.ReportsController">
+<AnchorPane id="AnchorPane" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.ReportsController">
    
     <children>
       <HBox prefHeight="100.0" prefWidth="200.0" spacing="20.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
@@ -49,9 +49,9 @@
                           <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Ventas por Mes" />
                           <Label text="Resumen mensual de ingresos" />
                       </VBox>
-                      <VBox onMouseClicked="#openVentasDetalle" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc;" GridPane.columnIndex="1" GridPane.rowIndex="0">
-                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Ventas Detalladas" />
-                          <Label text="Listado completo de ventas" />
+                      <VBox onMouseClicked="#openCierreDia" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc;" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                          <Label style="-fx-font-size: 14px; -fx-font-weight: bold;" text="Ventas Del Día" />
+                          <Label text="Corte de Caja" />
                       </VBox>
       
                       <VBox onMouseClicked="#openSaldos" style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #ccc;" GridPane.columnIndex="0" GridPane.rowIndex="1">

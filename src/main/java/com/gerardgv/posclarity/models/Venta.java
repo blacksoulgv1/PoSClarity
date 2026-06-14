@@ -10,6 +10,9 @@ public class Venta {
     private Empleados vendedor;
     private LocalDateTime fecha;
     private double total;
+    private double totalBruto;
+    private double descuentoTotal;
+    private double totalFinal;
     private double pagado;
     private double restante;
     private String estadoPago;
@@ -21,14 +24,16 @@ public class Venta {
     public Venta() {
     }
 
-
-    public Venta(int id, Branch sucursal, Clients cliente, Empleados vendedor, LocalDateTime fecha, double total, double pagado, double restante, String estadoPago, String estadoTrabajo, String odEsf, String odCil, String odEje, String oiEsf, String oiCil, String oiEje, String add) {
+    public Venta(int id, Branch sucursal, Clients cliente, Empleados vendedor, LocalDateTime fecha, double total, double totalBruto, double descuentoTotal, double totalFinal, double pagado, double restante, String estadoPago, String estadoTrabajo, String odEsf, String odCil, String odEje, String oiEsf, String oiCil, String oiEje, String add) {
         this.id = id;
         this.sucursal = sucursal;
         this.cliente = cliente;
         this.vendedor = vendedor;
         this.fecha = fecha;
         this.total = total;
+        this.totalBruto = totalBruto;
+        this.descuentoTotal = descuentoTotal;
+        this.totalFinal = totalFinal;
         this.pagado = pagado;
         this.restante = restante;
         this.estadoPago = estadoPago;
@@ -40,7 +45,10 @@ public class Venta {
         this.oiCil = oiCil;
         this.oiEje = oiEje;
         this.add = add;
-    }   
+    }
+
+
+    
     
     public Branch getSucursal() {
         return sucursal;
@@ -92,6 +100,32 @@ public class Venta {
     public void setTotal(double total) {
         this.total = total;
     }
+
+    public double getTotalBruto() {
+        return totalBruto;
+    }
+
+    public void setTotalBruto(double totalBruto) {
+        this.totalBruto = totalBruto;
+    }
+
+    public double getDescuentoTotal() {
+        return descuentoTotal;
+    }
+
+    public void setDescuentoTotal(double descuentoTotal) {
+        this.descuentoTotal = descuentoTotal;
+    }
+
+    public double getTotalFinal() {
+        return totalFinal;
+    }
+
+    public void setTotalFinal(double totalFinal) {
+        this.totalFinal = totalFinal;
+    }
+    
+    
 
     public double getPagado() {
         return pagado;

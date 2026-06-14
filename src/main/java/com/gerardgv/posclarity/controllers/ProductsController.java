@@ -1,22 +1,14 @@
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.utils.Session;
-import com.gerardgv.posclarity.database.ProductDAO;
+import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.utils.*;
 import com.gerardgv.posclarity.models.Product;
-import com.gerardgv.posclarity.utils.EventBus;
-import com.gerardgv.posclarity.utils.SearchUtils;
-import com.gerardgv.posclarity.utils.TableUtils;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.beans.property.*;
+import javafx.collections.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -45,6 +37,7 @@ public class ProductsController implements Initializable {
     @FXML private ComboBox<String> cbTipo;
  
     private ProductDAO productDAO = new ProductDAO(); 
+    private InventarioSucursalDAO inventarioSucuarsalDAO = new InventarioSucursalDAO();
     
     // ===== Buttons =====
     @FXML private Button btnGuardar;
@@ -158,14 +151,19 @@ public class ProductsController implements Initializable {
         Product actualizado = productDAO.getById(p.getId_product(),
                 Session.getSucursal().getId());
         
-        productoSeleccionado = p;
+        if(actualizado == null){
+            mostrarError("No se Pudo Cargar el Producto");
+            return;
+        }
+        
+        productoSeleccionado = actualizado;
         modoEdicion = true;
         
-        txtModelo.setText(p.getModelo());
-        txtMarca.setText(p.getMarca());
-        txtPrecio.setText(String.valueOf(p.getPrecio()));
-        cbCategoria.setValue(p.getCategoria());
-        cbTipo.setValue(p.getTipo_producto());
+        txtModelo.setText(actualizado.getModelo());
+        txtMarca.setText(actualizado.getMarca());
+        txtPrecio.setText(String.valueOf(actualizado.getPrecio()));
+        cbCategoria.setValue(actualizado.getCategoria());
+        cbTipo.setValue(actualizado.getTipo_producto());
         
         if(actualizado.isManejaStock()){
             txtStock.setText(String.valueOf(actualizado.getStock()));
@@ -209,9 +207,20 @@ public class ProductsController implements Initializable {
                 return;
             }
         
-        if(!txtStock.getText().isEmpty()){
-            stock = Integer.parseInt(txtStock.getText());
-        }               
+        try{
+            
+            if(!txtStock.getText().isEmpty()){
+                    stock = Integer.parseInt(txtStock.getText());
+                if(stock < 0){
+                    mostrarError("El Stock no puede ser negativo");
+                    return;
+                }
+            }
+        }catch(NumberFormatException e){
+            mostrarError("Stock Invalido");
+            return;
+        }
+               
         
         try{
              precio = Double.parseDouble(txtPrecio.getText());
@@ -243,19 +252,33 @@ public class ProductsController implements Initializable {
         boolean resultado;
 
             if(modoEdicion){
+                
                 p.setId_product(productoSeleccionado.getId_product());
-                resultado = productDAO.update(p);
-            }else{
-                resultado = productDAO.insert(p, Session.getSucursal().getId(),stock);
+                
+                boolean productoActualizado = productDAO.update(p);
+                boolean stockActualizado = true;
+                
+                if(p.isManejaStock()){
+                    
+                    stockActualizado = inventarioSucuarsalDAO.actualizarStock(Session.getSucursal().getId(),p.getId_product(),stock);
+                }
+                resultado = productoActualizado && stockActualizado;
+                
+            } else {
+                
+                resultado = productDAO.insert(p, Session.getSucursal().getId(), stock);
+                
             }
 
             if(resultado){
-            mostrarInfo("Producto guardado");
+            mostrarInfo( modoEdicion ? "Producto Actualizado Correctamente"
+                    : "Producto Guardado Correctamente");
             limpiarFormulario();
             cargarProductos();
             modoEdicion = false;
             }else{
-                mostrarError("No se pudo guardar");
+                mostrarError( modoEdicion ? "El Producto No Se Actualizo correctamente"
+                    : "El Producto No Se Guardo correctamente");
             }               
     }
 

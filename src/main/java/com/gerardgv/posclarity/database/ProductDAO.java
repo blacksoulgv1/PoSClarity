@@ -268,6 +268,7 @@ public class ProductDAO {
         return lista;
     }
     
+    //EliminarSTOCK producto 
     public boolean actulizarStock(int idProducto, int idSucursal, int cantidad){
         
         String sql = "UPDATE inventario_sucursal SET stock = stock -? WHERE id_product = ? AND id_sucursal = ?";

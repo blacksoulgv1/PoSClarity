@@ -16,6 +16,12 @@ public class Session {
     }  
     
     public static void setSucursal(Branch s){
+        
+        if(s == null){
+            throw new IllegalArgumentException(
+            "No se puede Iniciar Sesión con una Sucursal Nula");
+        }
+        
         sucursal = s;
         idBranch = s.getId();
     }

@@ -34,7 +34,9 @@
 			<element kind="staticText" uuid="b0f04827-d62b-4189-b699-5ea6f18d16a7" x="21" y="41" width="38" height="19">
 				<text><![CDATA[Cliente:]]></text>
 			</element>
-			<element kind="textField" uuid="d3e59470-8b16-4f30-96d8-635d3103b8d6" x="60" y="41" width="100" height="19">
+			<element kind="textField"
+                                    uuid="d3e59470-8b16-4f30-96d8-635d3103b8d6"
+                                    x="60" y="41" width="125" height="35" textAdjust="StretchHeight">
 				<expression><![CDATA[$P{cliente}]]></expression>
 			</element>
 			<element kind="staticText" uuid="bc0cf33a-b4b8-4f78-9b20-ea9afb5ffed8" x="10" y="90" width="20" height="20">

@@ -11,7 +11,7 @@ public class DBConnection {
     public static final String PORT = "3306"; //puertoMySQL
     public static final String DATABASE = "clarity"; //Nombre de Base de Datos.
     public static final String USER = "root"; //Usuario.
-    public static final String PASSWORD = "clarity2524"; //Contraseña.
+    public static final String PASSWORD = "clarity"; //Contraseña.
     
     public static final String URL = "jdbc:mysql://" + HOST + ":" + PORT + "/" + DATABASE
         + "?useSSL=false"

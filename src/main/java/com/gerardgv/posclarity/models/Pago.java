@@ -8,16 +8,18 @@ public class Pago {
     private double monto;
     private String referencia;
     private LocalDateTime fecha;
+    private String tipoPago;
 
     public Pago() {
     }
 
-    public Pago(String metodo, double monto, String referencia, LocalDateTime fecha) {
+    public Pago(String metodo, double monto, String referencia, LocalDateTime fecha, String tipoPago) {
         this.metodo = metodo;
         this.monto = monto;
         this.referencia = referencia;
         this.fecha = fecha;
-    }
+        this.tipoPago = tipoPago;
+    }    
 
     public LocalDateTime getFecha() {
         return fecha;
@@ -49,6 +51,14 @@ public class Pago {
 
     public void setReferencia(String referencia) {
         this.referencia = referencia;
+    }
+
+    public String getTipoPago() {
+        return tipoPago;
+    }
+
+    public void setTipoPago(String tipoPago) {
+        this.tipoPago = tipoPago;
     }
     
     

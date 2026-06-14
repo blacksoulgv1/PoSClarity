@@ -14,7 +14,9 @@ import java.util.Map;
 
 public class SaleDAO {
     
-                
+            //==============
+            //REALIZAR VENTA
+            //==============
     public int guardarVenta(
             List<SaleItem> carrito,
             List<Pago> pagos,
@@ -97,7 +99,7 @@ public class SaleDAO {
                 //Actualizar Inventario
                 //=============              
                 if(item.getProducto().isManejaStock()){
-                    System.out.println("Si Entre a actualizar stock");
+                    
                     psStock.setInt(1, item.getCantidad());
                     psStock.setInt(2, Session.getSucursal().getId());
                     psStock.setInt(3, item.getProducto().getId_product());
@@ -110,8 +112,11 @@ public class SaleDAO {
             //==============
             //Forma de Pago
             //=============
-            String sqlPago = "INSERT INTO pagos (id_venta,metodo_pago,monto,referencia)"
-                    + "VALUES (?,?,?,?)";
+            String sqlPago = """
+                    INSERT INTO pagos 
+                        (id_venta,metodo_pago,monto,referencia,tipo_pago)
+                    VALUES (?,?,?,?,?)
+                    """;
             PreparedStatement psPago = conn.prepareStatement(sqlPago);
             
             for(Pago p : pagos){
@@ -119,6 +124,7 @@ public class SaleDAO {
                 psPago.setString(2, p.getMetodo());
                 psPago.setDouble(3,p.getMonto());
                 psPago.setString(4, p.getReferencia());
+                psPago.setString(5, p.getTipoPago());
                 psPago.addBatch();
             }
             psPago.executeBatch();
@@ -358,9 +364,10 @@ public class SaleDAO {
           
           while(rs.next()){
               Pago p = new Pago();
-              p.setMetodo(rs.getString("metodo_pago"));
-              p.setMonto(rs.getDouble("monto"));
-              p.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
+            p.setMetodo(rs.getString("metodo_pago"));
+            p.setMonto(rs.getDouble("monto"));
+            p.setTipoPago(rs.getString("tipo_pago"));
+            p.setFecha(rs.getTimestamp("fecha").toLocalDateTime());
               lista.add(p);
           }
       }catch(Exception e){
@@ -369,9 +376,16 @@ public class SaleDAO {
       return lista;      
   }
   
+            //==============
+            //REALIZAR ABONO
+            //==============  
   public boolean registrarAbono(int idVenta, String metodo, double monto){
 
-    String sql = "INSERT INTO pagos(id_venta, metodo_pago, monto) VALUES (?,?,?)";
+    String sql = """
+                INSERT INTO pagos
+                    (id_venta, metodo_pago, monto,tipo_pago)
+                VALUES (?,?,?,?)
+                 """;
 
     try(Connection conn = DBConnection.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)){
@@ -379,6 +393,7 @@ public class SaleDAO {
         ps.setInt(1, idVenta);
         ps.setString(2, metodo);
         ps.setDouble(3, monto);
+        ps.setString(4, "ABONO");
         
         ps.executeUpdate();
         
@@ -399,6 +414,8 @@ public class SaleDAO {
         SELECT 
             v.id_ventas,
             v.fecha_venta,
+            v.total_bruto,
+            v.descuento_total,
             v.total_final,
             v.estado_pago,
             v.estado_trabajo,
@@ -467,6 +484,9 @@ public class SaleDAO {
             venta.setId(rs.getInt("id_ventas"));
             venta.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
             venta.setTotal(rs.getDouble("total_final"));
+            venta.setTotalBruto(rs.getDouble("total_bruto"));
+            venta.setDescuentoTotal(rs.getDouble("descuento_total"));
+            venta.setTotalFinal(rs.getDouble("total_final"));
             venta.setEstadoPago(rs.getString("estado_pago"));
             venta.setEstadoTrabajo(rs.getString("estado_trabajo"));
             venta.setOdEsf(rs.getString("od_esf"));
@@ -498,6 +518,7 @@ public class SaleDAO {
             p.modelo,
             p.categoria,
             dv.precio_unitario,
+            dv.descuento_aplicado,
             dv.nombre_descuento
         FROM detalle_venta dv
         JOIN products p ON dv.id_product = p.id_product
@@ -520,6 +541,7 @@ public class SaleDAO {
             p.setPrecio(rs.getDouble("precio_unitario"));
             item.setProducto(p);
             item.setCantidad(rs.getInt("cantidad"));
+            item.setDescuento(rs.getDouble("descuento_aplicado"));
             item.setNombreDescuento(rs.getString("nombre_descuento"));
 
             lista.add(item);
@@ -757,6 +779,7 @@ public class SaleDAO {
         SUM(
             CASE
                 WHEN estado_trabajo = 'PROCESO'
+                     AND estado_pago = 'PENDIENTE'
                 THEN 1
                 ELSE 0
             END
@@ -765,6 +788,7 @@ public class SaleDAO {
         SUM(
             CASE
                 WHEN estado_trabajo = 'RECIBIDO'
+                     AND estado_pago = 'PENDIENTE'
                 THEN 1
                 ELSE 0
             END
@@ -773,6 +797,7 @@ public class SaleDAO {
         SUM(
             CASE
                 WHEN estado_trabajo = 'PROCESO'
+                     AND estado_pago = 'PENDIENTE'
                 THEN (
                     total_final -
                     IFNULL((
@@ -788,6 +813,7 @@ public class SaleDAO {
         SUM(
             CASE
                 WHEN estado_trabajo = 'RECIBIDO'
+                     AND estado_pago = 'PENDIENTE'
                 THEN (
                     total_final -
                     IFNULL((
@@ -850,6 +876,7 @@ public class SaleDAO {
             ON v.id_ventas = p.id_venta
 
         WHERE v.estado_trabajo = 'PROCESO'
+        AND V.estado_pago = 'PENDIENTE'
         AND v.id_sucursal = ?
 
         GROUP BY v.id_ventas
@@ -907,6 +934,7 @@ public class SaleDAO {
                     LEFT JOIN pagos p
                     ON v.id_ventas = p.id_venta
                     WHERE v.estado_trabajo = 'RECIBIDO'
+                    AND v.estado_pago = 'PENDIENTE'
                     AND v.id_sucursal = ?
                     GROUP BY v.id_ventas
                     ORDER BY v.fecha_venta ASC

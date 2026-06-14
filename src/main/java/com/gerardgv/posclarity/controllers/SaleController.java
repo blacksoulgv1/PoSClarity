@@ -620,7 +620,8 @@ public class SaleController implements Initializable {
         Pago p = new Pago();
         p.setMetodo(cbMetodoPago.getValue());
         p.setMonto(monto);
-        p.setReferencia(null);        
+        p.setReferencia(null);
+        p.setTipoPago("VENTA");
         pagos.add(p);
         
         double totalBruto = calcularTotalBruto();
