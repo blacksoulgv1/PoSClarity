@@ -18,4 +18,12 @@ public class Configuracion {
         return obtenerSucursal() != -1;
     }
     
+    public static void guardarImpresora(String nombreImpresora){
+        prefs.put("impresora", nombreImpresora);
+    }
+    
+    public static String obtenerImpresora(){
+        return prefs.get("impresora",null);
+    }
+    
 }

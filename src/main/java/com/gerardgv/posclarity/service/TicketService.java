@@ -2,20 +2,21 @@ package com.gerardgv.posclarity.service;
 
 import com.gerardgv.posclarity.database.SaleDAO;
 import com.gerardgv.posclarity.models.*;
+import com.gerardgv.posclarity.utils.*;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import javafx.print.Printer;
 import javafx.scene.control.Alert;
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.JRPrintServiceExporter;
+import net.sf.jasperreports.export.*;
 import net.sf.jasperreports.view.JasperViewer;
 
 public class TicketService {
@@ -51,7 +52,7 @@ public class TicketService {
             JasperPrint print = JasperFillManager.fillReport(report,params,dataSource);
             
             try{
-                JasperPrintManager.printReport(print, false);
+                imprimirConImpresoraGuardada(print,2);
             } catch (Exception e){
                 Alert alert = new Alert(Alert.AlertType.WARNING);
                 alert.setTitle("Impresión");
@@ -61,10 +62,6 @@ public class TicketService {
             }
             
             JasperViewer.viewReport(print,false);
-            
-            /*JasperExportManager.exportReportToPdfFile(
-                print,
-                "ticket_" + venta.getId() + ".pdf");*/
             
         } catch(Exception e){
             e.printStackTrace();
@@ -146,11 +143,16 @@ public class TicketService {
             
             JasperPrint print = JasperFillManager.fillReport(report, params, new JREmptyDataSource());
             
+            try{
+                imprimirConImpresoraGuardada(print,2);
+            } catch(Exception e){
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("Impresión");
+                alert.setHeaderText(null);
+                alert.setContentText("No se pudo imprimir la orden.");
+                alert.showAndWait();
+            }
             JasperViewer.viewReport(print,false);
-            
-            /*JasperExportManager.exportReportToPdfFile(
-                print,
-                "orden_" + venta.getId() + ".pdf");  */          
         } catch (Exception e){
             e.printStackTrace();
         }
@@ -222,4 +224,59 @@ public class TicketService {
     return tipo.length() == 0 ? "N/A" : tipo.toString();
 }
     
+   private void imprimirConImpresoraGuardada(JasperPrint print, int copias) throws JRException {
+       
+       String nombreImpresora = Configuracion.obtenerImpresora();
+       
+       if(nombreImpresora == null){
+            Printer printerSeleccionada = PrinterUtils.seleccionarImpresora();
+            if(printerSeleccionada == null){
+                return;
+            }
+            nombreImpresora = printerSeleccionada.getName();
+       }
+       
+       PrintService impresora = null;
+       
+       for( PrintService ps : PrintServiceLookup.lookupPrintServices(null,null)){
+           if(ps.getName().equals(nombreImpresora)){
+               impresora = ps;
+               break;
+           }
+       }
+       
+       if(impresora == null){
+            Printer printerSeleccionada = PrinterUtils.seleccionarImpresora();
+            if(printerSeleccionada == null){
+                return;
+            }
+            nombreImpresora = printerSeleccionada.getName();
+            
+            for(PrintService ps :
+            PrintServiceLookup.lookupPrintServices(null, null)){
+
+                if(ps.getName().equals(nombreImpresora)){
+                    impresora = ps;
+            break;
+                }
+           }
+            if(impresora == null){
+                return;
+            }
+       }
+       
+        JRPrintServiceExporter exporter = new JRPrintServiceExporter();         
+        exporter.setExporterInput( new SimpleExporterInput(print));        
+        SimplePrintServiceExporterConfiguration exportConfig =
+            new SimplePrintServiceExporterConfiguration();        
+        exportConfig.setPrintService(impresora);
+        exportConfig.setDisplayPageDialog(false);
+        exportConfig.setDisplayPrintDialog(false);        
+        exporter.setConfiguration(exportConfig);
+        
+        for(int i = 0; i < copias; i++){
+            exporter.exportReport();
+        }
+       
+   }
 }
