@@ -71,6 +71,11 @@ public class MainController implements Initializable {
         viewVista("Saleview");
     }
     
+     @FXML
+    private void AbrirGarantias(){
+        viewVista("Garantias");
+    }
+    
     @FXML
     private void abrirPendintes(){
         viewVista("Ventas_pendientes");

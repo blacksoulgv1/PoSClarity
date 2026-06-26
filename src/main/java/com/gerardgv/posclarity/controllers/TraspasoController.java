@@ -1,18 +1,11 @@
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.database.BranchDAO;
-import com.gerardgv.posclarity.database.InventarioSucursalDAO;
-import com.gerardgv.posclarity.database.TraspasoDAO;
-import com.gerardgv.posclarity.models.Branch;
-import com.gerardgv.posclarity.models.Product;
-import com.gerardgv.posclarity.models.Traspaso;
-import com.gerardgv.posclarity.models.TraspasoDetalle;
+import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.models.*;
+import com.gerardgv.posclarity.utils.Configuracion;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import java.util.*;
+import javafx.collections.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -60,9 +53,31 @@ public class TraspasoController implements Initializable {
 
     private void cargarSucursales() {
         
-        cmbOrigen.setItems(FXCollections.observableArrayList(branchDAO.getAll()));
-        cmbDestino.setItems(FXCollections.observableArrayList(branchDAO.getAll()));
-
+        ObservableList<Branch> sucursales = 
+                FXCollections.observableArrayList(branchDAO.getAll());
+        
+        cmbOrigen.setItems(sucursales);
+        
+        int idSucursalActual = Configuracion.obtenerSucursal();
+        Branch sucursalActual = null;
+        
+        for(Branch b : sucursales){
+            if(b.getId() ==idSucursalActual){
+                sucursalActual = b;
+                break;
+            }
+        }
+        
+        cmbOrigen.setValue(sucursalActual);
+        
+        ObservableList<Branch> destinos =
+                FXCollections.observableArrayList(sucursales);
+        
+        destinos.remove(sucursalActual);        
+        cmbDestino.setItems(destinos);
+        
+        cmbOrigen.setDisable(true);
+        cargarInventarioOrigen();
     }
 
     private void configurarColumnas() {
@@ -91,22 +106,62 @@ public class TraspasoController implements Initializable {
         
         Product seleccionado = tblInventarioOrigen.getSelectionModel().getSelectedItem();
         
-        if (seleccionado == null) return;
+        if(seleccionado == null){
+            mostrarAlerta("Seleccionar un producto");
+            return;
+        }
         
-        int cantidad = Integer.parseInt(txtCantidad.getText());
+        if(txtCantidad.getText().isEmpty()){
+            mostrarAlerta("ingresar una Cantidad");
+            txtCantidad.requestFocus();
+            return;
+        }
         
-        if(cantidad <=0 || cantidad > seleccionado.getStock()){
+        int cantidad;
+        
+        try{
+            cantidad = Integer.parseInt(txtCantidad.getText());
+        }catch(NumberFormatException e){
+            mostrarAlerta("La Cantidad Debe Ser Numerica");
+            txtCantidad.clear();
+            txtCantidad.requestFocus();
+            return;
+        }
+        
+        if(cantidad <= 0){
             mostrarAlerta("Cantidad Inválida");
             return;
+        }
+        
+        if(cantidad > seleccionado.getStock()){
+            mostrarAlerta("Stock Disponible" + seleccionado.getStock());
+            return;
+        }
+        
+        for(TraspasoDetalle d : carrito){
+            
+            if(d.getIdProducto() == seleccionado.getId_product()){
+                
+                int nuevaCantidad = d.getCantidad() + cantidad;
+                
+                if(nuevaCantidad > seleccionado.getStock()){
+                    
+                    mostrarAlerta("No Puedes Superar Stock");
+                    return;
+                }
+                d.setCantidad(nuevaCantidad);
+                tblDetalle.refresh();
+                txtCantidad.clear();
+                return;
+            }
         }
         
         TraspasoDetalle detalle = new TraspasoDetalle();
         detalle.setIdProducto(seleccionado.getId_product());
         detalle.setModelo(seleccionado.getModelo());
         detalle.setCantidad(cantidad);
-        
         carrito.add(detalle);
-        txtCantidad.clear();
+        txtCantidad.clear();        
     }
 
     private void realizarTraspaso() {

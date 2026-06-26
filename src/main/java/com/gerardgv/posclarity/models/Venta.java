@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public class Venta {
     
     private int id;
+    private String folio;
     private Branch sucursal;
     private Clients cliente;
     private Empleados vendedor;
@@ -24,8 +25,9 @@ public class Venta {
     public Venta() {
     }
 
-    public Venta(int id, Branch sucursal, Clients cliente, Empleados vendedor, LocalDateTime fecha, double total, double totalBruto, double descuentoTotal, double totalFinal, double pagado, double restante, String estadoPago, String estadoTrabajo, String odEsf, String odCil, String odEje, String oiEsf, String oiCil, String oiEje, String add) {
+    public Venta(int id, String folio, Branch sucursal, Clients cliente, Empleados vendedor, LocalDateTime fecha, double total, double totalBruto, double descuentoTotal, double totalFinal, double pagado, double restante, String estadoPago, String estadoTrabajo, String odEsf, String odCil, String odEje, String oiEsf, String oiCil, String oiEje, String add) {
         this.id = id;
+        this.folio = folio;
         this.sucursal = sucursal;
         this.cliente = cliente;
         this.vendedor = vendedor;
@@ -45,10 +47,7 @@ public class Venta {
         this.oiCil = oiCil;
         this.oiEje = oiEje;
         this.add = add;
-    }
-
-
-    
+    }     
     
     public Branch getSucursal() {
         return sucursal;
@@ -57,6 +56,16 @@ public class Venta {
     public void setSucursal(Branch sucursal) {
         this.sucursal = sucursal;
     }
+
+    public String getFolio() {
+        return folio;
+    }
+
+    public void setFolio(String folio) {
+        this.folio = folio;
+    }
+    
+    
 
     public Clients getCliente() {
         return cliente;
@@ -73,8 +82,6 @@ public class Venta {
     public void setVendedor(Empleados vendedor) {
         this.vendedor = vendedor;
     }
-
-
 
     public int getId() {
         return id;

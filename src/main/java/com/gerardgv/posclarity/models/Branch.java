@@ -60,6 +60,8 @@ public class Branch {
         this.activo = activo;
     }
     
-    
-    
+    public String toString(){
+        return sucursal;
+    }
+        
 }

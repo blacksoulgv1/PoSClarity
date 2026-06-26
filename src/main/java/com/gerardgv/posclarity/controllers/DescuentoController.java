@@ -21,6 +21,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
@@ -39,6 +40,9 @@ public class DescuentoController implements Initializable {
     @FXML private TextField txtCupon;
     @FXML private TextField txtPrioridad;
     @FXML private TextField txtBuscar;
+    @FXML private TextField txtModeloProducto;
+    @FXML private TextField txtDioptriaMax;
+    @FXML private CheckBox chkRequiereArmazon;
     
     @FXML private ComboBox<String> cbCategoria;
     @FXML private ComboBox<String> cbTipoAplicacion;
@@ -180,6 +184,13 @@ public class DescuentoController implements Initializable {
         txtValor.setText(String.valueOf(d.getValor()));
         txtCupon.setText(d.getCodigoCupon());
         cbCategoria.setValue(d.getCategoria());
+        txtModeloProducto.setText(d.getModeloProducto());
+        chkRequiereArmazon.setSelected(d.isRequiereArmazon());
+
+        if(d.getDiotriaMax()!= null){
+            txtDioptriaMax.setText(String.valueOf(d.getDiotriaMax()));
+        }
+        
         dpInicio.setValue(d.getFechaInicio());
         dpFin.setValue(d.getFechaFin());
         txtPrioridad.setText(String.valueOf(d.getPrioridad()));
@@ -189,14 +200,22 @@ public class DescuentoController implements Initializable {
     @FXML
     private void guardar(){
         try{
-             Descuento d = new Descuento();
+            Descuento d = new Descuento();
              
-             d.setNombre(txtNombre.getText());
-             d.setTipoAplicacion(cbTipoAplicacion.getValue());
-             d.setTipoValor(cbTipoValor.getValue());
-             d.setValor(Double.parseDouble(txtValor.getText()));
-             d.setCodigoCupon(txtCupon.getText());
-             d.setCategoria(cbCategoria.getValue());
+            d.setNombre(txtNombre.getText());
+            d.setTipoAplicacion(cbTipoAplicacion.getValue());
+            d.setTipoValor(cbTipoValor.getValue());
+            d.setValor(Double.parseDouble(txtValor.getText()));
+            d.setCodigoCupon(txtCupon.getText());
+            d.setCategoria(cbCategoria.getValue());
+            d.setModeloProducto( txtModeloProducto.getText());
+            d.setRequiereArmazon(chkRequiereArmazon.isSelected());
+
+            if(!txtDioptriaMax.getText().isBlank()){
+                 d.setDiotriaMax(
+                    Double.parseDouble(
+                    txtDioptriaMax.getText()));
+            }
              d.setFechaInicio(dpInicio.getValue());
              d.setFechaFin(dpFin.getValue());
              d.setPrioridad(Integer.parseInt(txtPrioridad.getText()));
@@ -227,6 +246,9 @@ public class DescuentoController implements Initializable {
         txtValor.clear();
         txtCupon.clear();
         txtPrioridad.clear();
+        txtModeloProducto.clear();
+        txtDioptriaMax.clear();
+        chkRequiereArmazon.setSelected(false);
         cbTipoAplicacion.setValue(null);
         cbTipoValor.setValue(null);
         cbCategoria.setValue(null);        
@@ -271,5 +293,6 @@ public class DescuentoController implements Initializable {
             case "tratamiento" -> "Tratamiento";
             default -> valor;                
         };
-    }
+    }    
+   
 }

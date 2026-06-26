@@ -6,6 +6,9 @@ public class Descuento {
     
     private int id;
     private String nombre;
+    private String modeloProducto;
+    private boolean requiereArmazon;
+    private Double diotriaMax;
     private String tipoAplicacion;
     private String tipoValor;
     private double valor;
@@ -19,9 +22,12 @@ public class Descuento {
     public Descuento() {
     }
 
-    public Descuento(int id, String nombre, String tipoAplicacion, String tipoValor, double valor, String codigoCupon, String categoria, LocalDate fechaInicio, LocalDate fechaFin, int prioridad) {
+    public Descuento(int id, String nombre, String modeloProducto, boolean requiereArmazon, Double diotriaMax, String tipoAplicacion, String tipoValor, double valor, String codigoCupon, String categoria, LocalDate fechaInicio, LocalDate fechaFin, int prioridad) {
         this.id = id;
         this.nombre = nombre;
+        this.modeloProducto = modeloProducto;
+        this.requiereArmazon = requiereArmazon;
+        this.diotriaMax = diotriaMax;
         this.tipoAplicacion = tipoAplicacion;
         this.tipoValor = tipoValor;
         this.valor = valor;
@@ -30,7 +36,7 @@ public class Descuento {
         this.fechaInicio = fechaInicio;
         this.fechaFin = fechaFin;
         this.prioridad = prioridad;
-    }
+    }    
 
     public int getId() {
         return id;
@@ -118,6 +124,30 @@ public class Descuento {
 
     public void setActivo(boolean activo) {
         this.activo = activo;
-    }    
+    }
+
+    public String getModeloProducto() {
+        return modeloProducto;
+    }
+
+    public void setModeloProducto(String modeloProducto) {
+        this.modeloProducto = modeloProducto;
+    }
+
+    public boolean isRequiereArmazon() {
+        return requiereArmazon;
+    }
+
+    public void setRequiereArmazon(boolean requiereArmazon) {
+        this.requiereArmazon = requiereArmazon;
+    }
+
+    public Double getDiotriaMax() {
+        return diotriaMax;
+    }
+
+    public void setDiotriaMax(Double diotriaMax) {
+        this.diotriaMax = diotriaMax;
+    }         
    
 }

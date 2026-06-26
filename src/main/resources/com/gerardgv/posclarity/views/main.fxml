@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane fx:id="mainBorderPane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.MainController">
+<BorderPane fx:id="mainBorderPane" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.MainController">
    <top>
       <HBox prefHeight="39.0" prefWidth="727.0" BorderPane.alignment="CENTER" />
    </top>
@@ -37,6 +37,11 @@
                      </graphic>
                   </Button>
                   <Button mnemonicParsing="false" onAction="#abrirAbono" prefHeight="46.0" prefWidth="118.0" text="Ventas Pendientes">
+                     <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
+                     </graphic>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#AbrirGarantias" prefHeight="46.0" prefWidth="118.0" text="Garantias">
                      <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true" />
                      </graphic>

@@ -84,7 +84,7 @@ public class TicketService {
         params.put("vendedor", venta.getVendedor().getNombre());
         params.put("fecha", venta.getFecha().
                 format(DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm")));
-        params.put("nota", String.valueOf(venta.getId()));
+        params.put("nota", String.valueOf(venta.getFolio()));
         //Totales & Descuentos
         double subtotal = venta.getTotalBruto();        
         double descuento = venta.getDescuentoTotal();        
@@ -164,7 +164,7 @@ public class TicketService {
         
         params.put("sucursal", venta.getSucursal().getSucursal());
     // 🧾 Nombre + folio
-        params.put("cliente", venta.getCliente().getNombre() + " #" + venta.getId());
+        params.put("cliente", venta.getCliente().getNombre() + " #" + venta.getFolio());
     
     // 👓 Tipo de lente (ajústalo a tu modelo real)
         params.put("tipo_lente", construirTipo(items));

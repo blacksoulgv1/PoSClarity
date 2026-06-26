@@ -1,35 +1,15 @@
 package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.database.BranchDAO;
-import com.gerardgv.posclarity.models.Branch;
-import com.gerardgv.posclarity.models.Product;
-import com.gerardgv.posclarity.utils.SearchUtils;
-import com.gerardgv.posclarity.utils.TableUtils;
+import com.gerardgv.posclarity.models.*;
+import com.gerardgv.posclarity.utils.*;
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
-import javafx.css.SimpleStyleableObjectProperty;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.paint.Color;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.beans.property.*;
+import javafx.collections.*;
+import javafx.collections.transformation.*;
+import javafx.fxml.*;
+import javafx.scene.control.*;
 
 public class BranchController implements Initializable {
     
@@ -65,9 +45,7 @@ public class BranchController implements Initializable {
         SearchUtils.setupSearch(txtBuscar, tblSucursales, listaSucursales,
                 s -> s.getSucursal(),
                 s -> s.getDireccion());
-        
-        tblSucursales.setSelectionModel(null);
-        
+                
         colEstatus.setCellFactory(column ->
                 TableUtils.createActiveToggle(
                 Branch::getId,
@@ -155,7 +133,10 @@ public class BranchController implements Initializable {
         sucursalSeleccionada = null;
         modoEdicion = false;
 
-        tblSucursales.getSelectionModel().clearSelection();
+        if(tblSucursales.getSelectionModel() != null){
+            tblSucursales.getSelectionModel().clearSelection();
+        }
+                
         btnGuardar.setText("Guardar");
         txtSucursal.requestFocus();
     }
@@ -217,12 +198,6 @@ public class BranchController implements Initializable {
     @FXML
     private void nuevoRegistro(){
         clearform();
-        modoEdicion = false;
-        sucursalSeleccionada = null;
-        
-        tblSucursales.getSelectionModel().clearSelection();
-        btnGuardar.setText("Guardar");
-        txtSucursal.requestFocus();
    }
 
 }
