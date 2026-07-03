@@ -57,14 +57,16 @@
 			<element kind="textField" uuid="dd4363bc-be5f-49ee-a884-1b1b033acc38" x="380" y="0" width="170" height="30" fontSize="19.0">
 				<expression><![CDATA[$P{cajaInicial}]]></expression>
 			</element>
-			<element kind="textField" uuid="aa8b032e-a20f-4f8b-bf58-f354a05a61b2" x="60" y="120" width="115" height="30" fontSize="19.0">
+			<element kind="textField" uuid="aa8b032e-a20f-4f8b-bf58-f354a05a61b2" x="60" y="155" width="115" height="30" fontSize="19.0">
 				<expression><![CDATA[$P{totalVentas}]]></expression>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
 			</element>
 			<element kind="staticText" uuid="2db47c39-c51f-4888-a1ac-f6bac8cf2c4a" x="5" y="40" width="100" height="30" fontSize="19.0">
 				<text><![CDATA[Ventas:]]></text>
 			</element>
-			<element kind="textField" uuid="6a12d4a7-ac09-466c-938f-5a974f053851" x="260" y="120" width="80" height="30" fontSize="19.0">
+			<element kind="textField" uuid="6a12d4a7-ac09-466c-938f-5a974f053851" x="260" y="155" width="80" height="30" fontSize="19.0">
 				<expression><![CDATA[$P{totalAbonos}]]></expression>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
 			</element>
 			<element kind="staticText" uuid="bafd3c42-a211-4716-8083-2cc7487ed0e4" x="200" y="40" width="100" height="30" fontSize="19.0">
 				<text><![CDATA[Recogidos]]></text>
@@ -75,7 +77,7 @@
 			<element kind="staticText" uuid="5e770df9-0346-4730-8abb-31807095660e" x="5" y="290" width="100" height="30" fontSize="19.0">
 				<text><![CDATA[Venta Final]]></text>
 			</element>
-			<element kind="line" uuid="d1c3be21-db06-4e6b-ac71-e8c47c54167a" positionType="FixRelativeToBottom" x="0" y="160" width="550" height="1">
+			<element kind="line" uuid="d1c3be21-db06-4e6b-ac71-e8c47c54167a" positionType="FixRelativeToBottom" x="0" y="190" width="550" height="1">
 				<property name="com.jaspersoft.studio.unit.x" value="px"/>
 				<property name="com.jaspersoft.studio.unit.y" value="px"/>
 				<property name="com.jaspersoft.studio.unit.width" value="px"/>
@@ -120,26 +122,30 @@
 			<element kind="staticText" uuid="93efafcd-07f6-4638-ba04-ba29cebeadf3" x="380" y="40" width="100" height="30" fontSize="19.0">
 				<text><![CDATA[Abonos]]></text>
 			</element>
-			<element kind="textField" uuid="fe9b8056-4683-481c-a094-4652c7f98931" x="460" y="120" width="90" height="30" fontSize="19.0">
+			<element kind="textField" uuid="fe9b8056-4683-481c-a094-4652c7f98931" x="460" y="155" width="90" height="30" fontSize="19.0">
 				<expression><![CDATA[$P{totalAbonos}]]></expression>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
 			</element>
-			<element kind="textField" uuid="528af94b-0089-420a-9921-ea0cdcc9a650" x="5" y="70" width="170" height="30" fontSize="19.0">
+			<element kind="textField" uuid="528af94b-0089-420a-9921-ea0cdcc9a650" positionType="Float" x="5" y="70" width="170" height="80" fontSize="13.0" textAdjust="StretchHeight" linkType="None" linkTarget="Self">
 				<expression><![CDATA[$P{detalleNuevos}]]></expression>
 			</element>
-			<element kind="textField" uuid="f451af94-2f4e-4aa3-9161-21ca129d33db" x="200" y="70" width="140" height="30" fontSize="19.0">
+			<element kind="textField" uuid="f451af94-2f4e-4aa3-9161-21ca129d33db" positionType="Float" x="200" y="70" width="140" height="80" fontSize="13.0" textAdjust="StretchHeight">
 				<expression><![CDATA[$P{detalleRecogidos}]]></expression>
 			</element>
-			<element kind="textField" uuid="fe7925f9-c8af-44c6-8a9c-df1394e1fa8f" x="370" y="70" width="170" height="30" fontSize="19.0">
+			<element kind="textField" uuid="fe7925f9-c8af-44c6-8a9c-df1394e1fa8f" positionType="Float" x="370" y="70" width="170" height="80" fontSize="13.0" textAdjust="StretchHeight">
 				<expression><![CDATA[$P{detalleAbonos}]]></expression>
 			</element>
-			<element kind="staticText" uuid="96767ee7-6e6f-435a-9c1f-59f374d5b1dc" x="2" y="120" width="58" height="30" fontSize="19.0">
+			<element kind="staticText" uuid="96767ee7-6e6f-435a-9c1f-59f374d5b1dc" x="2" y="155" width="58" height="30" fontSize="19.0">
 				<text><![CDATA[Total:]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
 			</element>
-			<element kind="staticText" uuid="6a8ce762-82ff-4799-91fd-584ec7f4d30e" x="200" y="120" width="60" height="30" fontSize="19.0">
+			<element kind="staticText" uuid="6a8ce762-82ff-4799-91fd-584ec7f4d30e" x="200" y="155" width="60" height="30" fontSize="19.0">
 				<text><![CDATA[Total:]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
 			</element>
-			<element kind="staticText" uuid="9ba72a08-2fa4-4adb-841b-a233780c3a23" x="400" y="120" width="60" height="30" fontSize="19.0">
+			<element kind="staticText" uuid="9ba72a08-2fa4-4adb-841b-a233780c3a23" x="400" y="155" width="60" height="30" fontSize="19.0">
 				<text><![CDATA[Total:]]></text>
+				<property name="com.jaspersoft.studio.unit.y" value="px"/>
 			</element>
 		</band>
 	</detail>

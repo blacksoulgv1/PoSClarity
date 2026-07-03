@@ -120,4 +120,38 @@ public class EmpleadosDAO {
         return lista;
     }
     
+    public Empleados validarAcceso(int codigo, String password){
+        
+        String sql ="""
+                    SELECT * FROM vendedor
+                    WHERE codigo = ?
+                    AND pass = ?
+                    AND estatus = true                    
+                    """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement stm = conn.prepareStatement(sql)){
+            
+            stm.setInt(1, codigo);
+            stm.setString(2, password);
+
+            ResultSet rs = stm.executeQuery();
+            
+            if(rs.next()){
+               Empleados emp = new Empleados();
+
+            emp.setId_vendedor(rs.getInt("id_vendedor"));
+            emp.setNombre(rs.getString("nombre"));
+            emp.setCodigo(rs.getInt("codigo"));
+            emp.setRol(rs.getString("rol"));
+            emp.setActivo(rs.getBoolean("estatus"));
+
+            return emp; 
+            }
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
 }

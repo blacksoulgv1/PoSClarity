@@ -14,13 +14,14 @@ public class Garantia {
     private String estado;
     private String accion;
     private String observaciones;
+    private String cliente;
     private int usuario;
     private LocalDateTime fechaCreacion;
 
     public Garantia() {
     }
 
-    public Garantia(int idgarantias, String folio, int idventas, int idcliente, int idsucursal, LocalDateTime fechaSolicitud, String motivo, String estado, String accion, String observaciones, int usuario, LocalDateTime fechaCreacion) {
+    public Garantia(int idgarantias, String folio, int idventas, int idcliente, int idsucursal, LocalDateTime fechaSolicitud, String motivo, String estado, String accion, String observaciones, String cliente, int usuario, LocalDateTime fechaCreacion) {
         this.idgarantias = idgarantias;
         this.folio = folio;
         this.idventas = idventas;
@@ -31,9 +32,10 @@ public class Garantia {
         this.estado = estado;
         this.accion = accion;
         this.observaciones = observaciones;
+        this.cliente = cliente;
         this.usuario = usuario;
         this.fechaCreacion = fechaCreacion;
-    }
+    }    
 
     public int getIdgarantias() {
         return idgarantias;
@@ -130,4 +132,14 @@ public class Garantia {
     public void setFechaCreacion(LocalDateTime fechaCreacion) {
         this.fechaCreacion = fechaCreacion;
     }
+
+    public String getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(String cliente) {
+        this.cliente = cliente;
+    }
+    
+    
 }

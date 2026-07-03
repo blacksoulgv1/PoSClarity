@@ -176,100 +176,8 @@ public class SaleDAO {
     private boolean contieneBajoPedido (List<SaleItem> carrito){
         return carrito.stream()
                 .anyMatch(i-> "bajo_pedido".equals(i.getProducto().getTipo_producto()));
-    }
-    
-    private List<Venta> obtenerVentasPorCondicion(String condicion){
-    
-    List<Venta> lista = new ArrayList<>();
+    }    
 
-    String sql = """
-        SELECT
-            v.id_ventas,
-            v.fecha_venta,
-            v.total_final,
-            v.estado_pago,
-            v.estado_trabajo,
-            c.nombre AS cliente_nombre,
-            IFNULL(SUM(p.monto), 0) AS pagado
-        FROM ventas v
-        JOIN cliente c ON v.id_cliente = c.id_cliente
-        LEFT JOIN pagos p ON v.id_ventas = p.id_venta
-        WHERE """ + condicion + """
-        GROUP BY v.id_ventas
-    """;
-
-    try(Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery()){
-
-        while(rs.next()){
-
-            Venta v = new Venta();
-            Clients c = new Clients();
-
-            v.setId(rs.getInt("id_ventas"));
-            v.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
-            v.setTotal(rs.getDouble("total_final"));
-
-            double pagado = rs.getDouble("pagado");
-
-            v.setPagado(pagado);
-            v.setRestante(v.getTotal() - pagado);
-
-            v.setEstadoPago(rs.getString("estado_pago"));
-            v.setEstadoTrabajo(rs.getString("estado_trabajo"));
-
-            c.setNombre(rs.getString("cliente_nombre"));
-
-            v.setCliente(c);
-
-            lista.add(v);
-        }
-
-    }catch(Exception e){
-        e.printStackTrace();
-    }
-
-    return lista;
-}
-
-  public List<Venta> obtenerTrabajosActivos(){
-      
-      return obtenerVentasPorCondicion("""
-        v.estado_pago = 'PENDIENTE'
-        OR v.estado_trabajo IN ('PROCESO','RECIBIDO')
-    """);
-  }
-  
-  public List<Venta> obtenerTrabajosProceso(){
-
-    return obtenerVentasPorCondicion("""
-        v.estado_trabajo = 'PROCESO'
-    """);
-}
-  
-  public List<Venta> obtenerTrabajosListos(){
-
-    return obtenerVentasPorCondicion("""
-        v.estado_trabajo = 'LISTO'
-    """);
-}
-  
-  public List<Venta> obtenerSaldosPendientes(){
-
-    return obtenerVentasPorCondicion("""
-        v.estado_pago = 'PENDIENTE'
-    """);
-}
-  
-  public List<Venta> obtenerTrabajosAtrasados(){
-
-    return obtenerVentasPorCondicion("""
-        v.estado_trabajo = 'PROCESO'
-        AND v.fecha_venta < NOW() - INTERVAL 5 DAY
-    """);
-}
-  
   private String determinarEstadoTrabajo(List<SaleItem> carrito){
 
     boolean requiereProceso = carrito.stream().anyMatch(item -> {
@@ -294,63 +202,7 @@ public class SaleDAO {
             ? "PROCESO"
             : "ENTREGADO";
 }
-  
-  public List<Venta> buscarVentasPendientesPorCliente(String filtro){
-      
-      List<Venta> lista = new ArrayList<>();
-      
-      String sql = """
-        SELECT 
-            v.id_ventas,
-            v.fecha_venta,
-            v.total_final,
-            v.estado_pago,
-            v.estado_trabajo,
-            c.nombre AS cliente_nombre,
-            IFNULL(SUM(p.monto), 0) AS pagado
-        FROM ventas v
-        JOIN cliente c ON v.id_cliente = c.id_cliente
-        LEFT JOIN pagos p ON v.id_ventas = p.id_venta
-        WHERE (v.estado_pago = 'PENDIENTE'
-                   OR v.estado_trabajo = 'PROCESO')
-        AND (c.nombre LIKE ? OR c.telefono LIKE ?)
-        GROUP BY v.id_ventas
-    """;
-      
-      try(Connection conn = DBConnection.getConnection();
-              PreparedStatement ps = conn.prepareStatement(sql)){
-          ps.setString(1, "%" + filtro + "%");
-          ps.setString(2, "%" + filtro + "%");
-          
-          ResultSet rs = ps.executeQuery();
-          
-          while (rs.next()) {
-              
-              Venta v = new Venta();
-              Clients c = new Clients();
-              
-            v.setId(rs.getInt("id_ventas"));
-            v.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
-            v.setTotal(rs.getDouble("total_final"));
-
-            double pagado = rs.getDouble("pagado");
-            v.setPagado(pagado);
-            v.setRestante(v.getTotal() - pagado);
-
-            v.setEstadoPago(rs.getString("estado_pago"));
-            v.setEstadoTrabajo(rs.getString("estado_trabajo"));
-            c.setNombre(rs.getString("cliente_nombre"));
-            v.setCliente(c);
-            //v.setTelefono(rs.getString("telefono"));
-
-            lista.add(v);              
-          }
-      } catch(Exception e){
-          e.printStackTrace();
-      }
-      return lista;
-  }
-    
+ 
   public List<Pago> obtenerPagosPorVenta(int idVenta){
       
       List<Pago> lista = new ArrayList<>();
@@ -516,6 +368,7 @@ public class SaleDAO {
 
     String sql = """
         SELECT 
+            dv.id_detalle,
             dv.cantidad,
             p.modelo,
             p.categoria,
@@ -541,6 +394,7 @@ public class SaleDAO {
             p.setModelo(rs.getString("modelo"));
             p.setCategoria(rs.getString("categoria"));
             p.setPrecio(rs.getDouble("precio_unitario"));
+            item.setIdDetalle(rs.getInt("id_detalle"));
             item.setProducto(p);
             item.setCantidad(rs.getInt("cantidad"));
             item.setDescuento(rs.getDouble("descuento_aplicado"));
@@ -619,19 +473,6 @@ public class SaleDAO {
         }
     }
 
-    public boolean entregarVenta(int idVenta){
-        String sql = "UPDATE ventas SET estado_trabajo ='ENTREGADO' WHERE id_ventas =?";
-        
-        try(Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, idVenta);
-            return ps.executeUpdate()>0;
-        } catch(Exception e){
-            e.printStackTrace();
-            return false;
-        }
-    }
-    
     public ReporteVentas obtenerReporteMensual(int idSucursal, int mes, int anio){
         String sql = """
             SELECT
@@ -729,27 +570,6 @@ public class SaleDAO {
         return datos;
     }
     
-    public boolean recepcionarVenta(int idVenta){
-        
-        String sql = """
-        UPDATE ventas
-        SET estado_trabajo = 'RECIBIDO'
-        WHERE id_ventas = ?
-    """;
-
-    try(Connection conn = DBConnection.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)){
-
-        ps.setInt(1, idVenta);
-
-        return ps.executeUpdate() > 0;
-
-    }catch(Exception e){
-        e.printStackTrace();
-        return false;
-    }
-    }
-    
     public boolean cancelarVenta(int idVenta){
         
         String sql = """
@@ -770,209 +590,7 @@ public class SaleDAO {
             return false;
         }
     }
-    
-    public ReportPendientes obtenerResumenPendientes(int idSucursal){
-        
-        ReportPendientes r = new ReportPendientes();
-        
-        String sql = """
-        SELECT
-
-        SUM(
-            CASE
-                WHEN estado_trabajo = 'PROCESO'
-                     AND estado_pago = 'PENDIENTE'
-                THEN 1
-                ELSE 0
-            END
-        ) AS trabajos_realizar,
-
-        SUM(
-            CASE
-                WHEN estado_trabajo = 'RECIBIDO'
-                     AND estado_pago = 'PENDIENTE'
-                THEN 1
-                ELSE 0
-            END
-        ) AS trabajos_entregar,
-
-        SUM(
-            CASE
-                WHEN estado_trabajo = 'PROCESO'
-                     AND estado_pago = 'PENDIENTE'
-                THEN (
-                    total_final -
-                    IFNULL((
-                        SELECT SUM(monto)
-                        FROM pagos p
-                        WHERE p.id_venta = v.id_ventas
-                    ),0)
-                )
-                ELSE 0
-            END
-        ) AS saldo_realizar,
-
-        SUM(
-            CASE
-                WHEN estado_trabajo = 'RECIBIDO'
-                     AND estado_pago = 'PENDIENTE'
-                THEN (
-                    total_final -
-                    IFNULL((
-                        SELECT SUM(monto)
-                        FROM pagos p
-                        WHERE p.id_venta = v.id_ventas
-                    ),0)
-                )
-                ELSE 0
-            END
-        ) AS saldo_entregar
-
-        FROM ventas v
-        WHERE estado_trabajo != 'ENTREGADO'
-        AND estado_trabajo != 'CANCELADO'
-        AND v.id_sucursal = ?
-    """;
-        
-        try(Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)){
-            
-            ps.setInt(1, Session.getSucursal().getId());
-            
-            ResultSet rs = ps.executeQuery();
-            
-            if(rs.next()){
-                r.setTrabajosRealizar(rs.getInt("trabajos_realizar"));
-                r.setTrabajosEntregar(rs.getInt("trabajos_entregar"));
-                r.setSaldoRealizar(rs.getDouble("saldo_realizar"));
-                r.setSaldoEntregar(rs.getDouble("saldo_entregar"));
-            }           
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return r;
-    }
-    
-    public List<Venta> obtenerTrabajosPorRealizar(){
-        
-         List<Venta> lista = new ArrayList<>();
-
-    String sql = """
-        SELECT
-            v.id_ventas,
-            v.fecha_venta,
-            v.total_final,
-            v.estado_pago,
-            v.estado_trabajo,
-
-            c.nombre AS cliente_nombre,
-
-            IFNULL(SUM(p.monto),0) AS pagado
-
-        FROM ventas v
-
-        JOIN cliente c
-            ON v.id_cliente = c.id_cliente
-
-        LEFT JOIN pagos p
-            ON v.id_ventas = p.id_venta
-
-        WHERE v.estado_trabajo = 'PROCESO'
-        AND V.estado_pago = 'PENDIENTE'
-        AND v.id_sucursal = ?
-
-        GROUP BY v.id_ventas
-
-        ORDER BY v.fecha_venta ASC
-    """;
-
-    try(Connection conn = DBConnection.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
-        
-            ps.setInt(1, Session.getSucursal().getId());
-            
-            ResultSet rs = ps.executeQuery();
-        
-        while(rs.next()){
-            
-            Venta v = new Venta();
-            Clients c = new Clients();
-            
-            v.setId(rs.getInt("id_ventas"));
-            v.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
-            v.setTotal(rs.getDouble("total_final"));            
-            double pagado = rs.getDouble("pagado");
-            v.setPagado(pagado);
-            v.setRestante(v.getTotal()- pagado);
-            v.setEstadoPago(rs.getString("estado_pago"));
-            v.setEstadoTrabajo(rs.getString("estado_trabajo"));
-            c.setNombre(rs.getString("cliente_nombre"));
-            v.setCliente(c);
-            
-            lista.add(v);            
-        }
-    } catch(Exception e){
-        e.printStackTrace();
-    }
-    return lista;
-    }
-    
-    public List<Venta> obtenerTrabajosPorEntregar(){
-        
-        List<Venta> lista = new ArrayList<>();
-        
-        String sql = """
-                     SELECT
-                        v.id_ventas,
-                        v.fecha_venta,
-                        v.total_final,
-                        v.estado_pago,
-                        v.estado_trabajo,
-                        c.nombre AS cliente_nombre,
-                    IFNULL(SUM(p.monto),0) AS pagado
-                    FROM ventas v
-                    JOIN cliente c
-                    ON v.id_cliente = c.id_cliente
-                    LEFT JOIN pagos p
-                    ON v.id_ventas = p.id_venta
-                    WHERE v.estado_trabajo = 'RECIBIDO'
-                    AND v.estado_pago = 'PENDIENTE'
-                    AND v.id_sucursal = ?
-                    GROUP BY v.id_ventas
-                    ORDER BY v.fecha_venta ASC
-                    """;
-        
-        try(Connection conn = DBConnection.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql)){
-            
-            ps.setInt(1, Session.getSucursal().getId());
-            
-            ResultSet rs = ps.executeQuery();
-            
-            while(rs.next()){
-                
-                Venta v = new Venta();
-                Clients c = new Clients();
-                
-                v.setId(rs.getInt("id_ventas"));
-                v.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
-                v.setTotal(rs.getDouble("total_final"));
-                double pagado = rs.getDouble("pagado");
-                v.setPagado(pagado);
-                v.setRestante(v.getTotal() - pagado);
-                v.setEstadoPago(rs.getString("estado_pago"));
-                v.setEstadoTrabajo(rs.getString("estado_trabajo"));
-                c.setNombre(rs.getString("cliente_nombre"));
-                v.setCliente(c);
-                
-                lista.add(v);
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return lista;
-    }
-    
+ 
     public int obtenerSiguienteiDVenta(){
         
         String sql = "SELECT IFNULL(MAX(id_ventas),0) + 1 AS siguiente FROM ventas";
@@ -992,38 +610,60 @@ public class SaleDAO {
     return 1;
     }
     
-    public Venta buscarPorFolio(int folio){
+    public Venta buscarPorFolio(String folio){
          
         Venta venta = null;
 
         String sql = """
                 SELECT
                     v.id_ventas,
+                    v.folio,
                     v.fecha_venta,
                     v.total_final,
+                    v.estado_pago,
+                    v.estado_trabajo,
+                    v.od_esf,
+                    v.od_cil,
+                    v.od_eje,
+                    v.oi_esf,
+                    v.oi_cil,
+                    v.oi_eje,
+                    v.add_lente,
                     c.id_cliente,
                     c.nombre AS cliente_nombre,
-                    c.telefono
+                    c.telefono,
+                    c.direccion
                 FROM ventas v
-                JOIN cliente c
-                ON v.id_cliente = c.id_cliente
-                WHERE v.id_ventas = ?
+                JOIN cliente c ON v.id_cliente = c.id_cliente
+                WHERE v.folio = ?
                 """;
 
         try(Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, folio);
+            ps.setString(1, folio);
             ResultSet rs = ps.executeQuery();
 
             if(rs.next()){
                 venta = new Venta();
                 Clients cliente = new Clients();
+                
                 venta.setId(rs.getInt("id_ventas"));
+                venta.setFolio(rs.getString("folio"));
                 venta.setFecha(rs.getTimestamp("fecha_venta").toLocalDateTime());
                 venta.setTotal(rs.getDouble("total_final"));
+                venta.setEstadoPago(rs.getString("estado_pago"));
+                venta.setEstadoTrabajo(rs.getString("estado_trabajo"));
+                venta.setOdEsf(rs.getString("od_esf"));
+                venta.setOdCil(rs.getString("od_cil"));
+                venta.setOdEje(rs.getString("od_eje"));
+                venta.setOiEsf(rs.getString("oi_esf"));
+                venta.setOiCil(rs.getString("oi_cil"));
+                venta.setOiEje(rs.getString("oi_eje"));
+                venta.setAdd(rs.getString("add_lente"));
                 cliente.setId(rs.getInt("id_cliente"));
                 cliente.setNombre(rs.getString("cliente_nombre"));
                 cliente.setTelefono(rs.getString("telefono"));
+                cliente.setDireccion(rs.getString("direccion"));
                 venta.setCliente(cliente);
             }
         }catch(Exception e){

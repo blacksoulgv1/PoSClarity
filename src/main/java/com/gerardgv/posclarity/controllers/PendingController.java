@@ -1,28 +1,16 @@
-
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.database.SaleDAO;
+import com.gerardgv.posclarity.database.*;
 import com.gerardgv.posclarity.models.Venta;
-import com.gerardgv.posclarity.utils.EventBus;
-import com.gerardgv.posclarity.utils.TableUtils;
+import com.gerardgv.posclarity.utils.*;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
+import javafx.beans.property.*;
+import javafx.collections.*;
+import javafx.fxml.*;
+import javafx.scene.*;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
 public class PendingController implements Initializable {
@@ -42,6 +30,9 @@ public class PendingController implements Initializable {
     
     private ObservableList<Venta> listaVentas = FXCollections.observableArrayList();
     private ObservableList<Venta> listaFiltrada = FXCollections.observableArrayList();
+    
+    private PendingDAO pendingDAO = new PendingDAO();
+    private SaleDAO saleDAO = new SaleDAO();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -86,25 +77,20 @@ public class PendingController implements Initializable {
     }
 
     private void cargarVentasPendientes() {
-        SaleDAO dao = new SaleDAO();
-        
+                
         listaVentas.clear();
-        listaVentas.addAll(dao.obtenerTrabajosActivos());
-        System.out.println("ventas cargadas" + listaVentas.size());
-
+        listaVentas.addAll(pendingDAO.obtenerTrabajosActivos());
         listaFiltrada.setAll(listaVentas);
         tblVentas.setItems(listaFiltrada);
     }
 
     private void activarBusqueda() {
         
-        SaleDAO dao = new SaleDAO();
-        
         txtBuscarVenta.textProperty().addListener((obs,oldText,newText) -> {
             if(newText == null || newText.isEmpty()){
                 listaFiltrada.setAll(listaVentas);
             }else{
-                listaFiltrada.setAll(dao.buscarVentasPendientesPorCliente(newText));
+                listaFiltrada.setAll(pendingDAO.buscarPendientes(newText));
             }
         });
         tblVentas.setItems(listaVentas);
@@ -117,7 +103,7 @@ public class PendingController implements Initializable {
             return;
         }
         
-        boolean ok = new SaleDAO().entregarVenta(v.getId());
+        boolean ok = pendingDAO.entregarVenta(v.getId());
         
         if(ok){
             EventBus.publishVenta(v.getId());
@@ -155,7 +141,7 @@ public class PendingController implements Initializable {
 
     private void recepcionarVenta(Venta v){
         
-        boolean ok = new SaleDAO().recepcionarVenta(v.getId());
+        boolean ok = pendingDAO.recepcionarVenta(v.getId());
         
         if(ok){
             EventBus.publishVenta(v.getId());
@@ -167,7 +153,7 @@ public class PendingController implements Initializable {
     
     private void cancelarVenta(Venta v){
         
-        boolean ok = new SaleDAO().cancelarVenta(v.getId());
+        boolean ok = saleDAO.cancelarVenta(v.getId());
         
         if(ok){
             EventBus.publishVenta(v.getId());

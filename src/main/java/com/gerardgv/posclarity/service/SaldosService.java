@@ -20,16 +20,16 @@ public class SaldosService {
             StringBuilder realizarTexto = new StringBuilder();
 
             for(Venta v : entregar){
-                entregarTexto.append("Nota #")
-                .append(v.getId())
+                entregarTexto.append("Folio:")
+                .append(v.getFolio())
                 .append(" - $")
                 .append(String.format("%.2f", v.getRestante()))
                 .append("\n");
             }
 
             for(Venta v : realizar){
-                realizarTexto.append("Nota #")
-                .append(v.getId())
+                realizarTexto.append("Folio:")
+                .append(v.getFolio())
                 .append(" - $")
                 .append(String.format("%.2f", v.getRestante()))
                 .append("\n");

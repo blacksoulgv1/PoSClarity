@@ -3,10 +3,12 @@ package com.gerardgv.posclarity.database;
 import com.gerardgv.posclarity.models.Garantia;
 import com.gerardgv.posclarity.models.GarantiaDetalle;
 import com.gerardgv.posclarity.models.GarantiaGraduacion;
+import com.gerardgv.posclarity.utils.Session;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GarantiasDAO {
@@ -77,7 +79,7 @@ public class GarantiasDAO {
         
         String sql = """
                     INSERT INTO garantias(
-                        folio,id_ventas,id,cliente,id_sucursal,motivo,estado,accion,observaciones,usuario_creo)
+                        folio,id_ventas,id_cliente,id_sucursal,motivo,estado,accion,observaciones,usuario_creo)
                     VALUES (?,?,?,?,?,?,?,?,?)
                     """;
         
@@ -113,8 +115,8 @@ public class GarantiasDAO {
         
         try(PreparedStatement stm = conn.prepareStatement(sql)){
             
-            stm.setInt(1, detalle.getIdDetalle());
-            stm.setInt(2, detalle.getIdDetalleGarantia());
+            stm.setInt(1, detalle.getIdGarantias());
+            stm.setInt(2, detalle.getIdDetalle());
             stm.setInt(3, detalle.getCantidad());
             
             stm.executeUpdate();
@@ -139,12 +141,12 @@ public class GarantiasDAO {
                 // Ojo derecho
             stm.setString(3, graduacion.getOdEsfera());
             stm.setString(4, graduacion.getOdCilindro());
-            stm.setString(5, graduacion.getOdAdd());
+            stm.setString(5, graduacion.getOdEje());
             stm.setString(6, graduacion.getOdAdd());
                 // Ojo izquierdo
             stm.setString(7, graduacion.getOiEsfera());
             stm.setString(8, graduacion.getOiCilindro());
-            stm.setString(9, graduacion.getOiAdd());
+            stm.setString(9, graduacion.getOiEje());
             stm.setString(10, graduacion.getOiAdd());
             
             stm.executeUpdate();           
@@ -166,6 +168,75 @@ public class GarantiasDAO {
             e.printStackTrace();
         }
         return "GAR-000001";
+    }
+    
+    public List<Garantia> obtenergarantiasActivas(){
+        
+        List<Garantia> lista = new ArrayList<>();
+        
+        String sqlGaratias = """
+                SELECT
+                    g.id_garantias,
+                    g.folio,
+                    g.motivo,
+                    g.estado,
+                    g.fecha_solicitud,
+                    c.nombre AS cliente
+                FROM garantias g
+                INNER JOIN cliente c ON g.id_cliente = c.id_cliente
+                WHERE g.estado <> 'ENTREGADO'
+                ORDER BY g.fecha_solicitud DESC
+                             """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sqlGaratias);
+                ResultSet rs = ps.executeQuery()){
+            
+            while(rs.next()){
+                
+                Garantia g = new Garantia();
+                g.setIdgarantias(rs.getInt("id_garantias"));
+                g.setFolio(rs.getString("folio"));
+                g.setMotivo(rs.getString("motivo"));
+                g.setEstado(rs.getString("estado"));
+                g.setFechaSolicitud(rs.getTimestamp("fecha_solicitud").toLocalDateTime());
+                g.setCliente(rs.getString("cliente"));
+                lista.add(g);
+            }            
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        return lista;
+    }
+    
+    private boolean cambiarEstadoGarantia(int idGarantia,String estado){
+        
+        String sql ="""
+                    UPDATE garantias
+                    SET estado = ?
+                    WHERE id_garantias = ?
+                    AND id_sucursal = ?
+                    """;
+        
+        try(Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setString(1,estado);
+            ps.setInt(2, idGarantia);
+            ps.setInt(3,Session.getSucursal().getId());
+            
+            return ps.executeUpdate() > 0;
+        } catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public boolean recepcionGarantia(int idGarantia){
+        return cambiarEstadoGarantia(idGarantia,"RECIBIDO");
+    }
+    
+    public boolean entregarGarantia(int idGarantia){
+        return cambiarEstadoGarantia(idGarantia,"ENTREGADO");
     }
     
 }

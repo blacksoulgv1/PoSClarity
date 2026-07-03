@@ -8,6 +8,7 @@ public class SaleItem {
     private double descuento;
     private String descripcion;
     private double precio;
+    private int idDetalle;
 
     public SaleItem() {
     }
@@ -17,7 +18,7 @@ public class SaleItem {
         this.nombreDescuento = nombreDescuento;
         this.cantidad = 1;
         this.descuento = descuento;
-    }   
+    }
 
     public String getNombreDescuento() {
         return nombreDescuento;
@@ -70,5 +71,14 @@ public class SaleItem {
     
     public void setPrecio(double precio) {
         this.precio = precio;
-}
+    }
+
+    public int getIdDetalle() {
+        return idDetalle;
+    }
+
+    public void setIdDetalle(int idDetalle) {
+        this.idDetalle = idDetalle;
+    }
+    
 }

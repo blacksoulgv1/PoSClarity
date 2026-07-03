@@ -15,7 +15,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-
 <BorderPane xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.GarantiasController">
    <left>
        <VBox spacing="10.0" BorderPane.alignment="CENTER">
@@ -32,13 +31,7 @@
                    <Label text="Cliente:" GridPane.rowIndex="0" />
                    <Label fx:id="lblCliente" GridPane.columnIndex="1" GridPane.rowIndex="0" />
                    <Label text="Producto:" GridPane.rowIndex="1" />
-                   <Label fx:id="lblProducto" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                       <TableView fx:id="tblProductosVenta" prefHeight="120">
-                           <columns>
-                               <TableColumn fx:id="colProductoVenta" text="Producto" />
-                               <TableColumn fx:id="colCantidadVenta" text="Cantidad" />
-                           </columns>
-                       </TableView>
+            <TextArea fx:id="txtProductosVenta" editable="false" prefHeight="100.0" prefWidth="200.0" promptText="Productos Comprados" wrapText="true" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                <Label text="Motivo:" GridPane.rowIndex="2" />
                <ComboBox fx:id="cmbMotivo" GridPane.columnIndex="1" GridPane.rowIndex="2" />
                <Label text="Estado:" GridPane.rowIndex="3" />
@@ -63,6 +56,7 @@
                    <TableColumn fx:id="colProducto" text="Producto" />
                    <TableColumn fx:id="colEstado" text="Estado" />
                    <TableColumn fx:id="colFecha" text="Fecha" />
+               <TableColumn fx:id="colAcciones" prefWidth="75.0" text="Acciones" />
                </columns>
            </TableView>
        </VBox>

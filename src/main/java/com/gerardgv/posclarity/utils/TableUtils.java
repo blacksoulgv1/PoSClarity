@@ -1,5 +1,6 @@
 package com.gerardgv.posclarity.utils;
 
+import com.gerardgv.posclarity.models.Garantia;
 import com.gerardgv.posclarity.models.Venta;
 import java.util.function.*;
 import javafx.geometry.Pos;
@@ -118,6 +119,7 @@ public class TableUtils {
 
             if(empty){
                 setGraphic(null);
+                return;
             } else {
                 
                 T itemTable = getTableView().getItems().get(getIndex());
@@ -187,5 +189,63 @@ public class TableUtils {
              }
         };
     }
+    
+    //GARANTIAS 
+    public static <T> TableCell <T,Void>createGarantiaAcions(
+            Consumer<T> onRecepcionG,
+            Consumer<T> onEntregarG){
+        
+        return new TableCell<>(){
+            
+            private final FontIcon iconRecepcionG = new FontIcon("fas-box-open");
+            private final FontIcon iconEntregarG = new FontIcon("fas-box");
+            private final Button btnRecepcionG = new Button();
+            private final Button btnEntregarG = new Button();
+            
+            private final HBox boxG = new HBox(5, btnRecepcionG,btnEntregarG);
+            {
+                iconRecepcionG.setIconSize(16);
+                iconRecepcionG.setIconColor(Color.ORANGE);
+                iconEntregarG.setIconSize(16);
+                iconEntregarG.setIconColor(Color.DODGERBLUE);
+                btnRecepcionG.setGraphic(iconRecepcionG);
+                btnRecepcionG.setStyle("-fx-background-color: transparent;");
+                btnEntregarG.setGraphic(iconEntregarG);
+                btnEntregarG.setStyle("-fx-background-color: transparent;");
+                
+                btnRecepcionG.setTooltip(
+                    new javafx.scene.control.Tooltip("Producto recibido en óptica"));
+                btnEntregarG.setTooltip(
+                    new javafx.scene.control.Tooltip("Entregar producto"));
+                btnRecepcionG.setOnAction(e -> {
+                T item = getTableView().getItems().get(getIndex());
+                onRecepcionG.accept(item);
+                });
+                btnEntregarG.setOnAction(e -> {
+                T item = getTableView().getItems().get(getIndex());
+                onEntregarG.accept(item);
+                });
+                boxG.setAlignment(Pos.CENTER);
+            }
+            @Override
+            protected void updateItem(Void item, boolean empty){
+                super.updateItem(item, empty);
+                
+                if(empty){
+                    setGraphic(null);
+                    return;
+                } else {
+                    T itemTable = getTableView().getItems().get(getIndex());
+                    Garantia g = (Garantia) itemTable;
+                    btnRecepcionG.setVisible(
+                    g.getEstado().equalsIgnoreCase("PROCESO"));
+                    btnEntregarG.setVisible(
+                    g.getEstado().equalsIgnoreCase("RECIBIDO"));
+                     setGraphic(boxG);
+                }                
+            }
+        };
+    }
+    
     
 }

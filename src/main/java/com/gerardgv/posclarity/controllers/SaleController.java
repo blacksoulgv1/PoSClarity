@@ -3,21 +3,15 @@ package com.gerardgv.posclarity.controllers;
 import com.gerardgv.posclarity.database.*;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.service.TicketService;
-import com.gerardgv.posclarity.utils.EventBus;
-import com.gerardgv.posclarity.utils.Session;
+import com.gerardgv.posclarity.utils.*;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
+import java.util.*;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
+import javafx.fxml.*;
 import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.stage.Popup;
@@ -214,19 +208,14 @@ public class SaleController implements Initializable {
         configurarAutoLimpieza(txtTelefonoClient);
         
         /*Valida que solo acepte numeracion Enteros y Decimales*/
-        NumericalValidation(txtEsfOD);
-        NumericalValidation(txtCylOD);
-        NumericalValidation(txtEsfOI);
-        NumericalValidation(txtCylOI);        
-        //NumericalValidation(txtPrecio);
+        ValidacionSphCyl(txtEsfOD);
+        ValidacionSphCyl(txtCylOD);
+        ValidacionSphCyl(txtEsfOI);
+        ValidacionSphCyl(txtCylOI);
         
         /*Validacion Solo Positivos de Add*/
         ValidationAdd(txtAdd);
         
-        /*Valida que solo acepte numeracion Enteros*/
-        //NumericalValidation2(txtEjeOD);
-        //NumericalValidation2(txtEjeOI);
-        //NumericalValidation2(txtStock);
         
     }
     
@@ -248,18 +237,9 @@ public class SaleController implements Initializable {
     }
   
     /*Metodo para Decimales y Numeros*/    
-    private void NumericalValidation(TextField txt){
+    private void ValidacionSphCyl(TextField txt){
         txt.setTextFormatter(new TextFormatter<>(c -> {
-            if(c.getControlNewText().matches("-?\\d*(\\.\\d*)?")){
-                return c;
-            }
-            return null;
-        }));
-    }
-    
-    private void NumericalValidation2(TextField txt){
-        txt.setTextFormatter(new TextFormatter<>(c -> {
-            if(c.getControlNewText().matches("\\d*")){
+            if(c.getControlNewText().matches("[+-]?\\d*(\\.\\d*)?")){
                 return c;
             }
             return null;

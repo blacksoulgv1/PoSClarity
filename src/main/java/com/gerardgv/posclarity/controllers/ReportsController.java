@@ -39,6 +39,7 @@ public class ReportsController implements Initializable {
     
     private SaleDAO saleDAO = new SaleDAO();
     private MetaDAO metaDAO = new MetaDAO();
+    private PendingDAO pendingDAO = new PendingDAO();
     private CierrecajaDAO cierreDAO = new CierrecajaDAO();
     private CierreCajaService cierreService = new CierreCajaService();
 
@@ -59,8 +60,8 @@ public class ReportsController implements Initializable {
         
         try{
 
-        List<Venta> realizar = saleDAO.obtenerTrabajosPorRealizar();
-        List<Venta> entregar = saleDAO.obtenerTrabajosPorEntregar();
+        List<Venta> realizar = pendingDAO.obtenerTrabajosPorRealizar();
+        List<Venta> entregar = pendingDAO.obtenerTrabajosPorEntregar();
 
         if(realizar.isEmpty() && entregar.isEmpty()){
             mostrarAlerta("No hay trabajos pendientes");
@@ -218,7 +219,7 @@ public class ReportsController implements Initializable {
 
     private void cargarResumenPendientes() {
         
-        ReportPendientes r = saleDAO.obtenerResumenPendientes(Session.getSucursal().getId());
+        ReportPendientes r = pendingDAO.obtenerResumenPendientes();
 
         lblTrabajosRealizar.setText(r.getTrabajosRealizar() + " trabajos");
         lblTrabajosEntregar.setText(r.getTrabajosEntregar() + " trabajos");

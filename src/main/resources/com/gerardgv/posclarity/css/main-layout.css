@@ -3,14 +3,12 @@
     -fx-background-color: linear-gradient(to bottom right, #eef2f7,#dfe6ee);
 
 }
-
 /* HEADER*/
 .header-bar {
     -fx-background-color: white;
     -fx-padding: 15 25;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.08), 10, 0, 0, 4);
 }
-
 .header-title {
     -fx-font-size: 20px;
     -fx-font-weight: bold;
@@ -18,27 +16,23 @@
 }
 
 /* PANEL IZQUIERDO*/
-
 .form-panel{
     -fx-background-color: white;
     -fx-padding: 20;
     -fx-background-radius: 10;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 15, 0, 0, 6);
 }
-
 .form-title{
     -fx-font-size: 16px;
     -fx-font-weight: bold;
     -fx-text-fill: #34495e;
 }
-
 .form-label{
     -fx-text-fill: #2c3e50;
     -fx-font-size: 13px;
 }
 
 /* INPUTS */
-
 .text-field{
     -fx-pref-height: 40px;
     -fx-font-size: 14px;
@@ -48,13 +42,11 @@
     -fx-background-color: #fdfdfd;
     -fx-padding: 0 10;
 }
-
 .text-field:focused{
     -fx-border-color: #2ecc71;
     -fx-border-width: 2;
     -fx-background-color: white;
 }
-
 .label{
     -fx-font-size: 13px;
     -fx-text-fill: #2c3e50;
@@ -64,14 +56,11 @@
 .checkbox{
     -fx-text-fill: #2c3e50;
 }
-
-/* CHECKBOX */
 .combo-box{
     -fx-pref-height: 40px;
     -fx-min-height: 40px;
     -fx-max-height: 40px;
-    -fx-font-size: 14px;
-    
+    -fx-font-size: 14px;    
     -fx-background-radius: 8;
     -fx-border-radius: 8;
     -fx-background-color: white;
@@ -79,27 +68,22 @@
     -fx-border-width: 1;
     -fx-padding: 4 0 4 0;
 }
-
 .combo-box:focused{
     -fx-border-color: #2ecc71;
     -fx-border-width: 2;
 }
-
 .combo-box .list-cell{
     -fx-padding: 8 10 8 10;
 }
-
 .combo-box .arrow-button{
     -fx-padding: 0 10 0 10;
 }
-
 .combo-box .arrow{
     -fx-scale-x: 1.2;
     -fx-scale-y: 1.2;
 }
 
 /* BOTONES */
-
 .btn-primary{
     -fx-background-color: #2ecc71;
     -fx-text-fill: white;
@@ -280,4 +264,93 @@
 
 .table-row-cell:hover .table-cell{
     -fx-text-fill: #2c3e50
+}
+
+
+/* ================= MAIN LAYOUT ================= */
+
+.main-root {
+    -fx-background-color: #f4f6f8;
+}
+
+.top-bar {
+    -fx-background-color: white;
+    -fx-padding: 14 24;
+    -fx-spacing: 14;
+    -fx-alignment: center-left;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 8, 0, 0, 3);
+}
+
+.app-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
+
+.app-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.side-menu {
+    -fx-background-color: #111827;
+    -fx-pref-width: 230px;
+    -fx-min-width: 230px;
+    -fx-padding: 22 16;
+    -fx-spacing: 8;
+}
+
+.brand-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-padding: 0 0 20 0;
+}
+
+.menu-section {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #9ca3af;
+    -fx-padding: 18 0 4 4;
+}
+
+.menu-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e5e7eb;
+    -fx-font-size: 14px;
+    -fx-alignment: center-left;
+    -fx-padding: 11 14;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-pref-width: 198px;
+    -fx-graphic-text-gap: 14;
+}
+
+.menu-button:hover {
+    -fx-background-color: #1f2937;
+    -fx-text-fill: white;
+}
+
+.menu-button:pressed {
+    -fx-background-color: #374151;
+}
+
+.content-area {
+    -fx-background-color: #f4f6f8;
+    -fx-padding: 18;
+}
+
+.menu-button .ikonli-font-icon {
+    -fx-icon-color: #dbeafe;
+}
+
+.menu-button:hover .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+.brand-subtitle{
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #cbd5e1;
+    -fx-padding: 0 0 18 0;
 }

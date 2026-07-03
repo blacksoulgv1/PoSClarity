@@ -65,10 +65,11 @@ public class CierrecajaDAO {
         AND v.id_sucursal = ?
         AND p.tipo_pago = 'ABONO'
     """;
-    
+    //se agrego folio
     String sqlDetalleNuevos = """
         SELECT
             v.id_ventas,
+            v.folio,
             p.monto
         FROM pagos p
           JOIN ventas v
@@ -78,10 +79,11 @@ public class CierrecajaDAO {
             AND p.tipo_pago = 'VENTA'
         ORDER BY v.id_ventas                      
     """;
-    
+     //se agrego folio
     String sqlDetalleRecogidos = """
     SELECT
         id_ventas,
+        folio,
         total_final
     FROM ventas
     WHERE DATE(fecha_entrega) = CURDATE()
@@ -89,10 +91,11 @@ public class CierrecajaDAO {
         AND id_sucursal = ?
     ORDER BY id_ventas
 """;
-    
+     //se agrego folio
     String sqlDetalleAbonos = """
     SELECT
         v.id_ventas,
+        v.folio,
         p.monto
     FROM pagos p
     JOIN ventas v
@@ -137,8 +140,7 @@ public class CierrecajaDAO {
             
             while(rs.next()){
                 detalleNuevos
-            .append("#")
-            .append(rs.getInt("id_ventas"))
+            .append(rs.getString("folio"))
             .append(" $")
             .append(String.format("%.2f",
                     rs.getDouble("monto")))
@@ -160,8 +162,7 @@ public class CierrecajaDAO {
                 totalRecogidos += monto;
                 
                 detalleRecogidos
-                    .append("#")
-                    .append(rs.getInt("id_ventas"))
+                    .append(rs.getString("folio"))
                     .append(" $")
                     .append(String.format("%.2f", monto))
                     .append("\n");
@@ -182,8 +183,7 @@ public class CierrecajaDAO {
                 double monto = rs.getDouble("monto");
                 totalAbonosDetalle += monto;
                 detalleAbonos
-                .append("#")
-                .append(rs.getInt("id_ventas"))
+                .append(rs.getString("folio"))
                 .append(" $")
                 .append(String.format("%.2f", monto))
                 .append("\n");
