@@ -3,167 +3,221 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <BorderPane prefHeight="900" prefWidth="1440" 
+            styleClass="sale-root"
             stylesheets="@/com/gerardgv/posclarity/css/SaleView.css" 
-            xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1" 
             fx:controller="com.gerardgv.posclarity.controllers.SaleController">
 
    <!-- 🔝 HEADER -->
-   <top>
-      <VBox spacing="15" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
-         <children>
+<top>
+    <VBox spacing="14" styleClass="sale-card">
+        <children>
+            <Label text="Venta" styleClass="section-title"/>
+            <GridPane hgap="14" vgap="12">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="10"/>
+                    <ColumnConstraints percentWidth="23"/>
+                    <ColumnConstraints percentWidth="10"/>
+                    <ColumnConstraints percentWidth="23"/>
+                    <ColumnConstraints percentWidth="10"/>
+                    <ColumnConstraints percentWidth="24"/>
+                </columnConstraints>
 
-            <Label text="Venta">
-               <font><Font size="16" /></font>
-            </Label>
+                <children>
+                    <Label text="Colaborador" styleClass="field-label"/>
+                    <HBox styleClass="input-icon" GridPane.columnIndex="1">
+                        <children>
+                            <FontIcon iconLiteral="fas-search" iconSize="15"/>
+                                <TextField fx:id="txtColaborador"
+                                    promptText="Buscar colaborador..."
+                                    HBox.hgrow="ALWAYS"/>
+                        </children>
+                    </HBox>
 
-            <GridPane hgap="10" vgap="10">
-               <columnConstraints>
-                  <ColumnConstraints percentWidth="15.0" />
-                  <ColumnConstraints percentWidth="35.0" />
-                  <ColumnConstraints percentWidth="15.0" />
-                  <ColumnConstraints percentWidth="35.0" />
-                  <ColumnConstraints percentWidth="35.0" />
-                  <ColumnConstraints percentWidth="35.0" />
-               </columnConstraints>
+                    <Label text="Fecha" styleClass="field-label" GridPane.columnIndex="2"/>
+                    <TextField fx:id="txtDate"
+                               editable="false"
+                               GridPane.columnIndex="3"/>
 
-               <children>
-                  <Label text="Colaborador" />
-                  <TextField fx:id="txtColaborador" GridPane.columnIndex="1" />
+                    <Label text="Folio" styleClass="field-label" GridPane.columnIndex="4"/>
+                    <TextField fx:id="txtFolio"
+                               editable="false"
+                               GridPane.columnIndex="5"/>
 
-                  <Label text="Fecha" GridPane.columnIndex="2" />
-                  <TextField fx:id="txtDate" editable="false" GridPane.columnIndex="3" />
+                    <Label text="Sucursal" styleClass="field-label" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtSucursal"
+                               editable="false"
+                               GridPane.columnIndex="1"
+                               GridPane.rowIndex="1"/>
 
-                  <Label text="Sucursal" GridPane.rowIndex="1" />
-                  <TextField fx:id="txtSucursal" editable="false" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                    <Label text="Dirección" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtDireccionSuc"
+                               editable="false"
+                               GridPane.columnIndex="3"
+                               GridPane.rowIndex="1"/>
 
-                  <Label text="Folio" GridPane.columnIndex="4" />
-                  <TextField fx:id="txtFolio" editable="false" GridPane.columnIndex="5" />
+                    <Label text="Teléfono" styleClass="field-label" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtTelefonoSuc"
+                               editable="false"
+                               GridPane.columnIndex="5"
+                               GridPane.rowIndex="1"/>
 
-                  <Label text="Cliente" GridPane.rowIndex="2" />
-                  <TextField fx:id="txtCliente" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                    <Label text="Cliente" styleClass="field-label" GridPane.rowIndex="2"/>
+                    <HBox styleClass="input-icon" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <children>
+                            <FontIcon iconLiteral="fas-search" iconSize="15"/>
+                                <TextField fx:id="txtCliente"
+                                    promptText="Buscar cliente..."
+                                    HBox.hgrow="ALWAYS"/>
+                        </children>
+                    </HBox>
 
-                  <Label text="Teléfono" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                  <TextField fx:id="txtTelefonoClient" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-                  <Label text="Dirección" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                  <TextField fx:id="txtDireccionSuc" editable="false" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                  <Label text="Teléfono" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                  <TextField fx:id="txtTelefonoSuc" editable="false" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                  <TextField fx:id="txtDireccionClient" editable="false" GridPane.columnIndex="5" GridPane.rowIndex="2" />
-                  <Label text="Dirección" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-               </children>
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
+                    <Label text="Teléfono" styleClass="field-label" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtTelefonoClient"
+                               editable="false"
+                               GridPane.columnIndex="3"
+                               GridPane.rowIndex="2"/>
+
+                    <Label text="Dirección" styleClass="field-label" GridPane.columnIndex="4" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtDireccionClient"
+                               editable="false"
+                               GridPane.columnIndex="5"
+                               GridPane.rowIndex="2"/>
+                </children>
             </GridPane>
-
-         </children>
-      </VBox>
-   </top>
+        </children>
+    </VBox>
+</top>
 
    <!-- 🧾 CENTER -->
-   <center>
-      <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
+<center>
+    <VBox spacing="12" BorderPane.alignment="CENTER">
 
-         <!-- 👓 GRADUACIÓN -->
-         <Label text="Graduación">
-            <font><Font size="15" /></font>
-         </Label>
+        <!-- 👓 GRADUACIÓN -->
+        <VBox spacing="14" styleClass="sale-card">
+            <Label text="Graduación" styleClass="section-title"/>
 
-         <GridPane hgap="10" vgap="10">
-            <columnConstraints>
-               <ColumnConstraints percentWidth="20.0" />
-               <ColumnConstraints percentWidth="20.0" />
-               <ColumnConstraints percentWidth="20.0" />
-               <ColumnConstraints percentWidth="20.0" />
-               <ColumnConstraints percentWidth="20.0" />
-            </columnConstraints>
+            <GridPane hgap="35" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="18"/>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="20"/>
+                    <ColumnConstraints percentWidth="22"/>
+                </columnConstraints>
 
-            <children>
-               <Label text="" />
-               <Label text="ESFERA" GridPane.columnIndex="1" />
-               <Label text="CILINDRO" GridPane.columnIndex="2" />
-               <Label text="EJE" GridPane.columnIndex="3" />
-               <Label text="ADD" GridPane.columnIndex="4" />
+                <children>
+                    <Label text="" />
+                    <Label text="ESFERA" styleClass="rx-header" GridPane.columnIndex="1"/>
+                    <Label text="CILINDRO" styleClass="rx-header" GridPane.columnIndex="2"/>
+                    <Label text="EJE" styleClass="rx-header" GridPane.columnIndex="3"/>
+                    <Label text="ADD" styleClass="rx-header" GridPane.columnIndex="4"/>
 
-               <Label text="OD" GridPane.rowIndex="1" />
-               <TextField fx:id="txtEsfOD" maxWidth="80" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-               <TextField fx:id="txtCylOD" maxWidth="80" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-               <TextField fx:id="txtEjeOD" maxWidth="80" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-               <TextField fx:id="txtAdd" maxWidth="80" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                    <Label text="OD" styleClass="field-label" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtEsfOD" prefWidth="95" maxWidth="95" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtCylOD" prefWidth="95" maxWidth="95" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtEjeOD" prefWidth="95" maxWidth="95" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                    <TextField fx:id="txtAdd" prefWidth="95" maxWidth="95" GridPane.columnIndex="4" GridPane.rowIndex="1"/>
 
-               <Label text="OI" GridPane.rowIndex="2" />
-               <TextField fx:id="txtEsfOI" maxWidth="80" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-               <TextField fx:id="txtCylOI" maxWidth="80" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-               <TextField fx:id="txtEjeOI" maxWidth="80" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            </children>
-            <rowConstraints>
-               <RowConstraints />
-               <RowConstraints />
-               <RowConstraints />
-            </rowConstraints>
-         </GridPane>
+                    <Label text="OI" styleClass="field-label" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtEsfOI" prefWidth="95" maxWidth="95" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtCylOI" prefWidth="95" maxWidth="95" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                    <TextField fx:id="txtEjeOI" prefWidth="95" maxWidth="95" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                </children>
+            </GridPane>
+        </VBox>
 
-         <!-- 📦 PRODUCTOS -->
-         <Label text="Productos" />
-         
+        <!-- 📦 PRODUCTOS -->
+        <VBox spacing="14" styleClass="sale-card" VBox.vgrow="ALWAYS">
+            <Label text="Productos" styleClass="section-title"/>
 
-            <HBox alignment="CENTER_LEFT" spacing="10">
-                <TextField fx:id="txtBuscarProductos" promptText="Modelo / Producto" HBox.hgrow="ALWAYS" />
-                <Button onAction="#agregarProducto" text="Agregar" />
+            <HBox alignment="CENTER_LEFT" spacing="12">
+                <HBox styleClass="input-icon" HBox.hgrow="ALWAYS">
+                    <children>
+                        <FontIcon iconLiteral="fas-search" iconSize="15"/>
+                            <TextField fx:id="txtBuscarProductos"
+                                promptText="Modelo / Producto"
+                                HBox.hgrow="ALWAYS"/>
+                    </children>
+                </HBox>
+
+                <Button text="Agregar"
+                    onAction="#agregarProducto"
+                    styleClass="btn-add">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-plus-circle" iconSize="15"/>
+                    </graphic>
+                </Button>
             </HBox>
 
-         <!-- 📊 TABLA -->
-         <TableView fx:id="tableProduct" VBox.vgrow="ALWAYS">
-            <columns>
-               <TableColumn fx:id="colCantidad" text="Cantidad" />
-               <TableColumn fx:id="colModelo" text="Modelo" />
-               <TableColumn fx:id="colMarca" text="Marca" />
-               <TableColumn fx:id="colCategoria" text="Categoría" />
-               <TableColumn fx:id="colDescuento" text="Descuento" />
-               <TableColumn fx:id="colPrecio" text="Precio" />
-               <TableColumn fx:id="colSubtotal" prefWidth="75.0" text="Sub Total" />
-               <TableColumn fx:id="colAcciones" prefWidth="75.0" text="Acciones" />
-            </columns>
-         </TableView>
+            <TableView fx:id="tableProduct" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colCantidad" text="Cantidad"/>
+                    <TableColumn fx:id="colModelo" text="Modelo"/>
+                    <TableColumn fx:id="colMarca" text="Marca"/>
+                    <TableColumn fx:id="colCategoria" text="Categoría"/>
+                    <TableColumn fx:id="colDescuento" text="Descuento"/>
+                    <TableColumn fx:id="colPrecio" text="Precio"/>
+                    <TableColumn fx:id="colSubtotal" prefWidth="90" text="Sub Total"/>
+                    <TableColumn fx:id="colAcciones" prefWidth="90" text="Acciones"/>
+                </columns>
+            </TableView>
+        </VBox>
 
-      </VBox>
-   </center>
+    </VBox>
+</center>
 
    <!-- 💳 RIGHT -->
-   <right>
-      <VBox alignment="TOP_CENTER" prefWidth="300" spacing="10" style="-fx-background-color: white; -fx-background-radius: 10; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-radius: 10;">
-          <VBox alignment="CENTER" spacing="5">
-            <Label style="-fx-text-fill: #2ecc71; -fx-font-weight: bold;" text="SUB TOTAL" />
-            <Label fx:id="lblTotalBruto" style="-fx-font-size: 28px; -fx-font-weight: bold;" text="\$0.00" />
-            <Label style="-fx-text-fill: #2ecc71; -fx-font-weight: bold;" text="DESCUENTO" />
-            <Label fx:id="lblDescuento" style="-fx-font-size: 28px; -fx-font-weight: bold;" text="\$0.00" />
-            <Label style="-fx-text-fill: #2ecc71; -fx-font-weight: bold;" text="TOTAL" />
-            <Label fx:id="lblTotal" style="-fx-font-size: 28px; -fx-font-weight: bold;" text="\$0.00" />
-          </VBox>
+<right>
+    <VBox alignment="TOP_CENTER"
+          prefWidth="300"
+          spacing="14"
+          styleClass="payment-card">
 
-         <Separator />
-         
-         <VBox alignment="CENTER" spacing="6">
-            <Label text="MÉTODO DE PAGO" />
-            <ComboBox fx:id="cbMetodoPago" maxWidth="Infinity" VBox.vgrow="NEVER"  />
-            <Label text="IMPORTE" />
-            <TextField fx:id="txtMonto" maxWidth="200" />
-         </VBox>  
+        <VBox alignment="CENTER" spacing="5">
+            <Label text="SUB TOTAL" styleClass="payment-label"/>
+            <Label fx:id="lblTotalBruto" text="\$0.00" styleClass="payment-value"/>
 
-         <VBox alignment="CENTER" spacing="4">
-            <Label text="RESTANTE" />
-            <Label fx:id="lblRestante" text="\$0.00" />
-            <Label text="CAMBIO" />
-            <Label fx:id="lblCambio" text="\$0.00" />
-         </VBox>  
+            <Label text="DESCUENTO" styleClass="payment-label"/>
+            <Label fx:id="lblDescuento" text="\$0.00" styleClass="payment-value"/>
 
-         <Button onAction="#guardarVenta" style="-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-weight: bold;" text="COBRAR" />
-      </VBox>
-   </right>
+            <Separator/>
+
+            <Label text="TOTAL" styleClass="payment-label"/>
+            <Label fx:id="lblTotal" text="\$0.00" styleClass="payment-value"/>
+        </VBox>
+
+        <Separator/>
+
+        <VBox alignment="CENTER" spacing="8">
+            <Label text="MÉTODO DE PAGO" styleClass="field-label"/>
+            <ComboBox fx:id="cbMetodoPago" maxWidth="Infinity"/>
+
+            <Label text="IMPORTE" styleClass="field-label"/>
+            <TextField fx:id="txtMonto" maxWidth="220"/>
+        </VBox>
+
+        <VBox alignment="CENTER" spacing="4">
+            <Label text="RESTANTE" styleClass="field-label"/>
+            <Label fx:id="lblRestante" text="\$0.00"/>
+
+            <Label text="CAMBIO" styleClass="field-label"/>
+            <Label fx:id="lblCambio" text="\$0.00"/>
+        </VBox>
+
+        <Button text="COBRAR"
+        onAction="#guardarVenta"
+        maxWidth="Infinity"
+        styleClass="btn-charge">
+            <graphic>
+                <FontIcon iconLiteral="fas-cash-register" iconSize="16"/>
+            </graphic>
+        </Button>
+    </VBox>
+</right> 
 
 </BorderPane>
