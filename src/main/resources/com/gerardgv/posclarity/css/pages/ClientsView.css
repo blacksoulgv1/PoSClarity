@@ -1,0 +1,54 @@
+.clients-root {
+    -fx-background-color: -pos-bg;
+}
+
+.clients-table .table-row-cell {
+    -fx-min-height: 74;
+    -fx-pref-height: 74;
+}
+
+.clients-table .table-cell {
+    -fx-padding: 8 10;
+}
+
+.clients-table .label {
+    -fx-line-spacing: 2;
+}
+
+/* FORMULARIO SIN CONTORNO EXTERIOR */
+.clients-form-card {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-insets: 0;
+    -fx-border-radius: 0;
+
+    -fx-padding: 18;
+    -fx-effect: none;
+}
+
+/* SCROLLPANE TRANSPARENTE Y SIN BORDE */
+.transparent-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-effect: none;
+}
+
+.transparent-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.transparent-scroll > .corner {
+    -fx-background-color: transparent;
+}
+
+.transparent-scroll:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}

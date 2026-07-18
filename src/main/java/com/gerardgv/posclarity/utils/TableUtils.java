@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -49,93 +50,217 @@ public class TableUtils {
     }
     
     //funcion de Abonos
-    public static <T> TableCell <T,Void>createVentaAcions(
-            Consumer<T> onAbonar,
-            Consumer<T> onRecepcion,
-            Consumer<T> onEntregar,
-            Consumer<T> onCancelar){
-        
-        return new TableCell<>(){
-            
-            private final FontIcon iconAbonar = new FontIcon("fas-dollar-sign");
-            private final FontIcon iconRecepcion = new FontIcon("fas-box-open");
-            private final FontIcon iconEntregar = new FontIcon("fas-box");
-            private final FontIcon iconCancelar = new FontIcon("fas-times-circle"); 
-            
-            private final Button btnAbonar = new Button();
-            private final Button btnRecepcion = new Button();
-            private final Button btnEntregar = new Button();
-            private final Button btnCancelar = new Button();              
-            private final HBox box = new HBox(8, btnAbonar,btnRecepcion, btnEntregar,btnCancelar);
-            
-            {
-                iconAbonar.setIconSize(16);
-                iconAbonar.setIconColor(Color.GREEN);
-                iconRecepcion.setIconSize(16);
-                iconRecepcion.setIconColor(Color.ORANGE);
-                iconEntregar.setIconSize(16);
-                iconEntregar.setIconColor(Color.DODGERBLUE);
-                iconCancelar.setIconSize(16);
-                iconCancelar.setIconColor(Color.RED);
-                
-                btnAbonar.setGraphic(iconAbonar);
-                btnAbonar.setStyle("-fx-background-color: transparent;");
-                btnRecepcion.setGraphic(iconRecepcion);
-                btnRecepcion.setStyle("-fx-background-color: transparent;");
-                btnEntregar.setGraphic(iconEntregar);
-                btnEntregar.setStyle("-fx-background-color: transparent;");
-                btnCancelar.setGraphic(iconCancelar);
-                btnCancelar.setStyle("-fx-background-color: transparent;");
-                                
-                btnAbonar.setTooltip(new javafx.scene.control.Tooltip("Registrar Abono"));
-                btnRecepcion.setTooltip(
-                    new javafx.scene.control.Tooltip("Producto recibido en óptica"));
-                btnEntregar.setTooltip(
-                    new javafx.scene.control.Tooltip("Entregar producto"));
-                btnCancelar.setTooltip(
-                    new javafx.scene.control.Tooltip("Cancelar venta"));
-                
-                btnAbonar.setOnAction(e -> {
-                T item = getTableView().getItems().get(getIndex());
-                onAbonar.accept(item);
-                });
-                btnRecepcion.setOnAction(e -> {
-                T item = getTableView().getItems().get(getIndex());
-                onRecepcion.accept(item);
-                });
-                btnEntregar.setOnAction(e -> {
-                T item = getTableView().getItems().get(getIndex());
-                onEntregar.accept(item);
-                });
-                btnCancelar.setOnAction(e -> {
-                T item = getTableView().getItems().get(getIndex());
-                onCancelar.accept(item);
-                });
-                box.setAlignment(Pos.CENTER);
+    public static <T> TableCell<T, Void> createVentaAcions(
+        Consumer<T> onAbonar,
+        Consumer<T> onRecepcion,
+        Consumer<T> onEntregar,
+        Consumer<T> onCancelar) {
+
+    return new TableCell<>() {
+
+        private final FontIcon iconAbonar =
+                new FontIcon("fas-dollar-sign");
+
+        private final FontIcon iconRecepcion =
+                new FontIcon("fas-box-open");
+
+        private final FontIcon iconEntregar =
+                new FontIcon("fas-box");
+
+        private final FontIcon iconCancelar =
+                new FontIcon("fas-times-circle");
+
+        private final Button btnAbonar = new Button();
+        private final Button btnRecepcion = new Button();
+        private final Button btnEntregar = new Button();
+        private final Button btnCancelar = new Button();
+
+        private final HBox box = new HBox(8);
+
+        {
+            configurarIconos();
+            configurarBotones();
+            configurarAcciones();
+
+            box.setAlignment(Pos.CENTER);
+            setAlignment(Pos.CENTER);
         }
-            @Override
-        protected void updateItem(Void item, boolean empty){
+
+        private void configurarIconos() {
+
+            iconAbonar.setIconSize(16);
+            iconRecepcion.setIconSize(16);
+            iconEntregar.setIconSize(16);
+            iconCancelar.setIconSize(16);
+
+            iconAbonar.getStyleClass().add("pending-action-icon-pay");
+            iconRecepcion.getStyleClass().add("pending-action-icon-receive");
+            iconEntregar.getStyleClass().add("pending-action-icon-deliver");
+            iconCancelar.getStyleClass().add("pending-action-icon-cancel");
+        }
+
+        private void configurarBotones() {
+
+            configurarBoton(
+                    btnAbonar,
+                    iconAbonar,
+                    "Registrar abono"
+            );
+
+            configurarBoton(
+                    btnRecepcion,
+                    iconRecepcion,
+                    "Producto recibido en óptica"
+            );
+
+            configurarBoton(
+                    btnEntregar,
+                    iconEntregar,
+                    "Entregar producto"
+            );
+
+            configurarBoton(
+                    btnCancelar,
+                    iconCancelar,
+                    "Cancelar venta"
+            );
+        }
+
+        private void configurarBoton(
+                Button boton,
+                FontIcon icono,
+                String tooltip) {
+
+            boton.setGraphic(icono);
+            boton.getStyleClass().add("pending-action-button");
+            boton.setTooltip(new Tooltip(tooltip));
+            boton.setFocusTraversable(false);
+        }
+
+        private void configurarAcciones() {
+
+            btnAbonar.setOnAction(event ->
+                    ejecutarAccion(onAbonar)
+            );
+
+            btnRecepcion.setOnAction(event ->
+                    ejecutarAccion(onRecepcion)
+            );
+
+            btnEntregar.setOnAction(event ->
+                    ejecutarAccion(onEntregar)
+            );
+
+            btnCancelar.setOnAction(event ->
+                    ejecutarAccion(onCancelar)
+            );
+        }
+
+        private void ejecutarAccion(Consumer<T> accion) {
+
+            T itemTabla = obtenerItemActual();
+
+            if (itemTabla != null && accion != null) {
+                accion.accept(itemTabla);
+            }
+        }
+
+        private T obtenerItemActual() {
+
+            int index = getIndex();
+
+            if (index < 0
+                    || getTableView() == null
+                    || index >= getTableView().getItems().size()) {
+
+                return null;
+            }
+
+            return getTableView().getItems().get(index);
+        }
+
+        @Override
+        protected void updateItem(Void item, boolean empty) {
             super.updateItem(item, empty);
 
-            if(empty){
+            box.getChildren().clear();
+
+            if (empty) {
                 setGraphic(null);
                 return;
-            } else {
-                
-                T itemTable = getTableView().getItems().get(getIndex());
-                Venta v = (Venta) itemTable;
-                
-                btnAbonar.setVisible(
-                    !v.getEstadoPago().equalsIgnoreCase("COMPLETA"));
-                btnRecepcion.setVisible(
-                    v.getEstadoTrabajo().equalsIgnoreCase("PROCESO"));
-                btnEntregar.setVisible(
-                    v.getEstadoTrabajo().equalsIgnoreCase("RECIBIDO"));
-                btnCancelar.setVisible(
-                    !v.getEstadoTrabajo().equalsIgnoreCase("ENTREGADO"));
-                
-                setGraphic(box);
             }
+
+            T itemTabla = obtenerItemActual();
+
+            if (!(itemTabla instanceof Venta venta)) {
+                setGraphic(null);
+                return;
+            }
+
+            agregarAccionesValidas(venta);
+
+            setGraphic(
+                    box.getChildren().isEmpty()
+                            ? null
+                            : box
+            );
+        }
+
+        private void agregarAccionesValidas(Venta venta) {
+
+            String estadoPago = normalizar(
+                    venta.getEstadoPago()
+            );
+
+            String estadoTrabajo = normalizar(
+                    venta.getEstadoTrabajo()
+            );
+
+            boolean pagoCompleto =
+                    "COMPLETA".equals(estadoPago);
+
+            boolean entregada =
+                    "ENTREGADO".equals(estadoTrabajo);
+
+            if (!pagoCompleto && !entregada) {
+                box.getChildren().add(btnAbonar);
+            }
+
+            switch (estadoTrabajo) {
+
+                case "PROCESO" -> {
+
+                    box.getChildren().add(btnRecepcion);
+                    box.getChildren().add(btnCancelar);
+                }
+
+                case "RECIBIDO", "LISTO" -> {
+
+                    if (pagoCompleto) {
+                        box.getChildren().add(btnEntregar);
+                    }
+
+                    box.getChildren().add(btnCancelar);
+                }
+
+                case "ENTREGADO", "CANCELADO" -> {
+                    // No se agregan acciones.
+                }
+
+                default -> {
+
+                    if (!entregada) {
+                        box.getChildren().add(btnCancelar);
+                    }
+                }
+            }
+        }
+
+        private String normalizar(String valor) {
+
+            return valor == null
+                    ? ""
+                    : valor.trim().toUpperCase();
         }
     };
 }

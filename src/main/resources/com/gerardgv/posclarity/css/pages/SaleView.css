@@ -1,0 +1,27 @@
+.sale-root {
+    -fx-background-color: -pos-bg;
+    -fx-padding: 18;
+    -fx-font-family: "Segoe UI";
+}
+
+.sale-layout {
+    -fx-background-color: -pos-bg;
+}
+
+.sale-header-card {
+    -fx-padding: 14 18;
+}
+
+.sale-rx-card {
+    -fx-padding: 14 18;
+}
+
+.sale-products-card {
+    -fx-padding: 16 18;
+}
+
+.rx-header {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}

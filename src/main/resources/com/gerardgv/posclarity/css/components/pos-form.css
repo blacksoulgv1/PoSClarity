@@ -1,0 +1,73 @@
+.pos-form-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-form-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: -pos-muted;
+}
+
+.pos-form-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-form-grid {
+    -fx-hgap: 14;
+    -fx-vgap: 12;
+}
+
+.pos-form-section {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-primary;
+}
+
+.pos-form-footer {
+    -fx-alignment: CENTER_RIGHT;
+    -fx-spacing: 10;
+    -fx-padding: 8 0 0 0;
+}
+/* ==========================
+   CAMPOS DE GRADUACIÓN
+   ========================== */
+
+.grad-field{
+    -fx-pref-height:34;
+    -fx-min-height:34;
+    -fx-max-height:34;
+
+    -fx-font-size:13px;
+    -fx-alignment:CENTER;
+}
+.grad-title{
+    -fx-font-size:12px;
+    -fx-font-weight:bold;
+    -fx-text-fill:-pos-muted;
+}
+/* ==========================================
+   ENCABEZADOS DE SECCIÓN
+   ========================================== */
+
+.pos-section-header{
+    -fx-alignment: CENTER_LEFT;
+    -fx-spacing: 8;
+    -fx-padding: 4 0 6 0;
+}
+
+.pos-section-title{
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-section-icon{
+    -fx-icon-color: -pos-primary;
+}
+
+.pos-section-separator{
+    -fx-padding: 0 0 8 0;
+}

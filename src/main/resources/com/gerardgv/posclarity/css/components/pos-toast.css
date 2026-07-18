@@ -1,0 +1,56 @@
+.pos-toast {
+    -fx-background-color: white;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 12 16;
+    -fx-min-width: 260;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 18, 0, 0, 6);
+}
+
+.pos-toast-success {
+    -fx-border-color: -pos-success;
+    -fx-border-width: 0 0 0 4;
+}
+
+.pos-toast-danger {
+    -fx-border-color: -pos-danger;
+    -fx-border-width: 0 0 0 4;
+}
+
+.pos-toast-title {
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+    -fx-font-size: 13px;
+}
+
+.pos-toast-message {
+    -fx-text-fill: -pos-muted;
+    -fx-font-size: 12px;
+}
+
+.pos-toast-icon{
+    -fx-icon-size:22;
+}
+.pos-toast-success .pos-toast-icon{
+    -fx-icon-color: -pos-success;
+}
+
+.pos-toast-danger .pos-toast-icon{
+    -fx-icon-color: -pos-danger;
+}
+
+.pos-toast-warning .pos-toast-icon{
+    -fx-icon-color: #f59e0b;
+}
+
+.pos-toast-info .pos-toast-icon{
+    -fx-icon-color: -pos-primary;
+}
+
+.pos-toast-progress {
+    -fx-background-color: -pos-primary;
+    -fx-pref-height: 3;
+    -fx-background-radius: 0 0 12 12;
+    -fx-scale-x: 1;
+    -fx-translate-y: 8;
+}

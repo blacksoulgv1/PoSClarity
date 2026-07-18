@@ -1,0 +1,147 @@
+/* =========================================================
+   DIÁLOGO BASE
+   ========================================================= */
+
+.pos-dialog {
+    -fx-background-color: -pos-card;
+}
+
+.pos-dialog > .content.label {
+    -fx-padding: 0;
+}
+
+.pos-dialog .header-panel {
+    -fx-background-color: -pos-card;
+    -fx-padding: 18 20 10 20;
+}
+
+.pos-dialog .header-panel .label {
+    -fx-text-fill: -pos-text;
+}
+
+
+/* =========================================================
+   CONTENIDO DE AUTORIZACIÓN
+   ========================================================= */
+
+.authorization-content {
+    -fx-background-color: -pos-card;
+    -fx-padding: 10 22 18 22;
+    -fx-spacing: 14;
+}
+
+.authorization-icon-box {
+    -fx-background-color: #ecfdf5;
+    -fx-background-radius: 999;
+    -fx-min-width: 46;
+    -fx-min-height: 46;
+    -fx-pref-width: 46;
+    -fx-pref-height: 46;
+    -fx-alignment: CENTER;
+}
+
+.authorization-lock-icon {
+    -fx-icon-color: -pos-primary-dark;
+}
+
+.authorization-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.authorization-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: -pos-muted;
+}
+
+.authorization-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.authorization-error {
+    -fx-text-fill: -pos-danger;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.authorization-note {
+    -fx-text-fill: -pos-muted;
+    -fx-font-size: 11px;
+}
+
+
+/* =========================================================
+   BOTONES DEL DIÁLOGO
+   ========================================================= */
+
+.pos-dialog .button-bar {
+    -fx-background-color: -pos-soft;
+    -fx-padding: 12 18;
+}
+
+.pos-dialog .button-bar .button {
+    -fx-min-height: 38;
+    -fx-pref-height: 38;
+    -fx-padding: 0 18;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.pos-dialog .button-bar .button:default {
+    -fx-background-color: -pos-success;
+    -fx-text-fill: white;
+}
+
+.pos-dialog .button-bar .button:default:hover {
+    -fx-background-color: #059669;
+}
+
+.pos-dialog .button-bar .button:cancel {
+    -fx-background-color: -pos-soft;
+    -fx-border-color: -pos-border;
+    -fx-text-fill: -pos-text;
+}
+
+/*=========================================================
+  TARJETA EMPLEADO
+=========================================================*/
+
+.authorization-user-box{
+
+    -fx-background-color:#F0FDF4;
+    -fx-border-color:#BBF7D0;
+
+    -fx-background-radius:10;
+    -fx-border-radius:10;
+
+    -fx-padding:12;
+
+    -fx-alignment:CENTER_LEFT;
+}
+
+.authorization-user-icon{
+
+    -fx-icon-color:-pos-success;
+}
+
+.authorization-user{
+
+    -fx-font-size:15px;
+    -fx-font-weight:bold;
+
+    -fx-text-fill:-pos-text;
+}
+
+.authorization-role{
+
+    -fx-font-size:12px;
+
+    -fx-text-fill:-pos-success;
+
+    -fx-font-weight:bold;
+}

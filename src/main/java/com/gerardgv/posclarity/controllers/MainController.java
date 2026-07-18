@@ -1,6 +1,7 @@
 package com.gerardgv.posclarity.controllers;
 
 //Librerias Java
+import com.gerardgv.posclarity.models.Empleados;
 import com.gerardgv.posclarity.utils.AuthorizationDialog;
 import java.io.IOException;
 import java.net.URL;
@@ -8,6 +9,7 @@ import java.util.ResourceBundle;
 import java.util.HashMap;
 import java.util.Map;
 import com.gerardgv.posclarity.utils.ViewInf;
+import java.util.Optional;
 
 //Librerias Java Fx
 import javafx.fxml.FXML;
@@ -108,7 +110,10 @@ public class MainController implements Initializable {
     
     @FXML
     private void abrirDescuento(){
-        if(!AuthorizationDialog.solicitarGerente()){
+        Optional<Empleados> autorizado =
+        AuthorizationDialog.solicitarGerente();
+
+        if (autorizado.isEmpty()) {
             return;
         }
         

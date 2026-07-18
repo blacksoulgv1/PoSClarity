@@ -1,0 +1,265 @@
+/* =========================================================
+   BOTÓN BASE
+   ========================================================= */
+
+.pos-btn,
+.clarity-btn {
+    -fx-background-color: -pos-soft;
+    -fx-border-color: -pos-border;
+
+    -fx-text-fill: -pos-text;
+    -fx-font-weight: bold;
+
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
+
+    -fx-padding: 0 18;
+
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 8;
+}
+
+.pos-btn:hover,
+.clarity-btn:hover {
+    -fx-background-color: #eef2f7;
+}
+
+.pos-btn:pressed,
+.clarity-btn:pressed {
+    -fx-background-color: #e2e8f0;
+}
+
+.pos-btn .ikonli-font-icon,
+.clarity-btn .ikonli-font-icon {
+    -fx-icon-color: -pos-primary;
+}
+
+
+/* =========================================================
+   BOTÓN PRINCIPAL
+   Guardar / Confirmar / Agregar
+   ========================================================= */
+
+.pos-btn-primary,
+.clarity-btn-primary {
+
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+
+    -fx-background-color: #10B981;
+
+    -fx-border-color: transparent;
+    -fx-border-radius: 8;
+
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
+
+    -fx-padding: 0 18;
+
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 8;
+}
+
+.pos-btn-primary:hover,
+.clarity-btn-primary:hover {
+    -fx-background-color: #059669;
+}
+
+.pos-btn-primary:pressed,
+.clarity-btn-primary:pressed {
+    -fx-background-color: #047857;
+}
+
+.pos-btn-primary .ikonli-font-icon,
+.clarity-btn-primary .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+.pos-btn-primary:disabled,
+.clarity-btn-primary:disabled {
+    -fx-opacity: 1;
+    -fx-background-color: #9ca3af;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+}
+
+.pos-btn-primary:disabled .ikonli-font-icon,
+.clarity-btn-primary:disabled .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+
+/* =========================================================
+   BOTÓN DE PELIGRO
+   Eliminar / Cancelar
+   ========================================================= */
+
+.pos-btn-danger,
+.clarity-btn-danger {
+    -fx-background-color: -pos-danger;
+    -fx-border-color: transparent;
+
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
+
+    -fx-padding: 0 18;
+
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 8;
+}
+
+.pos-btn-danger:hover,
+.clarity-btn-danger:hover {
+    -fx-background-color: #dc2626;
+}
+
+.pos-btn-danger:pressed,
+.clarity-btn-danger:pressed {
+    -fx-background-color: #b91c1c;
+}
+
+.pos-btn-danger .ikonli-font-icon,
+.clarity-btn-danger .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+
+/* =========================================================
+   BOTÓN DE ADVERTENCIA
+   Editar / Acciones especiales
+   ========================================================= */
+
+.pos-btn-warning,
+.clarity-btn-warning {
+    -fx-background-color: -pos-warning;
+    -fx-border-color: transparent;
+
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+
+    -fx-min-height: 42;
+    -fx-pref-height: 42;
+
+    -fx-padding: 0 18;
+
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 8;
+}
+
+.pos-btn-warning:hover,
+.clarity-btn-warning:hover {
+    -fx-background-color: #d97706;
+}
+
+.pos-btn-warning:pressed,
+.clarity-btn-warning:pressed {
+    -fx-background-color: #b45309;
+}
+
+.pos-btn-warning .ikonli-font-icon,
+.clarity-btn-warning .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+
+/* =========================================================
+   BOTÓN COBRAR
+   ========================================================= */
+
+.pos-btn-charge {
+    -fx-background-color: #22c55e;
+    -fx-border-color: transparent;
+
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+
+    -fx-min-height: 46;
+    -fx-pref-height: 46;
+
+    -fx-padding: 0 20;
+
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 10;
+}
+
+.pos-btn-charge:hover {
+    -fx-background-color: #16a34a;
+}
+
+.pos-btn-charge:pressed {
+    -fx-background-color: #15803d;
+}
+
+.pos-btn-charge .ikonli-font-icon {
+    -fx-icon-color: white;
+}
+
+
+/* =========================================================
+   ACCIONES DE TABLA
+   ========================================================= */
+
+.clarity-action {
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+
+    -fx-min-width: 32;
+    -fx-min-height: 30;
+
+    -fx-pref-width: 32;
+    -fx-pref-height: 30;
+
+    -fx-cursor: hand;
+}
+
+.clarity-action:hover {
+    -fx-scale-x: 1.08;
+    -fx-scale-y: 1.08;
+}
+
+.clarity-action.danger {
+    -fx-background-color: #dc2626;
+}
+
+.clarity-action.danger:hover {
+    -fx-background-color: #b91c1c;
+}
+
+.clarity-action.success {
+    -fx-background-color: #16a34a;
+}
+
+.clarity-action.success:hover {
+    -fx-background-color: #15803d;
+}
+
+.clarity-action.info {
+    -fx-background-color: -pos-info;
+}
+
+.clarity-action.warning {
+    -fx-background-color: -pos-warning;
+}
+
+.clarity-action .ikonli-font-icon {
+    -fx-icon-color: white;
+}

@@ -1,107 +1,258 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.EmpleadosController">
-    <center>
-      <SplitPane fx:id="splitPane" dividerPositions="0.35" styleClass="main-split">
-         <items>
-            <VBox prefWidth="250.0" spacing="10.0" styleClass="form-panel">
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-               <children>
-                  <Label alignment="CENTER_RIGHT" styleClass="form-title" text="Alta / Edición de Empleados">
-                     <VBox.margin>
-                        <Insets left="10.0" />
-                     </VBox.margin></Label>
-                  
-                  <GridPane hgap="15.0" prefHeight="144.0" prefWidth="406.0" vgap="18">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="202.0" minWidth="10.0" prefWidth="86.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="322.0" minWidth="10.0" prefWidth="322.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                    </rowConstraints>
-                     <children>
-                        <Label styleClass="form-label" text="Codigo de Empleado" />
-                        <TextField fx:id="txtCodigo" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
-                        <Label styleClass="form-label" text="Nombre Completo" GridPane.rowIndex="1" />
-                        <TextField fx:id="txtEmpleado" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
-                        <Label styleClass="form-label" text="Rol" GridPane.rowIndex="2" />
-                        <ComboBox fx:id="cbRol" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                     </children>
-                     <VBox.margin>
-                        <Insets left="10.0" right="15.0" />
-                     </VBox.margin>
-                     <padding>
-                        <Insets bottom="20" left="25" right="25" top="20" />
-                     </padding>
-                  </GridPane>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                     <children>
-                        <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#guardar" styleClass="btn-primary" text="Guardar" />
-                        <Button fx:id="btnClear" mnemonicParsing="false" text="Limpiar" />
-                     </children>
-                  </HBox>
-               </children>
+<StackPane fx:id="root"
+           styleClass="pos-theme employees-root"
+           stylesheets="@/com/gerardgv/posclarity/css/theme/PosTheme.css,
+                        @/com/gerardgv/posclarity/css/components/pos-card.css,
+                        @/com/gerardgv/posclarity/css/components/pos-form.css,
+                        @/com/gerardgv/posclarity/css/components/pos-buttons.css,
+                        @/com/gerardgv/posclarity/css/components/pos-table.css,
+                        @/com/gerardgv/posclarity/css/components/pos-badge.css,
+                        @/com/gerardgv/posclarity/css/components/pos-textfield.css,
+                        @/com/gerardgv/posclarity/css/components/pos-toast.css"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.gerardgv.posclarity.controllers.EmpleadosController">
+
+    <HBox spacing="18"
+          maxWidth="Infinity"
+          maxHeight="Infinity">
+
+        <!-- =====================================================
+             FORMULARIO
+             ===================================================== -->
+
+        <VBox prefWidth="390"
+              minWidth="390"
+              maxWidth="390"
+              spacing="14"
+              styleClass="pos-card">
+
+            <!-- ENCABEZADO -->
+
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fas-user-tie"
+                          iconSize="18"
+                          styleClass="clarity-section-icon"/>
+
+                <Label text="Empleado"
+                       styleClass="clarity-title"/>
+            </HBox>
+
+            <Label text="Alta y edición de empleados del sistema"
+                   styleClass="pos-form-subtitle"/>
+
+            <Separator/>
+
+            <!-- INFORMACIÓN GENERAL -->
+
+            <VBox spacing="4">
+
+                <HBox styleClass="pos-section-header">
+                    <FontIcon iconLiteral="fas-id-card"
+                              iconSize="16"
+                              styleClass="pos-section-icon"/>
+
+                    <Label text="Información general"
+                           styleClass="pos-section-title"/>
+                </HBox>
+
+                <Separator styleClass="pos-section-separator"/>
+
             </VBox>
-            <VBox spacing="8.0">
-               <children>
-                  <HBox prefWidth="200.0" spacing="8.0" styleClass="table-panel">
-                     <children>
-                        <TextField fx:id="txtBuscar" promptText="Buscar por código o nombre" styleClass="search-field" />
-                     </children>
-                  </HBox>
-                  <TableView fx:id="tblEmpleados" prefHeight="252.0" prefWidth="776.0">
+
+            <GridPane hgap="14"
+                      vgap="12"
+                      styleClass="pos-form-grid">
+
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="34"/>
+                    <ColumnConstraints percentWidth="66"/>
+                </columnConstraints>
+
+                <children>
+
+                    <Label text="Código"
+                           styleClass="pos-form-label"/>
+
+                    <TextField fx:id="txtCodigo"
+                               promptText="Código del empleado"
+                               maxWidth="Infinity"
+                               GridPane.columnIndex="1"/>
+
+                    <Label text="Nombre completo"
+                           styleClass="pos-form-label"
+                           GridPane.rowIndex="1"/>
+
+                    <TextField fx:id="txtEmpleado"
+                               promptText="Nombre completo"
+                               maxWidth="Infinity"
+                               GridPane.columnIndex="1"
+                               GridPane.rowIndex="1"/>
+
+                    <Label text="Rol"
+                           styleClass="pos-form-label"
+                           GridPane.rowIndex="2"/>
+
+                    <ComboBox fx:id="cbRol"
+                              promptText="Selecciona un rol"
+                              maxWidth="Infinity"
+                              GridPane.columnIndex="1"
+                              GridPane.rowIndex="2"/>
+                    
+                    <Label text="Contraseña"
+                           styleClass="pos-form-label"
+                           GridPane.rowIndex="3"/>
+
+                    <PasswordField fx:id="txtPassword"
+                              promptText="Contraseña de autorización"
+                              maxWidth="Infinity"
+                              GridPane.columnIndex="1"
+                              GridPane.rowIndex="3"/>
+                    
+                    <Label text="Confirmar"
+                            styleClass="pos-form-label"
+                            GridPane.rowIndex="4"/>
+
+                    <PasswordField fx:id="txtConfirmarPassword"
+                                promptText="Repite la contraseña"
+                                maxWidth="Infinity"
+                                GridPane.columnIndex="1"
+                                GridPane.rowIndex="4"/>
+
+                </children>
+            </GridPane>
+            
+            <Separator/>
+
+            <!-- BOTONES -->
+
+            <HBox styleClass="pos-form-footer">
+
+                <Button fx:id="btnClear"
+                        text="Limpiar"
+                        minWidth="115"
+                        styleClass="pos-btn">
+
+                    <graphic>
+                        <FontIcon iconLiteral="fas-eraser"
+                                  iconSize="14"/>
+                    </graphic>
+                </Button>
+
+                <Button fx:id="btnGuardar"
+                        text="Guardar"
+                        minWidth="115"
+                        styleClass="pos-btn-primary">
+
+                    <graphic>
+                        <FontIcon iconLiteral="fas-save"
+                                  iconSize="14"/>
+                    </graphic>
+                </Button>
+
+            </HBox>
+
+        </VBox>
+
+        <!-- =====================================================
+             TABLA DE EMPLEADOS
+             ===================================================== -->
+
+        <BorderPane minWidth="0"
+                    minHeight="0"
+                    styleClass="pos-card"
+                    HBox.hgrow="ALWAYS">
+
+            <top>
+                <VBox spacing="14">
+
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <FontIcon iconLiteral="fas-users-cog"
+                                  iconSize="18"
+                                  styleClass="clarity-section-icon"/>
+
+                        <Label text="Empleados registrados"
+                               styleClass="clarity-title"/>
+                    </HBox>
+
+                    <Label text="Administración de vendedores, gerentes y directivos"
+                           styleClass="pos-form-subtitle"/>
+
+                    <HBox styleClass="clarity-search"
+                          HBox.hgrow="ALWAYS">
+
+                        <children>
+                            <FontIcon iconLiteral="fas-search"
+                                      iconSize="15"/>
+
+                            <TextField fx:id="txtBuscar"
+                                       promptText="Buscar por nombre, código o rol..."
+                                       HBox.hgrow="ALWAYS"/>
+                        </children>
+                    </HBox>
+
+                    <padding>
+                        <Insets bottom="14"/>
+                    </padding>
+
+                </VBox>
+            </top>
+
+            <center>
+                <TableView fx:id="tblEmpleados"
+                           minHeight="0">
+
                     <columns>
-                      <TableColumn fx:id="colId" prefWidth="75.0" text="Id" />
-                      <TableColumn fx:id="colCodigo" prefWidth="75.0" text="Codigo" />
-                        <TableColumn fx:id="colEmpleado" prefWidth="75.0" text="Empleado" />
-                        <TableColumn fx:id="colRol" prefWidth="75.0" text="Rol" />
-                        <TableColumn fx:id="colActivo" prefWidth="75.0" text="Estado" />
-                        <TableColumn fx:id="colAcciones" prefWidth="75.0" text="Acciones" />
+                        <TableColumn fx:id="colId"
+                                     text="ID"/>
+
+                        <TableColumn fx:id="colCodigo"
+                                     text="Código"/>
+
+                        <TableColumn fx:id="colEmpleado"
+                                     text="Empleado"/>
+
+                        <TableColumn fx:id="colRol"
+                                     text="Rol"/>
+
+                        <TableColumn fx:id="colActivo"
+                                     text="Estado"/>
+
+                        <TableColumn fx:id="colAcciones"
+                                     text="Acciones"/>
                     </columns>
-                  </TableView>
-               </children>
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-            </VBox>
-         </items>
-      </SplitPane>
-   </center>
-   <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="10.0" styleClass="header-bar">
-         <padding>
-            <Insets left="25" right="25" />
-         </padding>
-         <children>
-            <Label styleClass="header-title" text="Empleados" />
-         </children>
-      </HBox>
-   </top>
-   <bottom>
-      <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER_RIGHT">
-         <padding>
-            <Insets top="10.0" />
-         </padding>
-      </HBox>
-   </bottom>
-</BorderPane>
+
+                </TableView>
+            </center>
+
+            <bottom>
+                <HBox minHeight="38"
+                      prefHeight="38"
+                      styleClass="clarity-table-footer">
+
+                    <children>
+                        <FontIcon iconLiteral="fas-users"
+                                  iconSize="15"/>
+
+                        <Label text="Administración de empleados"
+                               styleClass="clarity-table-footer-label"/>
+                    </children>
+
+                    <BorderPane.margin>
+                        <Insets top="8"/>
+                    </BorderPane.margin>
+
+                </HBox>
+            </bottom>
+
+        </BorderPane>
+
+    </HBox>
+
+</StackPane>

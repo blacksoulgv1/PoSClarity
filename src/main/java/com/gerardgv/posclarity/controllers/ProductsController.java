@@ -1,26 +1,18 @@
 package com.gerardgv.posclarity.controllers;
 
+import com.gerardgv.posclarity.Ui.*;
 import com.gerardgv.posclarity.database.*;
 import com.gerardgv.posclarity.utils.*;
 import com.gerardgv.posclarity.models.Product;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.*;
 import javafx.collections.*;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.paint.Color;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.scene.layout.StackPane;
 
 
 public class ProductsController implements Initializable {
@@ -36,8 +28,8 @@ public class ProductsController implements Initializable {
     @FXML private ComboBox<String> cbCategoria;
     @FXML private ComboBox<String> cbTipo;
  
-    private ProductDAO productDAO = new ProductDAO(); 
-    private InventarioSucursalDAO inventarioSucuarsalDAO = new InventarioSucursalDAO();
+    private final ProductDAO productDAO = new ProductDAO(); 
+    private final InventarioSucursalDAO inventarioSucursalDAO = new InventarioSucursalDAO();
     
     // ===== Buttons =====
     @FXML private Button btnGuardar;
@@ -45,7 +37,7 @@ public class ProductsController implements Initializable {
     
     // ===== Tabla =====
     @FXML private TableView<Product> tblProductos;    
-    @FXML private TableColumn<Product,String> colId;
+    @FXML private TableColumn<Product,Integer> colId;
     @FXML private TableColumn<Product,String> colModelo;
     @FXML private TableColumn<Product,String> colMarca;
     @FXML private TableColumn<Product,String> colCategoria;
@@ -54,12 +46,12 @@ public class ProductsController implements Initializable {
     @FXML private TableColumn<Product,Integer> colStock;
     @FXML private TableColumn<Product,Boolean> colActivo;
     @FXML private TableColumn<Product, Void> colAcciones;
-    
-    @FXML private SplitPane splitPane;
+
+    @FXML private StackPane  root;
     
     private boolean modoEdicion = false;
     private Product productoSeleccionado;
-    private ObservableList<Product> listaProductos = FXCollections.observableArrayList();
+    private final ObservableList<Product> listaProductos = FXCollections.observableArrayList();
 
 
     /**
@@ -67,83 +59,82 @@ public class ProductsController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-                       
-        panel();
-        configurarColumnas();        
-        cargarCombos();
+ 
+        configurarTabla();        
+        configurarCombos();
+        configurarEventos();
+        configurarBusqueda();
+        suscribirEventos();
         cargarProductos();
-        EventBus.subscribeStock(ids -> {
-            refrescarInventario(ids);
-        });
-        
-        formatearCombos();
-        
-        SearchUtils.setupSearch(txtBuscar, tblProductos, listaProductos,
-                p -> p.getModelo(),
-                p -> p.getMarca());
-        
-        btnClear.setOnAction(e-> limpiarFormulario());
-        
-        colActivo.setCellFactory(column ->
-                TableUtils.createActiveToggle(
-                        Product::getId_product,
-                        productDAO::cambiarEstado));
-        colAcciones.setCellFactory(param ->
-            TableUtils.createEditButton(this::editarProducto));
-        
-        btnGuardar.setOnAction(e -> saveProduct());
-        
-        cbCategoria.valueProperty().addListener((obs,oldVal,newVal)-> {
-            if(newVal !=null){
-                aplicarComportamientoCategoria(newVal);
-            }
-        });
-        
-        tblProductos.setRowFactory(tv -> new TableRow<>() {
-        @Override
-        protected void updateItem(Product item, boolean empty) {
-            super.updateItem(item, empty);
+        formatearCombos();      
+                           
+    }
 
-                if (item == null || empty) {
-                setStyle("");
-                    } else if (!item.isActivo()) {
-                    setStyle("-fx-background-color: #ffe6e6;");
-                } else {
-                    setStyle("");
-                }
-            }
-        });
-        
-    }
-    
-    private void panel(){
-        splitPane.setDividerPositions(0.35);
-        splitPane.getDividers().forEach(div -> div.positionProperty().addListener((
-        obs,oldVal,newVal) -> {
-            div.setPosition(0.35);
-        }));
-    }
     
 //terminado 26-02
-    private void configurarColumnas(){
+    private void configurarTabla(){
         
-    colId.setCellValueFactory(data ->
-            new SimpleStringProperty(String.valueOf(data.getValue().getId_product())));
-    colModelo.setCellValueFactory(data ->
+        PosTable.apply(tblProductos);
+        
+    // ==============================
+    // DATOS DE LAS COLUMNAS
+    // ==============================
+        
+        colId.setCellValueFactory(data ->
+            new SimpleIntegerProperty(data.getValue().getId_product()).asObject());
+        colModelo.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getModelo()));
-    colMarca.setCellValueFactory(data ->
+        colMarca.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getMarca()));
-    colCategoria.setCellValueFactory(data ->
+        colCategoria.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getCategoria()));
-    colTipo.setCellValueFactory(data ->
+        colTipo.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getTipo_producto()));
-    colPrecio.setCellValueFactory(data ->
+        colPrecio.setCellValueFactory(data ->
             new SimpleDoubleProperty(data.getValue().getPrecio()).asObject());
-    colStock.setCellValueFactory( data -> 
+        colStock.setCellValueFactory(data ->
             new SimpleIntegerProperty(data.getValue().getStock()).asObject());
-    colActivo.setCellValueFactory(data ->
-        new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
+        colActivo.setCellValueFactory(data ->
+            new SimpleBooleanProperty(data.getValue().isActivo()).asObject());        
+        
+    // ==============================
+    // FORMATO DE LAS COLUMNAS
+    // ==============================
+
+        PosTable.integer(colId);
+        PosTable.text(colModelo);
+        PosTable.text(colMarca);
+        PosTable.category(colCategoria);
+        PosTable.enumColumn(colTipo);
+        PosTable.money(colPrecio);
+        PosTable.integer(colStock);
+
+    // ==============================
+    // ACCIONES Y ESTADO
+    // ==============================
+
+    colActivo.setCellFactory(column ->
+            TableUtils.createActiveToggle(
+                    Product::getId_product,
+                    productDAO::cambiarEstado
+            ));
+    colAcciones.setCellFactory(column ->
+            TableUtils.createEditButton(
+                    this::editarProducto
+            ));
+    
+    // ==============================
+    // COMPORTAMIENTO GENERAL
+    // ==============================
+    
+        PosTable.placeholder(tblProductos,
+            "No hay productos registrados",
+            "Agrega productos desde el formulario de la izquierda",
+            "fas-box-open");
+
+        PosTable.inactiveRows(tblProductos,Product::isActivo);    
     }
+    
 
     //terminado 26-02
     private void editarProducto( Product p){
@@ -176,16 +167,8 @@ public class ProductsController implements Initializable {
  
     }
     
-    private void desactivarProducto(Product p){
-        
-        boolean estadoNuevo = !p.isActivo();
-            if(productDAO.cambiarEstado(p.getId_product(),estadoNuevo)){
-                p.setActivo(estadoNuevo);
-                tblProductos.refresh();
-            }
-    }
     //26-02 terminado
-    private void cargarCombos() {
+    private void configurarCombos() {
         cbCategoria.setItems(FXCollections.observableArrayList(
             "armazon","lente_contacto","producto","mica","tratamiento"));
         cbTipo.setItems(FXCollections.observableArrayList(
@@ -194,202 +177,235 @@ public class ProductsController implements Initializable {
     
     private void saveProduct(){
         
-        int stock = 0;
-        double precio; 
-        
-        if(txtModelo.getText().isEmpty() ||
-            txtMarca.getText().isEmpty() ||
-            txtPrecio.getText().isEmpty() ||
-            cbCategoria.getValue() == null ||
-            cbTipo.getValue() == null){
-
-            mostrarError("Completa los campos");
-                return;
-            }
-        
-        try{
-            
-            if(!txtStock.getText().isEmpty()){
-                    stock = Integer.parseInt(txtStock.getText());
-                if(stock < 0){
-                    mostrarError("El Stock no puede ser negativo");
-                    return;
-                }
-            }
-        }catch(NumberFormatException e){
-            mostrarError("Stock Invalido");
+        if(!validarFormularioProducto()){
             return;
         }
-               
-        
-        try{
-             precio = Double.parseDouble(txtPrecio.getText());
-            }catch(NumberFormatException e){
-                mostrarError("Precio Invalido");
-                return;
-            }
-        
-        Product p = modoEdicion ? productoSeleccionado : new Product();
-        
-        p.setModelo(txtModelo.getText());
-        p.setMarca(txtMarca.getText());
-        p.setPrecio(precio);
-        p.setCategoria(cbCategoria.getValue());
-        String tipo = cbTipo.getValue();
-        
-        if(tipo != null) {
-            tipo = tipo.toLowerCase().replace(" ", "_");
+    
+        int stock = obtenerStock();        
+        if(stock < 0){
+            return;
         }
-        p.setTipo_producto(tipo);
-
-        p.setManejaStock(cbCategoria.getValue().equals("producto")||
-                cbCategoria.getValue().equals("armazon"));
-
-        p.setMicaBase(cbCategoria.getValue().equals("mica"));
-       
-        p.setActivo(true);
-
-        boolean resultado;
-
-            if(modoEdicion){
-                
-                p.setId_product(productoSeleccionado.getId_product());
-                
-                boolean productoActualizado = productDAO.update(p);
-                boolean stockActualizado = true;
-                
-                if(p.isManejaStock()){
-                    
-                    stockActualizado = inventarioSucuarsalDAO.actualizarStock(Session.getSucursal().getId(),p.getId_product(),stock);
-                }
-                resultado = productoActualizado && stockActualizado;
-                
-            } else {
-                
-                resultado = productDAO.insert(p, Session.getSucursal().getId(), stock);
-                
-            }
-
-            if(resultado){
-            mostrarInfo( modoEdicion ? "Producto Actualizado Correctamente"
-                    : "Producto Guardado Correctamente");
+    
+        double precio = obtenerPrecio();
+        if(precio < 0){
+            return;
+        }
+    
+        Product p = construirProducto(precio);
+    
+        boolean resultado = modoEdicion
+            ? actualizarProducto(p, stock)
+            : guardarProducto(p, stock);
+    
+        if(resultado){
+            mostrarExito(modoEdicion
+                ? "Producto actualizado correctamente."
+                : "Producto guardado correctamente.");
+        
             limpiarFormulario();
             cargarProductos();
-            modoEdicion = false;
-            }else{
-                mostrarError( modoEdicion ? "El Producto No Se Actualizo correctamente"
-                    : "El Producto No Se Guardo correctamente");
-            }               
+        }else{
+            mostrarError(modoEdicion
+                ? "El producto no se actualizó correctamente."
+                : "El producto no se guardó correctamente.");
+        }
     }
+    
+    private boolean validarFormularioProducto(){
+    
+    if(txtModelo.getText().trim().isEmpty()){
+        mostrarError("El modelo es obligatorio.");
+        txtModelo.requestFocus();
+        return false;
+    }
+    
+    if(txtMarca.getText().trim().isEmpty()){
+        mostrarError("La marca es obligatoria.");
+        txtMarca.requestFocus();
+        return false;
+    }
+    
+    if(cbCategoria.getValue() == null){
+        mostrarError("Selecciona una categoría.");
+        cbCategoria.requestFocus();
+        return false;
+    }
+    
+    if(cbTipo.getValue() == null){
+        mostrarError("Selecciona un tipo de producto.");
+        cbTipo.requestFocus();
+        return false;
+    }
+    
+    if(txtPrecio.getText().trim().isEmpty()){
+        mostrarError("El precio es obligatorio.");
+        txtPrecio.requestFocus();
+        return false;
+    }
+    
+    return true;
+}
+    
+    private int obtenerStock(){
+    
+    if(txtStock.getText().trim().isEmpty()){
+        return 0;
+    }
+    
+    try{
+        int stock = Integer.parseInt(txtStock.getText().trim());
+        
+        if(stock < 0){
+            mostrarError("El stock no puede ser negativo.");
+            txtStock.requestFocus();
+            return -1;
+        }
+        
+        return stock;
+        
+    }catch(NumberFormatException e){
+        mostrarError("El stock debe ser un número entero.");
+        txtStock.requestFocus();
+        return -1;
+    }
+}
 
+    private double obtenerPrecio(){
+    
+    try{
+        double precio = Double.parseDouble(txtPrecio.getText().trim());
+        
+        if(precio < 0){
+            mostrarError("El precio no puede ser negativo.");
+            txtPrecio.requestFocus();
+            return -1;
+        }
+        
+        return precio;
+        
+    }catch(NumberFormatException e){
+        mostrarError("El precio debe ser un número válido.");
+        txtPrecio.requestFocus();
+        return -1;
+    }
+}
+    
+    private Product construirProducto(double precio){
+    
+    Product p = modoEdicion ? productoSeleccionado : new Product();
+    
+    String categoria = cbCategoria.getValue();
+    String tipo = cbTipo.getValue().toLowerCase().replace(" ", "_");
+    
+    p.setModelo(txtModelo.getText().trim());
+    p.setMarca(txtMarca.getText().trim());
+    p.setPrecio(precio);
+    p.setCategoria(categoria);
+    p.setTipo_producto(tipo);
+    
+    p.setManejaStock(categoria.equals("producto") || categoria.equals("armazon"));
+    p.setMicaBase(categoria.equals("mica"));
+    p.setActivo(true);
+    
+    if(modoEdicion){
+        p.setId_product(productoSeleccionado.getId_product());
+    }
+    
+    return p;
+}
+    
+    private boolean guardarProducto(Product p, int stock){
+    return productDAO.insert(p, Session.getSucursal().getId(), stock);
+}
+    private boolean actualizarProducto(Product p, int stock){
+    
+    boolean productoActualizado = productDAO.update(p);
+    
+    if(!productoActualizado){
+        return false;
+    }
+    
+    if(p.isManejaStock()){
+        return inventarioSucursalDAO.actualizarStock(
+                Session.getSucursal().getId(),
+                p.getId_product(),
+                stock);
+    }
+    
+    return true;
+}
+    
     private void limpiarFormulario() {
         txtModelo.clear();
         txtMarca.clear();
         txtPrecio.clear();
+        txtStock.clear();
         cbCategoria.getSelectionModel().clearSelection();
         cbTipo.getSelectionModel().clearSelection();
         cbTipo.setDisable(false);
-        txtStock.setDisable(false);
-        txtStock.clear();
+        txtStock.setDisable(false);        
         modoEdicion = false;
         productoSeleccionado = null;    
         btnGuardar.setText("Guardar");
+        txtModelo.requestFocus();
     }
 
     private void cargarProductos() {
         listaProductos.clear();
         listaProductos.addAll(productDAO.getBySucursal(Session.getSucursal().getId()));
         tblProductos.setItems(listaProductos);
-    }
+    }    
     
-    //Corecto
-    private void mostrarError(String mensaje){
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+    private void mostrarError(String msg){
+        PosNotification.error(root, "Atención", msg);
     }
-    
-    //Correcto
-    private void mostrarInfo(String mensaje){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
-    }
+
+    private void mostrarExito(String msg){
+        PosNotification.success(root, "Listo", msg);
+    }   
     
 //listo 26-02
     private void aplicarComportamientoCategoria(String categoria) {
         
         switch (categoria) {
-            
-            case "armazon" ->{
-                cbTipo.setValue("fisico");
-                cbTipo.setDisable(true);
-                txtStock.setDisable(false);
-            }
-            case "producto" -> {
-                cbTipo.setValue("fisico");
-                cbTipo.setDisable(true);                
-                txtStock.setDisable(false);
-            }
-            case "mica" -> {
-                cbTipo.setValue("bajo_pedido");
-                cbTipo.setDisable(true);
+
+        case "armazon", "producto" -> {
+            cbTipo.setValue("fisico");
+            cbTipo.setDisable(true);
+
+            txtStock.setDisable(false);
+
+            if (txtStock.getText().isBlank()) {
                 txtStock.setText("0");
-                txtStock.setDisable(true);
             }
-            case "tratamiento" -> {
-                cbTipo.setValue("bajo_pedido");
-                cbTipo.setDisable(true);
-                txtStock.setText("0");
-                txtStock.setDisable(true);
-            }
-            
-            case "lente_contacto" -> {
-                cbTipo.setValue("bajo_pedido");
-                cbTipo.setDisable(true);
-                txtStock.setText("0");
-                txtStock.setDisable(true);
-            }
-            
         }
+
+        case "mica", "tratamiento", "lente_contacto" -> {
+            cbTipo.setValue("bajo_pedido");
+            cbTipo.setDisable(true);
+
+            txtStock.setText("0");
+            txtStock.setDisable(true);
+        }
+
+        default -> {
+            cbTipo.getSelectionModel().clearSelection();
+            cbTipo.setDisable(false);
+
+            txtStock.clear();
+            txtStock.setDisable(false);
+        }
+    }
     }
     
     private void formatearCombos() {
         
-        cbTipo.setCellFactory(lv -> new ListCell<>(){
-            @Override
-        protected void updateItem(String item,boolean empty){
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null: formatearTexto(item));
-            }
-        });
-        
-        cbTipo.setButtonCell(new ListCell<>(){
-            @Override
-        protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : formatearTexto(item));
-            }
-        });
-        cbCategoria.setCellFactory(lv -> new ListCell<>() {
-        @Override
-        protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : formatearTexto(item));
-            }
-        });
+        cbTipo.setCellFactory(listView -> crearCeldaFormateada());
+        cbTipo.setButtonCell(crearCeldaFormateada());
 
-    cbCategoria.setButtonCell(new ListCell<>() {
-        @Override
-        protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : formatearTexto(item));
-            }
-        });
+        cbCategoria.setCellFactory(listView -> crearCeldaFormateada());
+        cbCategoria.setButtonCell(crearCeldaFormateada());
+        
     }
     
     private String formatearTexto(String valor){
@@ -401,8 +417,25 @@ public class ProductsController implements Initializable {
         case "producto" -> "Producto";
         case "tratamiento" -> "Tratamiento";
         default -> valor;
-    };
+        };
     }
+    
+    private ListCell<String> crearCeldaFormateada() {
+
+    return new ListCell<>() {
+
+        @Override
+        protected void updateItem(String item, boolean empty) {
+            super.updateItem(item, empty);
+
+            setText(
+                    empty || item == null
+                            ? null
+                            : formatearTexto(item)
+            );
+        }
+    };
+}
 
     private void refrescarInventario(List<Integer> ids) {
         for(Integer id : ids){
@@ -421,6 +454,30 @@ public class ProductsController implements Initializable {
             }
         }
         tblProductos.refresh();
+    }
+
+    private void configurarEventos() {
+        
+        btnClear.setOnAction(e-> limpiarFormulario());           
+        btnGuardar.setOnAction(e -> saveProduct());        
+        cbCategoria.valueProperty().addListener((obs,oldVal,newVal)-> {
+            if(newVal !=null){
+                aplicarComportamientoCategoria(newVal);
+            }
+        }); 
+        
+    }
+
+    private void configurarBusqueda() {
+        
+        SearchUtils.setupSearch(txtBuscar, tblProductos, listaProductos,
+                Product::getModelo,
+                Product::getMarca);
+        
+    }
+
+    private void suscribirEventos() {
+        EventBus.subscribeStock(this::refrescarInventario);
     }
     
 }

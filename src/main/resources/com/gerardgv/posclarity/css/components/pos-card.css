@@ -1,0 +1,107 @@
+.pos-card,
+.clarity-card {
+    -fx-background-color: -pos-card;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: -pos-border;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.05), 10, 0, 0, 3);
+}
+
+.pos-title,
+.clarity-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-section-icon,
+.clarity-section-icon {
+    -fx-icon-color: -pos-primary;
+}
+.clarity-title {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #111827;
+}
+
+.clarity-section-icon {
+    -fx-icon-color: #111827;
+}
+
+.section-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #6B7280;
+}
+
+.sale-header-card,
+.sale-rx-card,
+.sale-products-card {
+    -fx-background-color: white;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: #E5E7EB;
+    -fx-padding: 16;
+}
+
+.separator *.line {
+    -fx-border-color: #E5E7EB;
+}
+
+.pos-stat-card {
+    -fx-background-color: -pos-card;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: -pos-border;
+    -fx-padding: 12 14;
+    -fx-alignment: CENTER;
+    -fx-spacing: 4;
+    -fx-min-height: 72;
+}
+
+.pos-stat-card:hover {
+    -fx-border-color: -pos-primary;
+    -fx-background-color: -pos-soft;
+}
+
+.pos-stat-value {
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-primary-dark;
+}
+
+.pos-stat-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -pos-muted;
+}
+/* ==========================
+   TARJETAS DE ESTADÍSTICAS
+   ========================== */
+
+.pos-stat-card {
+    -fx-background-color: -pos-card;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: -pos-border;
+    -fx-padding: 8 12;
+    -fx-alignment: CENTER;
+    -fx-spacing: 2;
+    -fx-min-height: 58;
+    -fx-pref-height: 58;
+}
+
+.pos-stat-card:hover {
+    -fx-border-color: -pos-primary;
+    -fx-background-color: -pos-soft;
+}
+
+.pos-stat-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-primary-dark;
+}
+
+.pos-stat-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: -pos-muted;
+}

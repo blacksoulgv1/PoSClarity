@@ -1,0 +1,164 @@
+.pos-search,
+.clarity-search {
+    -fx-background-color: white;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 0 10;
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+    -fx-pref-height: 42;
+}
+
+.pos-search .ikonli-font-icon,
+.clarity-search .ikonli-font-icon {
+    -fx-icon-color: -pos-muted;
+}
+
+.pos-search .text-field,
+.clarity-search .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.pos-search .text-field:focused,
+.clarity-search .text-field:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.input-icon {
+    -fx-background-color: white;
+    -fx-border-color: #d1d5db;
+    -fx-border-radius: 7;
+    -fx-background-radius: 7;
+    -fx-padding: 0 10;
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+    -fx-pref-height: 40px;
+}
+
+.input-icon .ikonli-font-icon {
+    -fx-icon-color: -pos-muted;
+}
+
+.input-icon .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-pref-height: 38px;
+}
+
+.input-icon .text-field:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+/*
+POPUP DE BUSCADORES
+*/
+
+.pos-search-popup {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: -pos-border;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.18), 14, 0, 0, 5);
+}
+
+.pos-search-popup-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 10;
+}
+
+.pos-search-popup-list .list-cell {
+    -fx-background-color: white;
+    -fx-padding: 10 12;
+    -fx-font-size: 13px;
+    -fx-text-fill: -pos-text;
+    -fx-background-insets:2;
+}
+
+.pos-search-popup-list .list-cell:hover {
+    -fx-background-color: #ecfeff;
+    -fx-background-radius:8;
+}
+
+.pos-search-popup-list .list-cell:selected {
+    -fx-background-color:#ccfbf1;
+    -fx-background-radius:8;
+}
+.pos-popup-row {
+    -fx-alignment: center-left;
+    -fx-padding: 6 4;
+}
+
+.pos-popup-icon {
+    -fx-icon-color: -pos-primary;
+}
+
+.pos-popup-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+.pos-popup-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: -pos-muted;
+}
+
+.pos-popup-row {
+    -fx-alignment: center-left;
+    -fx-padding: 7 6;
+    -fx-spacing: 10;
+}
+.pos-popup-empty {
+    -fx-text-fill: -pos-muted;
+    -fx-alignment: center;
+    -fx-font-size: 13px;
+    -fx-padding: 22;
+}
+.pos-popup-empty-icon {
+    -fx-icon-color: -pos-muted;
+}
+
+.pos-popup-empty-text {
+    -fx-text-fill: -pos-muted;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+/* ===========================
+   POS SEARCH POPUP SCROLL
+=========================== */
+
+.pos-search-popup-list .scroll-bar:vertical{
+    -fx-background-color: transparent;
+    -fx-pref-width: 8;
+}
+
+.pos-search-popup-list .scroll-bar:horizontal{
+    -fx-opacity:0;
+    -fx-max-height:0;
+}
+
+.pos-search-popup-list .thumb{
+    -fx-background-color:#cbd5e1;
+    -fx-background-radius:20;
+}
+
+.pos-search-popup-list .thumb:hover{
+    -fx-background-color:#94a3b8;
+}
+
+.pos-search-popup-list .track{
+    -fx-background-color:transparent;
+}
+.pos-search-popup-list:focused{
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}

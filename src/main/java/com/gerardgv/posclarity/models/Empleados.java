@@ -6,18 +6,20 @@ public class Empleados {
     private int codigo;
     private String nombre;
     private String rol;
+    private String passwordHash;
     private boolean activo = true;
 
     public Empleados() {
     }
-    
-    public Empleados(int id_vendedor, int codigo, String nombre, String rol) {
+
+    public Empleados(int id_vendedor, int codigo, String nombre, String rol, String passwordHash) {
         this.id_vendedor = id_vendedor;
         this.codigo = codigo;
         this.nombre = nombre;
         this.rol = rol;
-    }
-
+        this.passwordHash = passwordHash;
+    }   
+    
     public int getId_vendedor() {
         return id_vendedor;
     }
@@ -57,6 +59,13 @@ public class Empleados {
     public void setActivo(boolean activo) {
         this.activo = activo;
     }
-    
-    
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
 }

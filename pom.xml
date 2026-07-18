@@ -20,6 +20,13 @@
     <!-- ✅ Dependencias -->
     <dependencies>
         
+        <!-- Password Cryp -->  
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+        
         <!-- Ikonli Core -->        
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>

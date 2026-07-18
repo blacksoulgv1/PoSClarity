@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
- */
 package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.database.SaleDAO;
@@ -10,19 +6,27 @@ import com.gerardgv.posclarity.utils.EventBus;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.collections.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 
 
 public class AbonosController implements Initializable {
 
-    @FXML private Label lblCliente, lblTotal, lblPagado, lblRestante;
+    @FXML private Label lblFolio;
+    @FXML private Label lblCliente;
+    @FXML private Label lblTotal;
+    @FXML private Label lblPagado;
+    @FXML private Label lblRestante;
+    @FXML private Label lblEstado;
+    @FXML private Label lblTotalPagos;
     @FXML private TextField txtMonto;
     @FXML private ComboBox<String> cbMetodo;
+    @FXML private Button btnAbonar;
+    @FXML private StackPane root;
 
     @FXML private TableView<Pago> tblPagos;
     @FXML private TableColumn<Pago,String> colFecha;
@@ -57,7 +61,9 @@ public class AbonosController implements Initializable {
     }
 
     private void cargarDatos() {
-        lblCliente.setText("Cliente: " + venta.getCliente());
+        lblCliente.setText(
+            venta.getCliente() == null ? "Cliente no disponible"
+        : venta.getCliente().getNombre());
         lblTotal.setText("Total: $" + venta.getTotal());
         lblPagado.setText("Pagado: $" + venta.getPagado());
         lblRestante.setText("Restante: $" + venta.getRestante());

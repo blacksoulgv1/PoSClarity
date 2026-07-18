@@ -2,21 +2,38 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane prefHeight="900" prefWidth="1440" 
-            styleClass="sale-root"
-            stylesheets="@/com/gerardgv/posclarity/css/SaleView.css" 
+<StackPane  fx:id="rootSale"
+            styleClass="pos-theme sale-root"
+            stylesheets="@/com/gerardgv/posclarity/css/pages/SaleView.css,
+                         @/com/gerardgv/posclarity/css/theme/PosTheme.css,
+                         @/com/gerardgv/posclarity/css/components/pos-card.css,
+                         @/com/gerardgv/posclarity/css/components/pos-buttons.css,
+                         @/com/gerardgv/posclarity/css/components/pos-table.css,
+                         @/com/gerardgv/posclarity/css/components/pos-badge.css,
+                         @/com/gerardgv/posclarity/css/components/pos-textfield.css,
+                         @/com/gerardgv/posclarity/css/components/pos-summary.css,
+                         @/com/gerardgv/posclarity/css/components/pos-toast.css" 
             xmlns="http://javafx.com/javafx/21"
-            xmlns:fx="http://javafx.com/fxml/1" 
+            xmlns:fx="http://javafx.com/fxml/1"            
             fx:controller="com.gerardgv.posclarity.controllers.SaleController">
-
-   <!-- 🔝 HEADER -->
-<top>
-    <VBox spacing="14" styleClass="sale-card">
+    
+    <HBox spacing="18" styleClass="sale-layout">
+        
+        <VBox spacing="12" HBox.hgrow="ALWAYS">
+            
+            <!-- aquí pegas tu bloque de VENTA-->
+            
+            <VBox spacing="12" styleClass="pos-card sale-header-card">
         <children>
-            <Label text="Venta" styleClass="section-title"/>
+            
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fas-receipt" iconSize="18" styleClass="clarity-section-icon"/>
+            <Label text="Venta" styleClass="clarity-title"/>
+            </HBox>
+            <Separator/>
+            
             <GridPane hgap="14" vgap="12">
                 <columnConstraints>
                     <ColumnConstraints percentWidth="10"/>
@@ -91,15 +108,17 @@
             </GridPane>
         </children>
     </VBox>
-</top>
-
-   <!-- 🧾 CENTER -->
-<center>
-    <VBox spacing="12" BorderPane.alignment="CENTER">
+    <VBox spacing="12" VBox.vgrow="ALWAYS" >
 
         <!-- 👓 GRADUACIÓN -->
-        <VBox spacing="14" styleClass="sale-card">
-            <Label text="Graduación" styleClass="section-title"/>
+        <VBox spacing="12" styleClass="pos-card sale-rx-card">
+            
+            <HBox alignment="CENTER_LEFT" spacing="8">
+            <FontIcon iconLiteral="fas-eye" iconSize="18" styleClass="clarity-section-icon"/>
+            <Label text="Graduación" styleClass="clarity-title"/>
+            </HBox>
+
+<Separator/>
 
             <GridPane hgap="35" vgap="10">
                 <columnConstraints>
@@ -132,92 +151,149 @@
         </VBox>
 
         <!-- 📦 PRODUCTOS -->
-        <VBox spacing="14" styleClass="sale-card" VBox.vgrow="ALWAYS">
-            <Label text="Productos" styleClass="section-title"/>
+        <VBox spacing="14" styleClass="pos-card sale-products-card" VBox.vgrow="ALWAYS">
 
-            <HBox alignment="CENTER_LEFT" spacing="12">
-                <HBox styleClass="input-icon" HBox.hgrow="ALWAYS">
-                    <children>
-                        <FontIcon iconLiteral="fas-search" iconSize="15"/>
-                            <TextField fx:id="txtBuscarProductos"
-                                promptText="Modelo / Producto"
-                                HBox.hgrow="ALWAYS"/>
-                    </children>
-                </HBox>
-
-                <Button text="Agregar"
-                    onAction="#agregarProducto"
-                    styleClass="btn-add">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-plus-circle" iconSize="15"/>
-                    </graphic>
-                </Button>
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <FontIcon iconLiteral="fas-shopping-cart" iconSize="18" styleClass="clarity-section-icon"/>
+                <Label text="Productos" styleClass="clarity-title"/>
             </HBox>
+    <HBox alignment="CENTER_LEFT" spacing="12">
+        <HBox styleClass="clarity-search" HBox.hgrow="ALWAYS">
+            <children>
+                <FontIcon iconLiteral="fas-search" iconSize="15"/>
+                <TextField fx:id="txtBuscarProductos"
+                           promptText="Modelo / Producto"
+                           HBox.hgrow="ALWAYS"/>
+            </children>
+        </HBox>
 
-            <TableView fx:id="tableProduct" VBox.vgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="colCantidad" text="Cantidad"/>
-                    <TableColumn fx:id="colModelo" text="Modelo"/>
-                    <TableColumn fx:id="colMarca" text="Marca"/>
-                    <TableColumn fx:id="colCategoria" text="Categoría"/>
-                    <TableColumn fx:id="colDescuento" text="Descuento"/>
-                    <TableColumn fx:id="colPrecio" text="Precio"/>
-                    <TableColumn fx:id="colSubtotal" prefWidth="90" text="Sub Total"/>
-                    <TableColumn fx:id="colAcciones" prefWidth="90" text="Acciones"/>
-                </columns>
-            </TableView>
-        </VBox>
+        <Button text="Agregar"
+                onAction="#agregarProducto"
+                styleClass="pos-btn-primary">
+            <graphic>
+                <FontIcon iconLiteral="fas-plus-circle" iconSize="15"/>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <TableView fx:id="tableProduct"  VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colCantidad" text="Cantidad"/>
+            <TableColumn fx:id="colModelo" text="Modelo"/>
+            <TableColumn fx:id="colMarca" text="Marca"/>
+            <TableColumn fx:id="colCategoria" text="Categoría"/>
+            <TableColumn fx:id="colDescuento" text="Descuento"/>
+            <TableColumn fx:id="colPrecio" text="Precio"/>
+            <TableColumn fx:id="colSubtotal" text="Sub Total"/>
+            <TableColumn fx:id="colAcciones" text="Acciones"/>
+        </columns>
+    </TableView>
+
+    <HBox styleClass="clarity-table-footer">
+        <children>
+            <FontIcon iconLiteral="fas-shopping-cart" iconSize="15"/>
+            <Label text="Productos en el carrito" styleClass="clarity-table-footer-label"/>
+        </children>
+    </HBox>
 
     </VBox>
-</center>
 
-   <!-- 💳 RIGHT -->
-<right>
-    <VBox alignment="TOP_CENTER"
-          prefWidth="300"
-          spacing="14"
-          styleClass="payment-card">
+    </VBox>
+            
+        </VBox>  
+        
+            <VBox prefWidth="320"
+                    minWidth="320" 
+                    maxWidth="320" 
+                    spacing="14"
+                    styleClass="pos-summary-card">
 
-        <VBox alignment="CENTER" spacing="5">
-            <Label text="SUB TOTAL" styleClass="payment-label"/>
-            <Label fx:id="lblTotalBruto" text="\$0.00" styleClass="payment-value"/>
+        <HBox alignment="CENTER_LEFT" spacing="8">
+            <FontIcon iconLiteral="fas-cash-register" iconSize="18" styleClass="pos-section-icon"/>
+            <Label text="Resumen de cobro" styleClass="pos-title"/>
+        </HBox>
 
-            <Label text="DESCUENTO" styleClass="payment-label"/>
-            <Label fx:id="lblDescuento" text="\$0.00" styleClass="payment-value"/>
+        <VBox spacing="10">
+            <HBox styleClass="pos-summary-item">
+                <children>
+                    <VBox>
+                        <Label text="Subtotal" styleClass="pos-summary-label"/>
+                        <Label text="Antes de descuentos" styleClass="pos-summary-subtitle"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblTotalBruto" text="\$0.00" styleClass="pos-summary-value"/>
+                </children>
+            </HBox>
 
-            <Separator/>
+            <HBox styleClass="pos-summary-item">
+                <children>
+                    <VBox>
+                        <Label text="Descuento" styleClass="pos-summary-label"/>
+                        <Label text="Promociones aplicadas" styleClass="pos-summary-subtitle"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblDescuento" text="\$0.00" styleClass="pos-summary-discount"/>
+                </children>
+            </HBox>
 
-            <Label text="TOTAL" styleClass="payment-label"/>
-            <Label fx:id="lblTotal" text="\$0.00" styleClass="payment-value"/>
+            <HBox styleClass="pos-summary-total">
+                <children>
+                    <VBox>
+                        <Label text="Total" styleClass="pos-summary-total-label"/>
+                        <Label text="Importe final" styleClass="pos-summary-subtitle"/>
+                    </VBox>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblTotal" text="\$0.00" styleClass="pos-summary-total-value"/>
+                </children>
+            </HBox>
         </VBox>
 
         <Separator/>
 
-        <VBox alignment="CENTER" spacing="8">
-            <Label text="MÉTODO DE PAGO" styleClass="field-label"/>
+        <VBox spacing="10">
+            <Label text="Método de pago" styleClass="field-label"/>
             <ComboBox fx:id="cbMetodoPago" maxWidth="Infinity"/>
 
-            <Label text="IMPORTE" styleClass="field-label"/>
-            <TextField fx:id="txtMonto" maxWidth="220"/>
+            <Label text="Importe recibido" styleClass="field-label"/>
+            <HBox styleClass="input-icon">
+                <children>
+                    <FontIcon iconLiteral="fas-dollar-sign" iconSize="15"/>
+                    <TextField fx:id="txtMonto"
+                               promptText="0.00"
+                               HBox.hgrow="ALWAYS"/>
+                </children>
+            </HBox>
         </VBox>
 
-        <VBox alignment="CENTER" spacing="4">
-            <Label text="RESTANTE" styleClass="field-label"/>
-            <Label fx:id="lblRestante" text="\$0.00"/>
+        <VBox spacing="8">
+            <HBox styleClass="pos-payment-row">
+                <children>
+                    <Label text="Restante" styleClass="pos-payment-label"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblRestante" text="\$0.00" styleClass="pos-payment-value"/>
+                </children>
+            </HBox>
 
-            <Label text="CAMBIO" styleClass="field-label"/>
-            <Label fx:id="lblCambio" text="\$0.00"/>
+            <HBox styleClass="pos-payment-row">
+                <children>
+                    <Label text="Cambio" styleClass="pos-payment-label"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="lblCambio" text="\$0.00" styleClass="pos-payment-value"/>
+                </children>
+            </HBox>
         </VBox>
-
+        
         <Button text="COBRAR"
-        onAction="#guardarVenta"
-        maxWidth="Infinity"
-        styleClass="btn-charge">
+                onAction="#guardarVenta"
+                maxWidth="Infinity"
+                styleClass="pos-btn-charge">
             <graphic>
-                <FontIcon iconLiteral="fas-cash-register" iconSize="16"/>
+                <FontIcon iconLiteral="fas-credit-card" iconSize="16"/>
             </graphic>
         </Button>
-    </VBox>
-</right> 
 
-</BorderPane>
+    </VBox>
+        
+    </HBox> 
+
+</StackPane>

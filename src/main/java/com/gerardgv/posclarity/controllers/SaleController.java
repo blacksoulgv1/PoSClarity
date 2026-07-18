@@ -1,5 +1,6 @@
 package com.gerardgv.posclarity.controllers;
 
+import com.gerardgv.posclarity.Ui.*;
 import com.gerardgv.posclarity.database.*;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.service.TicketService;
@@ -9,11 +10,11 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.*;
 import javafx.fxml.*;
 import javafx.geometry.Bounds;
 import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Popup;
 
 
@@ -58,27 +59,22 @@ public class SaleController implements Initializable {
     @FXML private TableColumn<SaleItem,Double> colPrecio;
     @FXML private TableColumn<SaleItem,Double> colSubtotal;
     @FXML private TableColumn<SaleItem,Void> colAcciones;
+    @FXML private StackPane rootSale;
     
-    private ProductDAO productDAO = new ProductDAO();
-    private Popup popupProductos = new Popup();
-    private ListView<Product> listViewProduct = new ListView<>();    
-    private ObservableList<Product> resultados = FXCollections.observableArrayList();    
+    private ProductDAO productDAO = new ProductDAO();    
     private ObservableList<SaleItem> carrito = FXCollections.observableArrayList(); 
-    private ClientsDAO clientsDAO = new ClientsDAO();
-    private Popup popupClientes = new Popup();
-    private ListView<Clients> listViewClients = new ListView<>();
-    private ObservableList<Clients> resultadosClients = FXCollections.observableArrayList();
+    private ClientsDAO clientsDAO = new ClientsDAO();    
     private DescuentoDAO descuentoDAO = new DescuentoDAO();
     private SaleDAO saleDAO = new SaleDAO(); 
     private Clients clienteSeleccionado = null;
-    private FolioDAO folioDAO = new FolioDAO();
-    
+    private FolioDAO folioDAO = new FolioDAO();    
     private Empleados vendedorSeleccionado = null;
     private EmpleadosDAO empleadosDAO = new EmpleadosDAO();
-    private Popup popupVendedores = new Popup();
-    private ListView<Empleados> listViewVendedores = new ListView<>();
-    private ObservableList<Empleados> resultadosVendedores = FXCollections.observableArrayList();
-           
+    
+    private PosSearchPopup<Product> popupProductos = new PosSearchPopup<>();
+    private PosSearchPopup<Clients> popupClientes  = new PosSearchPopup<>();
+    private PosSearchPopup<Empleados> popupVendedores  = new PosSearchPopup<>();
+               
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         aplicarComportamientos();
@@ -104,25 +100,23 @@ public class SaleController implements Initializable {
             }
         });
         
+        colAcciones.setCellFactory(param ->
+            PosActions.delete(item ->{
+                carrito.remove(item);
+                recalcularPromociones();
+                actualizarTotal();
+                actualizarPago();
+            })
+        ); 
         
-        colAcciones.setCellFactory(param -> new TableCell<>(){
-            private final Button btnEliminar = new Button("X");
-            {
-                btnEliminar.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-                btnEliminar.setOnAction(e -> {
-                    SaleItem item = getTableView().getItems().get(getIndex());
-                    carrito.remove(item);
-                    recalcularPromociones();
-                    actualizarTotal();
-                    actualizarPago();
-                });
-            }
-            @Override
-            protected void updateItem(Void item,boolean empty){
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : btnEliminar);
-            }
-        });               
+        PosActions.delete(item ->{
+            carrito.remove(item);
+            recalcularPromociones();
+            actualizarTotal();
+            actualizarPago();
+            mostrarExito("Producto Eliminado Del Carrito");
+        });
+        
     }
     
     private void cargarFolioVenta(){
@@ -169,11 +163,15 @@ public class SaleController implements Initializable {
     
     private void configurarTabla(){
         
+        PosTable.apply(tableProduct);
+        
         colCantidad.setCellValueFactory(data ->
             new SimpleIntegerProperty(data.getValue().getCantidad()).asObject());
+        
         colCantidad.setCellFactory(
                 javafx.scene.control.cell.TextFieldTableCell.forTableColumn(
                 new javafx.util.converter.IntegerStringConverter()));
+        
         colCantidad.setOnEditCommit(e ->{
             SaleItem item = e.getRowValue();
             item.setCantidad(e.getNewValue());
@@ -183,15 +181,34 @@ public class SaleController implements Initializable {
         
         colModelo.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getProducto().getModelo()));
+        
         colMarca.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getProducto().getMarca()));
+        
         colCategoria.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getProducto().getCategoria()));
+        
         colDescuento.setCellValueFactory(data -> 
             new SimpleDoubleProperty(data.getValue().getDescuento()).asObject());
+        
         colPrecio.setCellValueFactory(data ->
             new SimpleDoubleProperty(data.getValue().getProducto().getPrecio()).asObject());
+        
+        colSubtotal.setCellValueFactory(data ->
+            new SimpleDoubleProperty(data.getValue().getSubtotal()).asObject());
+        
+        colCategoria.setCellFactory(col -> PosTable.categoryBadgeCell());
+        colPrecio.setCellFactory(col -> PosTable.moneyCell(false));
+        colDescuento.setCellFactory(col -> PosTable.discountCell());
+        colSubtotal.setCellFactory(col -> PosTable.moneyCell(true));
+        
+        PosTable.placeholder(tableProduct,
+                "No Hay Productos en el Carrito",
+                "Buscar Productos y Agregalos al Carrito",
+                "fas-shopping-cart");
+        
         tableProduct.setEditable(true);
+        PosTable.animationRows(tableProduct);
     }
     
     private void cargarFecha(){
@@ -264,92 +281,40 @@ public class SaleController implements Initializable {
             txtTelefonoSuc.setText(suc.getTelefono());            
         }
     }
-        
-    @FXML
-    private void SeleccionarProducto(){
-        
-        Product p = listViewProduct.getSelectionModel().getSelectedItem();
-        
-        if(p != null){
-            agregarProducto(p);
-        }
-    }
-    
+           
     private void configurarPopupProductos(){
         
-        listViewProduct.setItems(resultados);
-        listViewProduct.setPrefHeight(150);
+        popupProductos.setTitleProvider(p ->
+            p.getModelo() + " - " + p.getMarca());
         
-        popupProductos.getContent().add(listViewProduct);
-        popupProductos.setAutoHide(true);
+        popupProductos.setSubtitleProvider(p ->
+            p.getCategoria()+ " | $" + String.format("%.2f", p.getPrecio()) + " | stock:" + p.getStock());
         
-        txtBuscarProductos.textProperty().addListener((obs,oldText,newText) -> {
-            if(newText.isEmpty()){
+        popupProductos.setIconProvider(p->"fas-box-open");
+        popupProductos.setEmptyMessage("No Se Encontro Productos");
+        
+        popupProductos.setOnSelected(this::agregarProducto);
+        txtBuscarProductos.textProperty().addListener((obs, oldText, newText) -> {
+            if(newText == null || newText.isBlank()){
                 popupProductos.hide();
                 return;
             }
-            
-            List<Product> lista = productDAO.buscarPorNombre(
-                    newText,
-                    Session.getSucursal().getId());
-            if(lista.isEmpty()){
-                popupProductos.hide();
-                return;
-            }
-            resultados.setAll(lista);
-            mostrarPopupProductos();
+
+        List<Product> lista = productDAO.buscarPorNombre(
+                newText,
+                Session.getSucursal().getId());
+
+            popupProductos.setItems(lista);
+            popupProductos.show(txtBuscarProductos);
         });
-        //clic en item
-        listViewProduct.getSelectionModel().selectedItemProperty().addListener(
-            (obs,oldVal,newVal) -> {
-                if(newVal !=null){
-                    agregarProducto(newVal);
-                }
-            });
-        
-        //Funcion de seleccion con enter
-        txtBuscarProductos.setOnAction(e ->{
-            
-            if(!resultados.isEmpty()){
-                agregarProducto(resultados.get(0));
+
+        txtBuscarProductos.setOnAction(e -> {
+            Product p = popupProductos.getFirst();
+
+            if(p != null){
+                agregarProducto(p);
             }
-        });
-        
-        listViewProduct.setCellFactory(lv -> new ListCell<>(){
-            @Override
-            protected void updateItem(Product p, boolean empty){
-                super.updateItem(p, empty);
-                if(empty || p == null){
-                    setText(null);
-                } else{
-                    setText(p.getModelo() + " - $" + p.getPrecio() + " | Stock:"+ p.getStock());
-                }
-            }
-        });
-    }
-    
-    private void mostrarPopupProductos(){
-        if(!popupProductos.isShowing()){
-            Bounds boundsp = txtBuscarProductos.localToScreen(
-            txtBuscarProductos.getBoundsInLocal());
-            
-            popupProductos.show(
-                    txtBuscarProductos,
-                    boundsp.getMinX(),
-                    boundsp.getMaxY());
-        }    }
-    
-    private void mostrarPopupClientes(){
-        
-        if(!popupClientes.isShowing()){
-            Bounds boundsc = txtCliente.localToScreen(
-            txtCliente.getBoundsInLocal());
-            
-            popupClientes.show(
-                    txtCliente,
-                    boundsc.getMinX(),
-                    boundsc.getMaxY());
-        }
+        });        
     }
     
     @FXML
@@ -371,14 +336,14 @@ public class SaleController implements Initializable {
                 Session.getSucursal().getId());
         
         if(productDB == null){
-            mostrarAlerta("Error al obtener producto");
+            mostrarError("Error al obtener producto");
             return;
         }
         
         productDB.setStock(p.getStock());
         
         if(productDB.isManejaStock() && productDB.getStock()<=0){
-            mostrarAlerta("Sin Stock");
+            mostrarError("Sin Stock");
             return;
         }
 
@@ -386,7 +351,7 @@ public class SaleController implements Initializable {
         for(SaleItem item : carrito){
             if(item.getProducto().getId_product() == productDB.getId_product()){
                 if(productDB.isManejaStock() && item.getCantidad() >= productDB.getStock()){
-                  mostrarAlerta("Stock Máximo");
+                  mostrarError("Stock Máximo");
                     return;  
                 }
                 item.setCantidad(item.getCantidad()+1);
@@ -400,6 +365,7 @@ public class SaleController implements Initializable {
         String nombreDescuento = obtenerNombrePromocion(productDB);
         
         carrito.add(new SaleItem(productDB,nombreDescuento,descuento));
+        mostrarExito("Producto Agregado Al Carrito");
         tableProduct.setItems(carrito);
         actualizarTotal();
         txtBuscarProductos.clear();
@@ -421,65 +387,35 @@ public class SaleController implements Initializable {
     
     private void configurarPopupClientes(){
         
-        listViewClients.setItems(resultadosClients);
-        listViewClients.setPrefHeight(150);
-        
-        popupClientes.getContent().add(listViewClients);
-        popupClientes.setAutoHide(true);
-        
-        txtCliente.textProperty().addListener((obs, oldText,newText) -> {
-            
-            if(newText.isEmpty()){
+        popupClientes.setTitleProvider(c -> c.getNombre());
+        popupClientes.setSubtitleProvider(c -> "Tel: " + c.getTelefono());
+        popupClientes.setIconProvider(c -> "fas-user");
+        popupClientes.setEmptyMessage("No se encontraron clientes");
+    
+        popupClientes.setOnSelected(this::llenarDatosCliente);
+
+        txtCliente.textProperty().addListener((obs, oldText, newText) -> {
+
+            if(newText == null || newText.isBlank()){
                 popupClientes.hide();
                 return;
             }
-            
+
             List<Clients> lista = clientsDAO.buscarPorNombre(newText);
-            
-            if(lista.isEmpty()){
-                popupClientes.hide();
-                return;
-            }
-            
-            resultadosClients.setAll(lista);
-            mostrarPopupClientes();
+
+            popupClientes.setItems(lista);
+            popupClientes.show(txtCliente);
         });
-        
-        listViewClients.setOnMouseClicked(e -> seleccionarCliente());
-        
-        txtCliente.setOnAction(e ->{
-            if(!resultadosClients.isEmpty()){
-                seleccionarClienteDirecto(resultadosClients.get(0));
+
+        txtCliente.setOnAction(e -> {
+            Clients c = popupClientes.getFirst();
+
+            if(c != null){
+                llenarDatosCliente(c);
             }
         });
-        
-        listViewClients.setCellFactory(param -> new ListCell<>(){
-            @Override
-            protected void updateItem(Clients item,boolean empty){
-                super.updateItem(item, empty);
-                
-                if(empty || item == null){
-                    setText(null);
-                } else {
-                    setText(item.getNombre() + " - " + item.getTelefono());
-                }
-            }
-        });
-    }
-    
-    private void seleccionarCliente(){
-        
-        Clients c = listViewClients.getSelectionModel().getSelectedItem();
-        
-        if(c != null){
-            llenarDatosCliente(c);
-        }
-    }
-    
-    private void seleccionarClienteDirecto(Clients c){
-        llenarDatosCliente(c);
-    }
-    
+    }  
+
     private void llenarDatosCliente(Clients c){
         clienteSeleccionado = c;
         txtCliente.setText(c.getNombre());
@@ -602,17 +538,17 @@ public class SaleController implements Initializable {
     private void guardarVenta(){
         
         if(clienteSeleccionado == null){
-            mostrarAlerta("Selecciona un Cliente");
+            mostrarError("Selecciona un Cliente");
             return;
         }
         
         if(vendedorSeleccionado == null){
-            mostrarAlerta("Selecciona un Vendedor");
+            mostrarError("Selecciona un Vendedor");
             return;
         }
         
         if(carrito.isEmpty()){
-            mostrarAlerta("No Hay Productos en la Venta");
+            mostrarError("No Hay Productos en la Venta");
             return;
         }
         
@@ -623,20 +559,20 @@ public class SaleController implements Initializable {
         try{
             monto = txtMonto.getText().isEmpty() ? 0 : Double.parseDouble(txtMonto.getText());
         } catch(Exception e){
-            mostrarAlerta("Monto Inválido");
+            mostrarError("Monto Inválido");
             return;
         }
         
         if(esBajoPedido){
             double anticipoMinimo = total * 0.30;
             if(monto < anticipoMinimo){
-                mostrarAlerta("Se Requiere Mínimo el 30% de Anticipo: $"
+                mostrarError("Se Requiere Mínimo el 30% de Anticipo: $"
                         + String.format("%.2f",anticipoMinimo));
                 return;
             }
         } else{
             if(monto<=0){
-                mostrarAlerta("Debe ingresar un monto");
+                mostrarError("Debe ingresar un monto");
                 return;
             }
         }       
@@ -691,12 +627,21 @@ public class SaleController implements Initializable {
             List<Integer> productosIds = carrito.stream()
                     .map(item -> item.getProducto().getId_product()).toList();
             EventBus.publishStock(productosIds);
-            mostrarAlerta("Venta Realizada Correctamente");
+            mostrarExito("Venta Realizada Correctamente");
             limpiarVenta();
         } else{
-            mostrarAlerta("Error al Guardar Venta");
+            mostrarError("Error al Guardar Venta");
         }
     }
+    
+    private void mostrarError(String msg){
+    PosNotification.error(rootSale, "Atención", msg);
+    }
+
+    private void mostrarExito(String msg){
+    PosNotification.success(rootSale, "Listo", msg);
+    }
+    
     
     private boolean contieneBajoPedido(List<SaleItem> carrito){
         return carrito.stream().anyMatch(item -> !item.getProducto().isManejaStock());
@@ -739,13 +684,6 @@ public class SaleController implements Initializable {
         cargarFolioVenta();
     }
     
-    private void mostrarAlerta(String msg){
-        Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
-    }
-    
     private double calcularTotalBruto(){
         return carrito.stream()
             .mapToDouble(i -> i.getProducto().getPrecio() * i.getCantidad())
@@ -764,53 +702,38 @@ public class SaleController implements Initializable {
     
     private void configurarPopupVendedores(){
         
-        listViewVendedores.setItems(resultadosVendedores);
-        listViewVendedores.setPrefHeight(150);
-        
-        popupVendedores.getContent().add(listViewVendedores);
-        popupVendedores.setAutoHide(true);
-        
-        txtColaborador.textProperty().addListener((obs,oldText,newText)->{
-            if(newText.isEmpty()){
-                popupVendedores.hide();
-                return;
-            }
-            
-            List<Empleados> lista = empleadosDAO.buscarPorNombre(newText);
-            
-            if(lista.isEmpty()){
-                popupVendedores.hide();
-                return;
-            }
-            
-            resultadosVendedores.setAll(lista);
-            
-            Bounds bounds = txtColaborador.localToScreen(txtColaborador.getBoundsInLocal());
-            popupVendedores.show(txtColaborador, bounds.getMinX(), bounds.getMaxY());
+        popupVendedores.setTitleProvider(emp -> emp.getNombre());
+        popupVendedores.setSubtitleProvider(emp -> "Código: " + emp.getCodigo());
+        popupVendedores.setIconProvider(emp -> "fas-user-tie");
+        popupVendedores.setEmptyMessage("No se encontraron colaboradores");
+
+        popupVendedores.setOnSelected(emp -> {
+            vendedorSeleccionado = emp;
+            txtColaborador.setText(emp.getNombre());
         });
-        
-        listViewVendedores.setOnMouseClicked(e -> {
-            Empleados emp = listViewVendedores.getSelectionModel().getSelectedItem();
+
+        txtColaborador.textProperty().addListener((obs, oldText, newText) -> {
+
+            if(newText == null || newText.isBlank()){
+                popupVendedores.hide();
+                return;
+            }
+
+            List<Empleados> lista = empleadosDAO.buscarPorNombre(newText);
+
+                popupVendedores.setItems(lista);
+                popupVendedores.show(txtColaborador);
+        });
+
+        txtColaborador.setOnAction(e -> {
+            Empleados emp = popupVendedores.getFirst();
+
             if(emp != null){
                 vendedorSeleccionado = emp;
                 txtColaborador.setText(emp.getNombre());
                 popupVendedores.hide();
             }
         });
-        
-        listViewVendedores.setCellFactory(param -> new ListCell<>(){
-            @Override
-            protected void updateItem(Empleados emp,boolean empty){
-                super.updateItem(emp, empty);
-                
-                if(empty || emp == null){
-                    setText(null);
-                }else{
-                    setText(emp.getCodigo() + " - " + emp.getNombre() );
-                }
-            }
-        });
-        
     }
     
     private boolean ventaTieneArmazon(){

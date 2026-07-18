@@ -1,0 +1,16 @@
+.root,
+.pos-theme{
+    -pos-primary: #14b8a6;
+    -pos-primary-dark: #0f766e;
+    -pos-success: #10b981;
+    -pos-danger: #ef4444;
+    -pos-warning: #f59e0b;
+    -pos-info: #3b82f6;
+
+    -pos-bg: #f4f6f8;
+    -pos-card: #ffffff;
+    -pos-border: #e5e7eb;
+    -pos-soft: #f8fafc;
+    -pos-text: #0f172a;
+    -pos-muted: #64748b;
+}

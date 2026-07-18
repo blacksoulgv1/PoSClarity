@@ -1,22 +1,19 @@
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.database.ClientsDAO;
-import com.gerardgv.posclarity.database.SaleDAO;
-import com.gerardgv.posclarity.models.ClientStats;
-import com.gerardgv.posclarity.models.Clients;
-import com.gerardgv.posclarity.utils.EventBus;
-import com.gerardgv.posclarity.utils.SearchUtils;
-import com.gerardgv.posclarity.utils.TableUtils;
+import com.gerardgv.posclarity.Ui.PosNotification;
+import com.gerardgv.posclarity.Ui.PosTable;
+import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.models.*;
+import com.gerardgv.posclarity.utils.*;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.util.ResourceBundle;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.collections.*;
-import javafx.collections.transformation.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.StackPane;
 
 
 public class ClientsController implements Initializable {
@@ -39,6 +36,7 @@ public class ClientsController implements Initializable {
     
     @FXML private Button btnGuardar;
     @FXML private Button btnLimpiar;
+    @FXML private StackPane root;
     
     @FXML private TableView<Clients> tblClientes;
     @FXML private TableColumn<Clients, Integer> colId;
@@ -52,130 +50,113 @@ public class ClientsController implements Initializable {
     private Clients clienteSeleccionado = null;
     private boolean  modoEdicion = false;
     
-    private SaleDAO saleDAO = new SaleDAO();
+    private final SaleDAO saleDAO = new SaleDAO();    
+    private final ClientsDAO clientsDAO = new ClientsDAO();
+    private final ObservableList<Clients> listaClientes = FXCollections.observableArrayList();
+    private final BooleanProperty formularioDeshabilitado = new SimpleBooleanProperty(false);
     
-    private ClientsDAO clientsDAO = new ClientsDAO();
-    private ObservableList<Clients> listaClientes = FXCollections.observableArrayList();
-    private BooleanProperty formularioDesabilitado = new SimpleBooleanProperty(false);
+    
     
      
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
-        EventBus.subscribeVenta(idCliente -> {
-            if(clienteSeleccionado != null && clienteSeleccionado.getId() == idCliente){
-                cargarEstadisticasCliente(idCliente);
-            }
-        });
-        
-        txtBuscar.requestFocus();
-        
-        SearchUtils.setupSearch(txtBuscar, tblClientes, listaClientes,
-                c-> c.getNombre(),
-                c-> c.getTelefono(),
-                c-> c.getDireccion());
-        
         configurarTabla();
-        activarguardado();
-        cargarClienteDB();
-        
-         colEstado.setCellFactory(column ->
-                TableUtils.createActiveToggle(
-                        Clients::getId,
-                        clientsDAO::updateEstado));
-         colAcciones.setCellFactory(param ->
-            TableUtils.createEditButton(this::seleccionarClienteDesdeTabla));
-        
-        btnGuardar.setOnAction(e -> saveClient());
-        btnLimpiar.setOnAction(e -> clearform());
-        
-        txtBuscar.sceneProperty().addListener((obs,oldScene,scene)->{
-            if(scene != null){
-                scene.setOnKeyPressed(e->{
-                    if(e.getCode().toString().equals("ESCAPE")){
-                        clearform();
-                    }
-                });
-            }
-        });
+        configurarEventos();
+        configurarBusqueda();
+        configurarGuardado();
+        suscribirEventos();
+        cargarClientes();
+        limpiarFormulario();      
+
     }    
 
     private void configurarTabla() {
-
-        colId.setCellValueFactory(data -> 
-            new javafx.beans.property.SimpleIntegerProperty(data.getValue().getId()).asObject()
-        );
-
-        colNombre.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getNombre())
-        );
-
-        colTelefono.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getTelefono())
-        );
         
-        colDireccion.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getDireccion())
-        );
-        
-        colGraduacion.setCellValueFactory(data -> {
-            Clients c = data.getValue();
+         PosTable.apply(tblClientes);
 
-            String grad = String.format(
-                "OD: %s / %s x %s\nOI: %s / %s x %s\nADD: %s",
-                nvl(c.getOdEsf()), nvl(c.getOdCil()), nvl(c.getOdEje()),
-                nvl(c.getOiEsf()), nvl(c.getOiCil()), nvl(c.getOiEje()),
-                nvl(c.getAdd())
-        );
-
-        return new SimpleStringProperty(grad);
-    });
-         // Permite saltos de línea en la celda
-        colGraduacion.setCellFactory(tc -> {
-        TableCell<Clients, String> cell = new TableCell<>();
-        Label label = new Label();
-        label.setWrapText(true);
-        cell.setGraphic(label);
-
-        cell.itemProperty().addListener((obs, oldText, newText) -> {
-            label.setText(newText);
-        });
-
-        return cell;
-    });
-        
-        colEstado.setCellValueFactory(data ->
-            new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
-   
-    //Coloca en Gris los Clientes Inactivos
-    tblClientes.setRowFactory(tv -> new TableRow<>(){
-        @Override
-        protected void updateItem(Clients cliente, boolean empty){
-            super.updateItem(cliente, empty);
-            
-            if(cliente == null || empty){
-                setStyle("");
-            } else if(!cliente.isActivo()){
-                setStyle("-fx-background-color: #e0e0e0;");
-            } else {
-                setStyle("");
-            }
-        }
-    });
-    
-        tblClientes.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-        colId.setMaxWidth(60);
-        colNombre.setPrefWidth(180);
-        colTelefono.setPrefWidth(120);
-        colDireccion.setPrefWidth(220);
-        colGraduacion.setPrefWidth(260);
-        colEstado.setMaxWidth(90);
-        colAcciones.setMaxWidth(120);
-
-        colId.setStyle("-fx-alignment: CENTER;");
-        colEstado.setStyle("-fx-alignment: CENTER;");
+    // La columna Graduación usa varias líneas
         tblClientes.setFixedCellSize(-1);
 
+    // ==============================
+    // DATOS DE LAS COLUMNAS
+    // ==============================
+
+        colId.setCellValueFactory(data ->
+            new SimpleIntegerProperty(data.getValue().getId()).asObject());
+
+        colNombre.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getNombre()));
+
+        colTelefono.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getTelefono()));
+
+        colDireccion.setCellValueFactory(data ->
+            new SimpleStringProperty(data.getValue().getDireccion()));
+
+        colGraduacion.setCellValueFactory(data -> {
+            Clients cliente = data.getValue();
+
+        String graduacion = String.format(
+                "OD: %s / %s x %s%n"
+              + "OI: %s / %s x %s%n"
+              + "ADD: %s",
+                nvl(cliente.getOdEsf()),
+                nvl(cliente.getOdCil()),
+                nvl(cliente.getOdEje()),
+                nvl(cliente.getOiEsf()),
+                nvl(cliente.getOiCil()),
+                nvl(cliente.getOiEje()),
+                nvl(cliente.getAdd())
+        );
+
+        return new SimpleStringProperty(graduacion);
+    });
+
+    colEstado.setCellValueFactory(data ->
+            new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
+
+    // ==============================
+    // FORMATO DE LAS COLUMNAS
+    // ==============================
+
+    PosTable.integer(colId);
+    PosTable.text(colNombre);
+    PosTable.text(colTelefono);
+    PosTable.text(colDireccion);
+    PosTable.multiline(colGraduacion);
+
+    colGraduacion.setMinWidth(190);
+
+    // ==============================
+    // ACCIONES Y ESTADO
+    // ==============================
+
+    colEstado.setCellFactory(column ->
+            TableUtils.createActiveToggle(
+                    Clients::getId,
+                    clientsDAO::updateEstado));
+
+    colAcciones.setCellFactory(column ->
+            TableUtils.createEditButton(
+                    this::seleccionarClienteDesdeTabla));
+    colEstado.setStyle("-fx-alignment: CENTER;");
+    colAcciones.setStyle("-fx-alignment: CENTER;");
+    // ==============================
+    // COMPORTAMIENTO GENERAL
+    // ==============================
+
+    PosTable.placeholder(
+            tblClientes,
+            "No hay clientes registrados",
+            "Agrega clientes desde el formulario de la izquierda",
+            "fas-users"
+    );
+
+    PosTable.inactiveRows(
+            tblClientes,
+            Clients::isActivo
+    );
+        
         
     }
     
@@ -186,61 +167,83 @@ public class ClientsController implements Initializable {
     
     private void saveClient(){
         
-        if(!validarFormulario()){
+        if (!validarFormulario()) {
             return;
         }
+
+        Clients cliente = construirCliente();
+
+        boolean resultado = modoEdicion
+            ? actualizarCliente(cliente)
+            : guardarCliente(cliente);
+
+        if (resultado) {
+            mostrarExito(
+                modoEdicion
+                        ? "Cliente actualizado correctamente."
+                        : "Cliente guardado correctamente."
+        );
+
+            cargarClientes();
+            limpiarFormulario();
+            tblClientes.getSelectionModel().clearSelection();
+
+        } else {
+            mostrarError(
+                modoEdicion
+                        ? "No se pudo actualizar el cliente."
+                        : "No se pudo guardar el cliente." );
+        }
+    }
+    
+    private void cargarClientes(){
+        listaClientes.setAll(clientsDAO.findAll());
+        tblClientes.setItems(listaClientes);
+    }
+    
+    private Clients construirCliente() {
         
         Clients cliente = new Clients();
-        cargarDatos(cliente);
-        
-        boolean resultado;
-        
-        if(modoEdicion && clienteSeleccionado != null){
-           cliente.setId(clienteSeleccionado.getId());
-           cliente.setActivo(clienteSeleccionado.isActivo());
-           resultado = clientsDAO.update(cliente);
+
+        cliente.setNombre(txtNombre.getText().trim());
+        cliente.setTelefono(txtTelefono.getText().trim());
+        cliente.setDireccion(txtDireccion.getText().trim());
+
+        cliente.setOdEsf(txtOdEsf.getText().trim());
+        cliente.setOdCil(txtOdCil.getText().trim());
+        cliente.setOdEje(txtOdEje.getText().trim());
+
+        cliente.setOiEsf(txtOiEsf.getText().trim());
+        cliente.setOiCil(txtOiCil.getText().trim());
+        cliente.setOiEje(txtOiEje.getText().trim());
+
+        cliente.setAdd(txtAdd.getText().trim());
+
+        if (modoEdicion && clienteSeleccionado != null) {
+            cliente.setId(clienteSeleccionado.getId());
+            cliente.setActivo(clienteSeleccionado.isActivo());
         } else {
             cliente.setActivo(true);
-            resultado = clientsDAO.insert(cliente);
         }
-        
-        if(resultado){
-            mostrarInfo(modoEdicion ? "Cliente Actualizado Correctamente" :
-                    "Cliente Guardado Correctamente");
-            cargarClienteDB();
-            clearform();
-            tblClientes.getSelectionModel().clearSelection();
-            modoEdicion = false;
-            clienteSeleccionado = null;
-        } else{
-            mostrarError("Ocurrió un Error al Guardar Cliente");
-        }
-
+            return cliente;      
     }
     
-    private void cargarClienteDB(){
-        listaClientes.clear();
-        listaClientes.addAll(clientsDAO.findAll());
+    private boolean guardarCliente(Clients cliente) {
+        return clientsDAO.insert(cliente);
     }
     
-    private void cargarDatos(Clients c) {
-        c.setNombre(txtNombre.getText());
-        c.setTelefono(txtTelefono.getText());
-        c.setDireccion(txtDireccion.getText());
+    private boolean actualizarCliente(Clients cliente) {
 
-        c.setOdEsf(txtOdEsf.getText());
-        c.setOdCil(txtOdCil.getText());
-        c.setOdEje(txtOdEje.getText());
+        if (clienteSeleccionado == null) {
+            mostrarError("No hay un cliente seleccionado para actualizar.");
+            return false;
+        }
 
-        c.setOiEsf(txtOiEsf.getText());
-        c.setOiCil(txtOiCil.getText());
-        c.setOiEje(txtOiEje.getText());
-
-        c.setAdd(txtAdd.getText());
-        
+        return clientsDAO.update(cliente);
     }
 
-    private void clearform() {
+    private void limpiarFormulario() {
+        
         txtNombre.clear();
         txtTelefono.clear();
         txtDireccion.clear();
@@ -251,66 +254,52 @@ public class ClientsController implements Initializable {
         txtOiCil.clear();
         txtOiEje.clear();
         txtAdd.clear();
-        
         clienteSeleccionado = null;
         modoEdicion = false;
         deshabilitarFormulario(false);
+        btnGuardar.setText("Guardar");
+        tblClientes.getSelectionModel().clearSelection();
+        limpiarEstadisticas();
         txtNombre.requestFocus();
     }
        
     private boolean validarFormulario(){
         
-        if (txtNombre.getText().trim().isEmpty()){
-            mostrarError("El Nombre es Obligatorio");
+        String nombre = txtNombre.getText().trim();
+        String telefono = txtTelefono.getText().trim();
+        String direccion = txtDireccion.getText().trim();
+
+        if (nombre.isEmpty()) {
+            mostrarError("El nombre es obligatorio.");
             txtNombre.requestFocus();
             return false;
         }
-        
-        if (txtTelefono.getText().trim().isEmpty()){
-            mostrarError("El Telefono es Obligatorio");
+        if (telefono.isEmpty()) {
+            mostrarError("El teléfono es obligatorio.");
             txtTelefono.requestFocus();
             return false;
         }
-        
-        if (txtDireccion.getText().trim().isEmpty()){
-            mostrarError("La Dirección es Obligatoria");
+        if (direccion.isEmpty()) {
+            mostrarError("La dirección es obligatoria.");
             txtDireccion.requestFocus();
             return false;
         }
-        
-        if(!txtTelefono.getText().matches("\\d+")){
-            mostrarError("El Teléfono solo debe Contener Números");
+        if (!telefono.matches("\\d+")) {
+            mostrarError("El teléfono solo debe contener números.");
             txtTelefono.requestFocus();
             return false;
         }
         return true;
     }
     
-    private void mostrarError(String mensaje){
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+    private void mostrarError(String msg){
+        PosNotification.error(root, "Atención", msg);
     }
     
-    private void mostrarInfo(String mensaje){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+    private void mostrarExito(String msg){
+        PosNotification.success(root, "Listo", msg);
     }
-    
-    private void activarguardado(){
-        btnGuardar.disableProperty().bind(
-            formularioDesabilitado
-                    .or(txtNombre.textProperty().isEmpty())
-                    .or(txtTelefono.textProperty().isEmpty())
-                    .or(txtDireccion.textProperty().isEmpty())
-                    );
-    }
-    
+ 
     private void deshabilitarFormulario(boolean estado){
         txtNombre.setDisable(estado);
         txtTelefono.setDisable(estado);
@@ -322,50 +311,120 @@ public class ClientsController implements Initializable {
         txtOiCil.setDisable(estado);
         txtOiEje.setDisable(estado);
         txtAdd.setDisable(estado);
-        formularioDesabilitado.set(estado);
+        formularioDeshabilitado.set(estado);
     }
 
     private void seleccionarClienteDesdeTabla(Clients cliente){
-        clienteSeleccionado = cliente;
-        modoEdicion = true;
-        txtNombre.setText(cliente.getNombre());
-        txtTelefono.setText(cliente.getTelefono());
-        txtDireccion.setText(cliente.getDireccion());
+        if (cliente == null) {
+        return;
+    }
 
-        txtOdEsf.setText(cliente.getOdEsf());
-        txtOdCil.setText(cliente.getOdCil());
-        txtOdEje.setText(cliente.getOdEje());
+    clienteSeleccionado = cliente;
+    modoEdicion = true;
 
-        txtOiEsf.setText(cliente.getOiEsf());
-        txtOiCil.setText(cliente.getOiCil());
-        txtOiEje.setText(cliente.getOiEje());
+    txtNombre.setText(nvl(cliente.getNombre()));
+    txtTelefono.setText(nvl(cliente.getTelefono()));
+    txtDireccion.setText(nvl(cliente.getDireccion()));
 
-        txtAdd.setText(cliente.getAdd());
+    txtOdEsf.setText(nvl(cliente.getOdEsf()));
+    txtOdCil.setText(nvl(cliente.getOdCil()));
+    txtOdEje.setText(nvl(cliente.getOdEje()));
 
-        deshabilitarFormulario(!cliente.isActivo()); 
-        cargarEstadisticasCliente(cliente.getId());
+    txtOiEsf.setText(nvl(cliente.getOiEsf()));
+    txtOiCil.setText(nvl(cliente.getOiCil()));
+    txtOiEje.setText(nvl(cliente.getOiEje()));
+
+    txtAdd.setText(nvl(cliente.getAdd()));
+
+    btnGuardar.setText("Actualizar");
+
+    deshabilitarFormulario(!cliente.isActivo());
+    cargarEstadisticasCliente(cliente.getId());
+
+    txtNombre.requestFocus();
     }
     
     private void cargarEstadisticasCliente(int idClient){
         
-        ClientStats stats = saleDAO.obtenerEstadisticasCliente(idClient);
-        
-        lblCompras.setText(String.valueOf(stats.getTotalCompras()));
-        lblTotalGastado.setText(String.format("%.2f", stats.getTotalGastado()));
-        
-        if(stats.getUltimavisita() != null){
-            lblUltimaVisita.setText(stats.getUltimavisita().toLocalDate().toString());
-        } else {
-            lblUltimaVisita.setText("-");
-        }
-        if(stats.getClienteDesde() != null){
-            lblClienteDesde.setText(stats.getClienteDesde().toLocalDate().toString());
-        } else {
-            lblClienteDesde.setText("-");
-        }
+       ClientStats stats = saleDAO.obtenerEstadisticasCliente(idClient);
+        actualizarEstadisticas(stats);
     }
     
     public void refrescarStats(int idCliente){
         cargarEstadisticasCliente(idCliente);
     }
+
+    private void configurarEventos() {
+        
+        btnGuardar.setOnAction(e -> saveClient());
+        btnLimpiar.setOnAction(e -> limpiarFormulario());
+        
+        txtBuscar.sceneProperty().addListener((obs,oldScene,scene)->{
+            if(scene != null){
+                scene.setOnKeyPressed(e->{
+                    if(e.getCode() == KeyCode.ESCAPE){
+                        limpiarFormulario();
+                    }
+                });
+            }
+        });        
+    }
+
+    private void configurarBusqueda() {
+        SearchUtils.setupSearch(txtBuscar, tblClientes, listaClientes,
+                c-> c.getNombre(),
+                c-> c.getTelefono(),
+                c-> c.getDireccion());
+    }
+
+    private void configurarGuardado() {
+        btnGuardar.disableProperty().bind(
+            formularioDeshabilitado
+                    .or(txtNombre.textProperty().isEmpty())
+                    .or(txtTelefono.textProperty().isEmpty())
+                    .or(txtDireccion.textProperty().isEmpty())
+                    );
+    }
+
+    private void suscribirEventos() {
+        EventBus.subscribeVenta(idCliente -> {
+            if(clienteSeleccionado != null && clienteSeleccionado.getId() == idCliente){
+                cargarEstadisticasCliente(idCliente);
+            }
+        });        
+    }
+    
+    private void actualizarEstadisticas(ClientStats stats) {
+        
+        if(stats == null){
+            limpiarEstadisticas();
+            return;
+        }
+
+        lblCompras.setText(String.valueOf(stats.getTotalCompras()));
+        lblTotalGastado.setText(String.format("$%,.2f", stats.getTotalGastado()));
+
+        lblUltimaVisita.setText(
+            formatearFecha(stats.getUltimavisita())
+        );
+
+        lblClienteDesde.setText(
+            formatearFecha(stats.getClienteDesde())
+        );
+    
+    }
+
+    private void limpiarEstadisticas() {
+        lblCompras.setText("0");
+        lblTotalGastado.setText("$0.00");
+        lblUltimaVisita.setText("-");
+        lblClienteDesde.setText("-");    
+    }
+    
+    private String formatearFecha(LocalDateTime fecha){
+
+        return fecha == null
+                ? "-"
+                : fecha.toLocalDate().toString();
+        }
 }

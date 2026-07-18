@@ -1,0 +1,36 @@
+.badge {
+    -fx-padding: 4 10;
+    -fx-background-radius: 20;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.badge-armazon {
+    -fx-background-color: #dbeafe;
+    -fx-text-fill: #1d4ed8;
+}
+
+.badge-mica {
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #15803d;
+}
+
+.badge-tratamiento {
+    -fx-background-color: #f3e8ff;
+    -fx-text-fill: #7e22ce;
+}
+
+.badge-servicio {
+    -fx-background-color: #ffedd5;
+    -fx-text-fill: #c2410c;
+}
+
+.badge-lente {
+    -fx-background-color: #fef9c3;
+    -fx-text-fill: #a16207;
+}
+
+.badge-producto {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #334155;
+}

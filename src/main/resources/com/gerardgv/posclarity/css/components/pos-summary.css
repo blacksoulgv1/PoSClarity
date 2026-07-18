@@ -1,0 +1,77 @@
+.pos-summary-card {
+    -fx-background-color: -pos-card;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: -pos-border;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 12, 0, 0, 4);
+}
+
+.pos-summary-item {
+    -fx-background-color: -pos-soft;
+    -fx-background-radius: 10;
+    -fx-padding: 12;
+    -fx-alignment: center-left;
+}
+
+.pos-summary-total {
+    -fx-background-color: linear-gradient(to right, #ecfdf5, #f0fdfa);
+    -fx-background-radius: 12;
+    -fx-padding: 14;
+    -fx-alignment: center-left;
+    -fx-border-color: #99f6e4;
+    -fx-border-radius: 12;
+}
+
+.pos-summary-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-summary-subtitle {
+    -fx-font-size: 11px;
+    -fx-text-fill: -pos-muted;
+}
+
+.pos-summary-value {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-summary-discount {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-success;
+}
+
+.pos-summary-total-label {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-summary-total-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-primary-dark;
+}
+
+.pos-payment-row {
+    -fx-background-color: -pos-soft;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12;
+    -fx-alignment: center-left;
+}
+
+.pos-payment-label {
+    -fx-font-size: 13px;
+    -fx-text-fill: -pos-muted;
+}
+
+.pos-payment-value {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}

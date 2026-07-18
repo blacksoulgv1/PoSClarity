@@ -1,36 +1,416 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.PendingController">
-   <top>
-      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-         <children>
-            <TextField fx:id="txtBuscarVenta" promptText="Buscar Por Cliente o Nota" />
-         </children>
-         <padding>
-            <Insets left="5.0" top="5.0" />
-         </padding>
-      </HBox>
-   </top>
-   <center>
-      <TableView fx:id="tblVentas" prefHeight="280.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <columns>
-          <TableColumn fx:id="colId" prefWidth="75.0" text="ID" />
-          <TableColumn fx:id="colCliente" prefWidth="75.0" text="Cliente" />
-            <TableColumn fx:id="colFecha" prefWidth="75.0" text="Fecha" />
-            <TableColumn fx:id="colTotal" prefWidth="75.0" text="Total" />
-            <TableColumn fx:id="colPagado" prefWidth="75.0" text="Pagado" />
-            <TableColumn fx:id="colRestante" prefWidth="75.0" text="Restante" />
-            <TableColumn fx:id="colEstadoPago" prefWidth="75.0" text="Pago" />
-            <TableColumn fx:id="colEstadoTrabajo" prefWidth="75.0" text="Trabajo" />
-            <TableColumn fx:id="colAcciones" prefWidth="190" text="Acciones" />
-        </columns>
-      </TableView>
-   </center>
-</BorderPane>
+<StackPane fx:id="root"
+           prefHeight="720.0"
+           prefWidth="1180.0"
+           styleClass="pending-root"
+           stylesheets="@/com/gerardgv/posclarity/css/pages/PendingView.css,
+                        @/com/gerardgv/posclarity/css/theme/PosTheme.css,
+                        @/com/gerardgv/posclarity/css/components/pos-card.css,
+                        @/com/gerardgv/posclarity/css/components/pos-buttons.css,
+                        @/com/gerardgv/posclarity/css/components/pos-table.css,
+                        @/com/gerardgv/posclarity/css/components/pos-badge.css,
+                        @/com/gerardgv/posclarity/css/components/pos-textfield.css,
+                        @/com/gerardgv/posclarity/css/components/pos-summary.css,
+                        @/com/gerardgv/posclarity/css/components/pos-toast.css"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.gerardgv.posclarity.controllers.PendingController">
+
+    <children>
+
+        <VBox spacing="18.0"
+              StackPane.alignment="CENTER">
+
+            <padding>
+                <Insets top="24.0"
+                        right="24.0"
+                        bottom="24.0"
+                        left="24.0"/>
+            </padding>
+
+            <!-- ENCABEZADO -->
+            <HBox alignment="CENTER_LEFT"
+                  spacing="14.0"
+                  styleClass="pending-header">
+
+                <children>
+
+                    <StackPane prefHeight="48.0"
+                               prefWidth="48.0"
+                               minHeight="48.0"
+                               minWidth="48.0"
+                               styleClass="pending-header-icon-box">
+
+                        <children>
+                            <FontIcon iconLiteral="fas-clock"
+                                      iconSize="22"
+                                      styleClass="pending-header-icon"/>
+                        </children>
+
+                    </StackPane>
+
+                    <VBox spacing="2.0">
+
+                        <children>
+                            <Label text="Ventas pendientes"
+                                   styleClass="pending-title"/>
+
+                            <Label text="Control de trabajos, saldos y entregas"
+                                   styleClass="pending-subtitle"/>
+                        </children>
+
+                    </VBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="10.0"
+                          styleClass="pending-search-box">
+
+                        <children>
+
+                            <FontIcon iconLiteral="fas-search"
+                                      iconSize="16"
+                                      styleClass="pending-search-icon"/>
+
+                            <TextField fx:id="txtBuscarVenta"
+                                       promptText="Buscar por folio, cliente o teléfono"
+                                       prefWidth="330.0"
+                                       styleClass="pos-text-field,
+                                                   pending-search-field"/>
+                        </children>
+
+                    </HBox>
+
+                </children>
+
+            </HBox>
+
+            <!-- TARJETAS DE RESUMEN -->
+            <GridPane hgap="14.0"
+                      vgap="14.0">
+
+                <columnConstraints>
+                    <ColumnConstraints percentWidth="25.0"
+                                       hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="25.0"
+                                       hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="25.0"
+                                       hgrow="ALWAYS"/>
+                    <ColumnConstraints percentWidth="25.0"
+                                       hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <children>
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="12.0"
+                          styleClass="pending-summary-card"
+                          GridPane.columnIndex="0">
+
+                        <children>
+
+                            <StackPane styleClass="pending-summary-icon-box,
+                                                  pending-summary-process">
+
+                                <children>
+                                    <FontIcon iconLiteral="fas-tools"
+                                              iconSize="18"
+                                              styleClass="pending-summary-icon"/>
+                                </children>
+
+                            </StackPane>
+
+                            <VBox spacing="3.0">
+
+                                <children>
+                                    <Label text="Por realizar"
+                                           styleClass="pending-summary-label"/>
+
+                                    <Label fx:id="lblTrabajosRealizar"
+                                           text="0"
+                                           styleClass="pending-summary-value"/>
+                                </children>
+
+                            </VBox>
+
+                        </children>
+
+                        <padding>
+                            <Insets top="16.0"
+                                    right="16.0"
+                                    bottom="16.0"
+                                    left="16.0"/>
+                        </padding>
+
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="12.0"
+                          styleClass="pending-summary-card"
+                          GridPane.columnIndex="1">
+
+                        <children>
+
+                            <StackPane styleClass="pending-summary-icon-box,
+                                                  pending-summary-ready">
+
+                                <children>
+                                    <FontIcon iconLiteral="fas-box-open"
+                                              iconSize="18"
+                                              styleClass="pending-summary-icon"/>
+                                </children>
+
+                            </StackPane>
+
+                            <VBox spacing="3.0">
+
+                                <children>
+                                    <Label text="Por entregar"
+                                           styleClass="pending-summary-label"/>
+
+                                    <Label fx:id="lblTrabajosEntregar"
+                                           text="0"
+                                           styleClass="pending-summary-value"/>
+                                </children>
+
+                            </VBox>
+
+                        </children>
+
+                        <padding>
+                            <Insets top="16.0"
+                                    right="16.0"
+                                    bottom="16.0"
+                                    left="16.0"/>
+                        </padding>
+
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="12.0"
+                          styleClass="pending-summary-card"
+                          GridPane.columnIndex="2">
+
+                        <children>
+
+                            <StackPane styleClass="pending-summary-icon-box,
+                                                  pending-summary-balance">
+
+                                <children>
+                                    <FontIcon iconLiteral="fas-dollar-sign"
+                                              iconSize="18"
+                                              styleClass="pending-summary-icon"/>
+                                </children>
+
+                            </StackPane>
+
+                            <VBox spacing="3.0">
+
+                                <children>
+                                    <Label text="Saldo por realizar"
+                                           styleClass="pending-summary-label"/>
+
+                                    <Label fx:id="lblSaldoRealizar"
+                                           text="\$0.00"
+                                           styleClass="pending-summary-value"/>
+                                </children>
+
+                            </VBox>
+
+                        </children>
+
+                        <padding>
+                            <Insets top="16.0"
+                                    right="16.0"
+                                    bottom="16.0"
+                                    left="16.0"/>
+                        </padding>
+
+                    </HBox>
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="12.0"
+                          styleClass="pending-summary-card"
+                          GridPane.columnIndex="3">
+
+                        <children>
+
+                            <StackPane styleClass="pending-summary-icon-box,
+                                                  pending-summary-delivery">
+
+                                <children>
+                                    <FontIcon iconLiteral="fas-hand-holding-usd"
+                                              iconSize="18"
+                                              styleClass="pending-summary-icon"/>
+                                </children>
+
+                            </StackPane>
+
+                            <VBox spacing="3.0">
+
+                                <children>
+                                    <Label text="Saldo por entregar"
+                                           styleClass="pending-summary-label"/>
+
+                                    <Label fx:id="lblSaldoEntregar"
+                                           text="\$0.00"
+                                           styleClass="pending-summary-value"/>
+                                </children>
+
+                            </VBox>
+
+                        </children>
+
+                        <padding>
+                            <Insets top="16.0"
+                                    right="16.0"
+                                    bottom="16.0"
+                                    left="16.0"/>
+                        </padding>
+
+                    </HBox>
+
+                </children>
+
+            </GridPane>
+
+            <!-- TABLA -->
+            <VBox spacing="12.0"
+                  styleClass="pos-card"
+                  VBox.vgrow="ALWAYS">
+
+                <padding>
+                    <Insets top="18.0"
+                            right="18.0"
+                            bottom="14.0"
+                            left="18.0"/>
+                </padding>
+
+                <children>
+
+                    <HBox alignment="CENTER_LEFT">
+
+                        <children>
+
+                            <VBox spacing="2.0">
+
+                                <children>
+                                    <Label text="Trabajos activos"
+                                           styleClass="pending-section-title"/>
+
+                                    <Label text="Ventas con saldo o trabajo pendiente"
+                                           styleClass="pending-section-subtitle"/>
+                                </children>
+
+                            </VBox>
+
+                            <Region HBox.hgrow="ALWAYS"/>
+
+                            <Label fx:id="lblTotalRegistros"
+                                   text="0 registros"
+                                   styleClass="pending-record-count"/>
+
+                        </children>
+
+                    </HBox>
+
+                    <Separator/>
+
+                    <TableView fx:id="tblVentas"
+                               styleClass="pos-table"
+                               VBox.vgrow="ALWAYS">
+
+                        <columns>
+
+                            <TableColumn fx:id="colFolio"
+                                         minWidth="85.0"
+                                         prefWidth="90.0"
+                                         text="Folio"/>
+
+                            <TableColumn fx:id="colCliente"
+                                         minWidth="170.0"
+                                         prefWidth="220.0"
+                                         text="Cliente"/>
+
+                            <TableColumn fx:id="colFecha"
+                                         minWidth="135.0"
+                                         prefWidth="155.0"
+                                         text="Fecha"/>
+
+                            <TableColumn fx:id="colTotal"
+                                         minWidth="105.0"
+                                         prefWidth="120.0"
+                                         text="Total"/>
+
+                            <TableColumn fx:id="colPagado"
+                                         minWidth="105.0"
+                                         prefWidth="120.0"
+                                         text="Pagado"/>
+
+                            <TableColumn fx:id="colRestante"
+                                         minWidth="105.0"
+                                         prefWidth="120.0"
+                                         text="Restante"/>
+
+                            <TableColumn fx:id="colEstadoPago"
+                                         minWidth="115.0"
+                                         prefWidth="125.0"
+                                         text="Pago"/>
+
+                            <TableColumn fx:id="colEstadoTrabajo"
+                                         minWidth="125.0"
+                                         prefWidth="135.0"
+                                         text="Trabajo"/>
+
+                            <TableColumn fx:id="colAcciones"
+                                         minWidth="190.0"
+                                         prefWidth="210.0"
+                                         text="Acciones"/>
+
+                        </columns>
+
+                    </TableView>
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8.0"
+                          styleClass="pending-footer">
+
+                        <children>
+
+                            <FontIcon iconLiteral="fas-info-circle"
+                                      iconSize="14"
+                                      styleClass="pending-footer-icon"/>
+
+                            <Label text="La entrega solo se permite cuando la venta está liquidada."
+                                   styleClass="pending-footer-text"/>
+
+                        </children>
+
+                    </HBox>
+
+                </children>
+
+            </VBox>
+
+        </VBox>
+
+    </children>
+
+</StackPane>
