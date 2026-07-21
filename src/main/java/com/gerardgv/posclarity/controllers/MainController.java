@@ -91,6 +91,14 @@ public class MainController implements Initializable {
     
     @FXML
     private void abrirProductos(){
+        
+        Optional<Empleados> autorizado =
+        AuthorizationDialog.solicitarGerente();
+
+        if (autorizado.isEmpty()) {
+            return;
+        }
+        
         viewVista("Productsview");
     }
     
@@ -101,6 +109,14 @@ public class MainController implements Initializable {
     
     @FXML
     private void abrirSucursales(){
+        
+        Optional<Empleados> autorizado =
+        AuthorizationDialog.solicitarGerente();
+
+        if (autorizado.isEmpty()) {
+            return;
+        }
+        
         viewVista("Branch");
     }
     @FXML

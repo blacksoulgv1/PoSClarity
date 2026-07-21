@@ -1,0 +1,241 @@
+.garantias-root {
+    -fx-background-color: -pos-background;
+}
+
+.garantias-view {
+    -fx-background-color: -pos-background;
+}
+
+/* =========================================
+   CARDS
+   ========================================= */
+
+.garantia-info-card,
+.graduacion-card,
+.garantias-table-card {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 1;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(15, 23, 42, 0.07),
+        12,
+        0,
+        0,
+        3
+    );
+}
+
+.garantia-info-card {
+    -fx-spacing: 8;
+}
+
+/* =========================================
+   TEXTOS Y FOLIO
+   ========================================= */
+
+.garantias-root .pos-section-title {
+    -fx-font-size: 15px;
+}
+
+.garantias-root .pos-section-description {
+    -fx-font-size: 11px;
+}
+
+.garantia-folio {
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-primary;
+}
+
+.garantia-data-value {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 7;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 7;
+    -fx-padding: 9 11;
+    -fx-text-fill: -pos-text;
+    -fx-font-weight: 600;
+}
+
+.garantia-readonly-area {
+    -fx-opacity: 1;
+}
+
+/* =========================================
+   CONTROLES DEL FORMULARIO
+   ========================================= */
+
+.garantias-root .text-field,
+.garantias-root .combo-box {
+    -fx-pref-height: 36;
+    -fx-min-height: 36;
+    -fx-max-height: 36;
+}
+
+.garantias-root .text-area {
+    -fx-font-size: 12px;
+}
+
+.garantias-root .separator {
+    -fx-padding: 0;
+}
+
+/* =========================================
+   GRADUACIONES
+   ========================================= */
+
+.graduacion-column-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+    -fx-alignment: center;
+    -fx-max-width: Infinity;
+}
+
+.graduacion-eye-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.graduacion-field {
+    -fx-pref-height: 34;
+    -fx-min-height: 34;
+    -fx-max-height: 34;
+
+    -fx-alignment: center;
+    -fx-font-size: 13px;
+
+    -fx-background-color: white;
+    -fx-background-radius: 7;
+
+    -fx-border-radius: 7;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1;
+
+    -fx-padding: 5 8;
+}
+
+.graduacion-field:focused {
+    -fx-border-color: -pos-primary;
+    -fx-border-width: 1.4;
+    -fx-effect: dropshadow(
+        gaussian,
+        rgba(37, 99, 235, 0.15),
+        5,
+        0,
+        0,
+        0
+    );
+}
+
+.readonly-field {
+    -fx-background-color: #f8fafc;
+    -fx-border-color: #e2e8f0;
+    -fx-text-fill: #64748b;
+    -fx-opacity: 1;
+}
+
+.graduacion-original-card {
+    -fx-border-color: #dbeafe;
+}
+
+.graduacion-nueva-card {
+    -fx-border-color: #d1fae5;
+}
+
+.graduacion-info-box {
+    -fx-background-color: #eff6ff;
+    -fx-background-radius: 7;
+    -fx-border-color: #dbeafe;
+    -fx-border-radius: 7;
+    -fx-padding: 8 10;
+}
+
+.graduacion-help {
+    -fx-font-size: 12px;
+    -fx-text-fill: #475569;
+}
+
+/* =========================================
+   SPLITPANE
+   ========================================= */
+
+.garantias-split {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.garantias-split > .split-pane-divider {
+    -fx-background-color: transparent;
+    -fx-padding: 3 0 3 0;
+}
+
+/* =========================================
+   SCROLLPANE
+   ========================================= */
+
+.garantias-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.garantias-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.garantias-scroll .scroll-bar:vertical {
+    -fx-pref-width: 9;
+}
+
+.garantias-scroll .scroll-bar:horizontal {
+    -fx-pref-height: 9;
+}
+
+/* =========================================
+   TABLA
+   ========================================= */
+
+.pos-table-placeholder {
+    -fx-text-fill: #94a3b8;
+    -fx-font-size: 13px;
+}
+
+.garantia-estado-badge {
+    -fx-pref-height: 36;
+    -fx-min-height: 36;
+    -fx-max-height: 36;
+
+    -fx-padding: 7 14;
+
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+
+    -fx-alignment: center-left;
+}
+
+.estado-proceso {
+    -fx-background-color: #fef3c7;
+    -fx-border-color: #fde68a;
+    -fx-text-fill: #92400e;
+}
+
+.estado-recibido {
+    -fx-background-color: #dcfce7;
+    -fx-border-color: #bbf7d0;
+    -fx-text-fill: #166534;
+}
+
+.estado-entregado {
+    -fx-background-color: #dbeafe;
+    -fx-border-color: #bfdbfe;
+    -fx-text-fill: #1d4ed8;
+}

@@ -1,0 +1,189 @@
+<!-- Created with Jaspersoft Studio version 7.0.6.final using JasperReports Library version 7.0.6-5d2a603fdc6b3db8f842a83383e594f41891534d  -->
+<jasperReport name="OrderGarantia" language="java" columnCount="1" pageWidth="200" pageHeight="270" columnWidth="190" leftMargin="5" rightMargin="5" topMargin="5" bottomMargin="5" uuid="ce6f89d2-e328-4f1e-aa3b-f45fd223a150" ignorePagination="true">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="cliente" class="java.lang.String"/>
+	<parameter name="tipo_lente" class="java.lang.String"/>
+	<parameter name="od_esf" class="java.lang.String"/>
+	<parameter name="od_cil" class="java.lang.String"/>
+	<parameter name="od_eje" class="java.lang.String"/>
+	<parameter name="oi_esf" class="java.lang.String"/>
+	<parameter name="oi_cil" class="java.lang.String"/>
+	<parameter name="oi_eje" class="java.lang.String"/>
+	<parameter name="add" class="java.lang.String"/>
+	<parameter name="sucursal" class="java.lang.String"/>
+	<parameter name="vendedor" class="java.lang.String"/>
+	<parameter name="logo" class="java.io.InputStream"/>
+	<parameter name="folio_garantia" class="java.lang.String"/>
+	<parameter name="folio_venta" class="java.lang.String"/>
+	<parameter name="motivo" class="java.lang.String"/>
+	<parameter name="accion" class="java.lang.String"/>
+	<parameter name="fecha" class="java.lang.String"/>
+	<query language="sql"><![CDATA[]]></query>
+	<background splitType="Stretch"/>
+	<title height="260" splitType="Stretch">
+		<element kind="frame" uuid="bee501a8-45ba-4a25-93b3-6a0d52bdca3b" x="0" y="0" width="190" height="260">
+			<element kind="image" uuid="18e46b3e-5e6b-42a6-8535-3a2ee287b836" x="0" y="0" width="38" height="38" scaleImage="RetainShape" onErrorType="Blank">
+				<expression><![CDATA[$P{logo}]]></expression>
+			</element>
+			<element kind="staticText" uuid="355309f4-93cd-48d7-a329-73dd01d10c5f" x="42" y="0" width="148" height="13" fontSize="10.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[ÓPTICAS CLARITY]]></text>
+			</element>
+			<element kind="staticText" uuid="ef8265e7-2de5-4bb1-8ae6-f40fb390ab64" x="42" y="13" width="148" height="13" fontSize="9.0" bold="true" hTextAlign="Center" vTextAlign="Middle">
+				<text><![CDATA[ORDEN DE GARANTÍA]]></text>
+			</element>
+			<element kind="textField" uuid="d834c65a-acf4-4993-83b2-acfb629a0830" x="42" y="26" width="148" height="12" fontSize="8.0" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[
+                    $P{sucursal} == null ? "" : $P{sucursal}
+                ]]></expression>
+			</element>
+			<element kind="line" uuid="c94793c8-a3c4-49e7-a462-7f7e720b42ab" x="0" y="42" width="190" height="1"/>
+			<element kind="staticText" uuid="1e1bcb29-6a2e-4d30-9400-20543032ae70" x="0" y="46" width="42" height="12" fontSize="8.0" bold="true">
+				<text><![CDATA[Garantía:]]></text>
+			</element>
+			<element kind="textField" uuid="7e17291d-c157-4df3-a751-c1671b35c294" x="42" y="46" width="68" height="12" fontSize="8.0" bold="true">
+				<expression><![CDATA[
+                    $P{folio_garantia} == null ? "" : $P{folio_garantia}
+                ]]></expression>
+			</element>
+			<element kind="staticText" uuid="89d42757-0b36-4e6d-9142-b0a619674a39" x="112" y="46" width="28" height="12" fontSize="8.0" bold="true">
+				<text><![CDATA[Venta:]]></text>
+			</element>
+			<element kind="textField" uuid="ca3b5c1d-a8ca-4a03-8015-eb0eb0f94b38" x="140" y="46" width="50" height="12" fontSize="8.0">
+				<expression><![CDATA[
+                    $P{folio_venta} == null ? "" : $P{folio_venta}
+                ]]></expression>
+			</element>
+			<element kind="staticText" uuid="6f6e7d86-e838-4f15-a89e-bcabbe4c3484" x="0" y="60" width="31" height="12" fontSize="8.0" bold="true">
+				<text><![CDATA[Fecha:]]></text>
+			</element>
+			<element kind="textField" uuid="6766e4bc-31ac-4091-839c-a93e86cb3d2e" x="32" y="60" width="78" height="12" fontSize="8.0">
+				<expression><![CDATA[
+                    $P{fecha} == null ? "" : $P{fecha}
+                ]]></expression>
+			</element>
+			<element kind="staticText" uuid="3a2606d1-ed85-4ec8-8a5a-11e757a5a307" x="112" y="60" width="34" height="12" fontSize="8.0" bold="true">
+				<text><![CDATA[Atendió:]]></text>
+			</element>
+			<element kind="textField" uuid="cc9eb5c6-3998-491f-93a1-d44ec07b8b7b" x="147" y="60" width="43" height="12" fontSize="7.0" textAdjust="ScaleFont">
+				<expression><![CDATA[
+                    $P{vendedor} == null ? "" : $P{vendedor}
+                ]]></expression>
+			</element>
+			<element kind="line" uuid="803b9154-948d-4871-906f-acbf1fe470fa" x="0" y="75" width="190" height="1"/>
+			<element kind="staticText" uuid="b0f04827-d62b-4189-b699-5ea6f18d16a7" x="0" y="79" width="38" height="13" fontSize="8.0" bold="true">
+				<text><![CDATA[Cliente:]]></text>
+			</element>
+			<element kind="textField" uuid="d3e59470-8b16-4f30-96d8-635d3103b8d6" x="39" y="79" width="151" height="25" fontSize="8.0" textAdjust="StretchHeight">
+				<expression><![CDATA[
+                    $P{cliente} == null ? "" : $P{cliente}
+                ]]></expression>
+			</element>
+			<element kind="line" uuid="6dfa8233-355a-4a2b-91bd-f8bb853c6977" x="0" y="106" width="190" height="1"/>
+			<element kind="staticText" uuid="59641d7a-b527-4bcf-9577-ed43ec646080" x="0" y="110" width="37" height="13" fontSize="8.0" bold="true">
+				<text><![CDATA[Motivo:]]></text>
+			</element>
+			<element kind="textField" uuid="dcbf513c-6691-4537-ae94-fe7797ce391f" x="38" y="110" width="152" height="16" fontSize="8.0" textAdjust="ScaleFont">
+				<expression><![CDATA[
+                    $P{motivo} == null ? "" : $P{motivo}
+                ]]></expression>
+			</element>
+			<element kind="staticText" uuid="d43f048f-7905-4ed9-b02b-020369a45907" x="0" y="127" width="37" height="13" fontSize="8.0" bold="true">
+				<text><![CDATA[Acción:]]></text>
+			</element>
+			<element kind="textField" uuid="1077c21e-623b-4f8e-89b8-34a060cc793a" x="38" y="127" width="152" height="14" fontSize="8.0" textAdjust="ScaleFont">
+				<expression><![CDATA[
+                    $P{accion} == null ? "" : $P{accion}
+                ]]></expression>
+			</element>
+			<element kind="line" uuid="0f7bb144-1294-4072-a38a-d8da752093a1" x="0" y="144" width="190" height="1"/>
+			<element kind="staticText" uuid="938550c2-b8f1-479d-b568-58173984cc97" x="0" y="148" width="190" height="13" fontSize="8.0" bold="true" hTextAlign="Center">
+				<text><![CDATA[GRADUACIÓN NUEVA]]></text>
+			</element>
+			<element kind="staticText" uuid="071b9179-7d06-4550-91d9-2d3873919bb8" x="40" y="163" width="32" height="12" fontSize="7.0" bold="true" hTextAlign="Center">
+				<text><![CDATA[ESF]]></text>
+			</element>
+			<element kind="staticText" uuid="9a55d3ed-98a9-48d5-8081-c4a694a84bd1" x="73" y="163" width="32" height="12" fontSize="7.0" bold="true" hTextAlign="Center">
+				<text><![CDATA[CIL]]></text>
+			</element>
+			<element kind="staticText" uuid="8ab9447d-a213-4e6a-a478-dda983e58612" x="106" y="163" width="32" height="12" fontSize="7.0" bold="true" hTextAlign="Center">
+				<text><![CDATA[EJE]]></text>
+			</element>
+			<element kind="staticText" uuid="1c3a6fa2-e28e-4a91-9fd7-fac93f77a282" x="140" y="163" width="34" height="12" fontSize="7.0" bold="true" hTextAlign="Center">
+				<text><![CDATA[ADD]]></text>
+			</element>
+			<element kind="staticText" uuid="bc0cf33a-b4b8-4f78-9b20-ea9afb5ffed8" x="8" y="177" width="22" height="15" fontSize="8.0" bold="true">
+				<text><![CDATA[OD]]></text>
+			</element>
+			<element kind="textField" uuid="75a3b539-5abe-4497-85b5-bcbe9d01ba5e" x="40" y="177" width="32" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{od_esf} == null || $P{od_esf}.isBlank()
+                    ? "—"
+                    : $P{od_esf}
+                ]]></expression>
+			</element>
+			<element kind="textField" uuid="7bbac8cf-ebeb-4135-a103-e3108c5a242a" x="73" y="177" width="32" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{od_cil} == null || $P{od_cil}.isBlank()
+                    ? "—"
+                    : $P{od_cil}
+                ]]></expression>
+			</element>
+			<element kind="textField" uuid="eb430164-9d57-4d8a-9748-8d447f84d391" x="106" y="177" width="32" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{od_eje} == null || $P{od_eje}.isBlank()
+                    ? "—"
+                    : $P{od_eje}
+                ]]></expression>
+			</element>
+			<element kind="textField" uuid="d0494b93-eda7-410a-8b2d-dbcb481d91b6" x="140" y="177" width="34" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{add} == null || $P{add}.isBlank()
+                    ? "—"
+                    : $P{add}
+                ]]></expression>
+			</element>
+			<element kind="staticText" uuid="ef21639d-060f-4ebe-a0d6-41d59e0efcbc" x="8" y="194" width="22" height="15" fontSize="8.0" bold="true">
+				<text><![CDATA[OI]]></text>
+			</element>
+			<element kind="textField" uuid="cee67301-7f7b-4269-a9cb-13c5564e5a96" x="40" y="194" width="32" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{oi_esf} == null || $P{oi_esf}.isBlank()
+                    ? "—"
+                    : $P{oi_esf}
+                ]]></expression>
+			</element>
+			<element kind="textField" uuid="723147ad-21a7-4b90-810e-5eda34aa6a62" x="73" y="194" width="32" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{oi_cil} == null || $P{oi_cil}.isBlank()
+                    ? "—"
+                    : $P{oi_cil}
+                ]]></expression>
+			</element>
+			<element kind="textField" uuid="af8f801a-705f-492f-bdb1-97ba8c938ee4" x="106" y="194" width="32" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{oi_eje} == null || $P{oi_eje}.isBlank()
+                    ? "—"
+                    : $P{oi_eje}
+                ]]></expression>
+			</element>
+			<element kind="textField" uuid="9e841d8b-c650-4c0c-b8cf-d00715bc8df2" x="140" y="194" width="34" height="15" fontSize="8.0" hTextAlign="Center">
+				<expression><![CDATA[
+                    $P{add} == null || $P{add}.isBlank()
+                    ? "—"
+                    : $P{add}
+                ]]></expression>
+			</element>
+			<element kind="line" uuid="7256884d-e74e-4996-9cab-243b8efb6333" x="0" y="212" width="190" height="1"/>
+			<element kind="staticText" uuid="966e3a20-6626-4eed-9874-c74b4da8408f" x="0" y="216" width="190" height="13" fontSize="8.0" bold="true" hTextAlign="Center">
+				<text><![CDATA[TRABAJO DE LABORATORIO]]></text>
+			</element>
+			<element kind="textField" uuid="251151c9-f2b5-438a-b781-529306d8fa94" x="4" y="230" width="182" height="27" fontSize="8.0" textAdjust="ScaleFont" hTextAlign="Center" vTextAlign="Middle">
+				<expression><![CDATA[
+                    $P{tipo_lente} == null || $P{tipo_lente}.isBlank()
+                    ? "NO ESPECIFICADO"
+                    : $P{tipo_lente}
+                ]]></expression>
+			</element>
+		</element>
+	</title>
+</jasperReport>

@@ -1,0 +1,140 @@
+<!-- Created with Jaspersoft Studio version 7.0.6.final using JasperReports Library version 7.0.6-5d2a603fdc6b3db8f842a83383e594f41891534d  -->
+<jasperReport name="ticket_abono" language="java" columnCount="1" pageWidth="200" pageHeight="600" columnWidth="190" leftMargin="5" rightMargin="5" topMargin="5" bottomMargin="5" uuid="d4a15115-036d-4301-a387-11fb63d2778d" ignorePagination="true">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
+	<parameter name="sucursal" class="java.lang.String"/>
+	<parameter name="telefono_suc" class="java.lang.String"/>
+	<parameter name="direccion_suc" class="java.lang.String"/>
+	<parameter name="logo" class="java.io.InputStream"/>
+	<parameter name="folio" class="java.lang.String"/>
+	<parameter name="cliente" class="java.lang.String"/>
+	<parameter name="fecha" class="java.lang.String"/>
+	<parameter name="hora" class="java.lang.String"/>
+	<parameter name="metodo" class="java.lang.String"/>
+	<parameter name="monto_abono" class="java.lang.Double"/>
+	<parameter name="total_venta" class="java.lang.Double"/>
+	<parameter name="pagado_acumulado" class="java.lang.Double"/>
+	<parameter name="saldo_pendiente" class="java.lang.Double"/>
+	<parameter name="estado" class="java.lang.String"/>
+	<query language="sql"><![CDATA[]]></query>
+	<background splitType="Stretch"/>
+	<title height="112" splitType="Stretch">
+		<element kind="frame" uuid="8144a724-82fa-43bd-92bc-a927d9973dc3" x="0" y="0" width="190" height="100">
+			<element kind="image" uuid="8c04a767-90b0-423f-a4af-f641458ea697" x="10" y="10" width="50" height="50">
+				<expression><![CDATA[$P{logo}]]></expression>
+			</element>
+			<element kind="staticText" uuid="136dd18f-cf54-45b2-9eca-3f983f457363" x="70" y="10" width="100" height="16" fontSize="11.0" bold="true" hTextAlign="Center">
+				<text><![CDATA[ÓPTICAS CLARITY]]></text>
+			</element>
+			<element kind="staticText" uuid="c3a6a2f4-dcf7-47cd-9155-8d52fcb1c640" x="70" y="30" width="30" height="20">
+				<text><![CDATA[Suc:]]></text>
+			</element>
+			<element kind="textField" uuid="84f29987-dd1c-410e-8079-dd8504d8eeec" x="100" y="30" width="80" height="20">
+				<expression><![CDATA[$P{sucursal}]]></expression>
+			</element>
+			<element kind="staticText" uuid="90b3e9e9-f39f-4c3c-a7fd-0a215634e215" x="60" y="50" width="50" height="20">
+				<text><![CDATA[Teléfono:]]></text>
+			</element>
+			<element kind="textField" uuid="6ef501ed-b0ac-4ae5-b070-4f46529f1114" x="110" y="50" width="70" height="20">
+				<expression><![CDATA[$P{telefono_suc}]]></expression>
+			</element>
+			<element kind="staticText" uuid="b20f4e3b-b2f2-44d5-819c-a9ad93150d98" x="10" y="72" width="50" height="20">
+				<text><![CDATA[Dirección:]]></text>
+			</element>
+			<element kind="textField" uuid="922de384-5878-4228-a13e-97aacb14ca2e" x="60" y="72" width="120" height="20">
+				<expression><![CDATA[$P{direccion_suc}]]></expression>
+			</element>
+		</element>
+		<element kind="line" uuid="dcf687ed-4116-4f67-aea0-590931148f08" x="0" y="110" width="190" height="1">
+			<pen lineStyle="Double"/>
+		</element>
+	</title>
+	<pageHeader height="142">
+		<element kind="staticText" uuid="a96c14e2-063d-4adb-b838-e60e86e8c09c" x="0" y="2" width="190" height="20" fontSize="12.0" bold="true" hTextAlign="Center">
+			<text><![CDATA[COMPROBANTE DE ABONO]]></text>
+		</element>
+		<element kind="line" uuid="683131f3-2885-42a9-a40e-a4a82aa67b4f" x="0" y="25" width="190" height="1">
+			<pen lineStyle="Dashed"/>
+		</element>
+		<element kind="staticText" uuid="3baceaf5-99d0-4bc5-9305-a84aa844aa88" x="0" y="32" width="35" height="20">
+			<text><![CDATA[Folio:]]></text>
+		</element>
+		<element kind="textField" uuid="d5bd8124-49d1-42f3-ad0a-6b64d618b44d" x="38" y="32" width="150" height="20" bold="true">
+			<expression><![CDATA[$P{folio}]]></expression>
+		</element>
+		<element kind="staticText" uuid="4f172b53-f47c-452f-b674-f4be0e3cd216" x="0" y="54" width="42" height="20">
+			<text><![CDATA[Cliente:]]></text>
+		</element>
+		<element kind="textField" uuid="23cb054d-e60d-443a-8b75-95c05c44e623" x="44" y="54" width="144" height="35" textAdjust="StretchHeight">
+			<expression><![CDATA[$P{cliente}]]></expression>
+		</element>
+		<element kind="staticText" uuid="4a81d9bd-a52d-4d8e-af14-c77854f51474" x="0" y="92" width="35" height="20">
+			<text><![CDATA[Fecha:]]></text>
+		</element>
+		<element kind="textField" uuid="2f650174-f366-4ea3-9417-258ec9ddd1fc" x="38" y="92" width="65" height="20">
+			<expression><![CDATA[$P{fecha}]]></expression>
+		</element>
+		<element kind="staticText" uuid="7083b716-a0af-4b81-8e67-d68705287082" x="105" y="92" width="30" height="20">
+			<text><![CDATA[Hora:]]></text>
+		</element>
+		<element kind="textField" uuid="125af657-27a2-438d-b630-d17d3ee0b730" x="137" y="92" width="50" height="20">
+			<expression><![CDATA[$P{hora}]]></expression>
+		</element>
+		<element kind="staticText" uuid="331768fd-bd62-436f-a83c-99525af986bf" x="0" y="116" width="45" height="20">
+			<text><![CDATA[Método:]]></text>
+		</element>
+		<element kind="textField" uuid="4f8473f4-981c-4afb-b6c8-366d506881a1" x="48" y="116" width="140" height="20" bold="true">
+			<expression><![CDATA[$P{metodo}]]></expression>
+		</element>
+	</pageHeader>
+	<detail>
+		<band height="170" splitType="Stretch">
+			<element kind="line" uuid="2988bc88-c8dd-4c97-95a5-131f12ee5244" x="0" y="2" width="190" height="1">
+				<pen lineStyle="Dashed"/>
+			</element>
+			<element kind="staticText" uuid="c0b3bdcf-c1c4-4ce5-a2c7-f6b3d0b96e30" x="5" y="12" width="100" height="24" fontSize="11.0" bold="true">
+				<text><![CDATA[MONTO ABONADO:]]></text>
+			</element>
+			<element kind="textField" uuid="a5ad74ac-e1d3-4674-9e58-6b9bb4fdc222" x="105" y="12" width="80" height="24" fontSize="11.0" pattern="$ #,##0.00" bold="true" hTextAlign="Right">
+				<expression><![CDATA[$P{monto_abono}]]></expression>
+			</element>
+			<element kind="line" uuid="16e94768-f5b6-408e-bf3c-612ed44292b4" x="0" y="42" width="190" height="1">
+				<pen lineStyle="Dashed"/>
+			</element>
+			<element kind="staticText" uuid="fc96523d-3746-46fa-83fa-914a24eed84f" x="25" y="54" width="95" height="20">
+				<text><![CDATA[Total de venta:]]></text>
+			</element>
+			<element kind="textField" uuid="61181078-168b-4a4c-a3b2-afdf3b5a7275" x="120" y="54" width="65" height="20" pattern="$ #,##0.00" hTextAlign="Right">
+				<expression><![CDATA[$P{total_venta}]]></expression>
+			</element>
+			<element kind="staticText" uuid="fd0ca707-83c5-46ad-81f7-4abebc08c904" x="25" y="76" width="95" height="20">
+				<text><![CDATA[Pagado acumulado:]]></text>
+			</element>
+			<element kind="textField" uuid="96ecac5c-410c-4ceb-89ae-46fd2f33c9b3" x="120" y="76" width="65" height="20" pattern="$ #,##0.00" hTextAlign="Right">
+				<expression><![CDATA[$P{pagado_acumulado}]]></expression>
+			</element>
+			<element kind="staticText" uuid="c62ffba4-6e12-4dc6-b92a-f73e46f5ad55" x="25" y="98" width="95" height="20" bold="true">
+				<text><![CDATA[Saldo pendiente:]]></text>
+			</element>
+			<element kind="textField" uuid="2386d074-3570-4526-b39e-f38b9f28286a" x="120" y="98" width="65" height="20" pattern="$ #,##0.00" bold="true" hTextAlign="Right">
+				<expression><![CDATA[$P{saldo_pendiente}]]></expression>
+			</element>
+			<element kind="staticText" uuid="960dbad4-89d2-46b2-8495-84b029ab849e" x="25" y="124" width="45" height="20" bold="true">
+				<text><![CDATA[Estado:]]></text>
+			</element>
+			<element kind="textField" uuid="69080f4f-17eb-41da-985e-c31c62104e40" x="72" y="124" width="113" height="20" bold="true" hTextAlign="Right">
+				<expression><![CDATA[$P{estado}]]></expression>
+			</element>
+			<element kind="line" uuid="287e0502-d84f-4055-a5a8-a6a9fa05cbaa" x="0" y="154" width="190" height="1">
+				<pen lineStyle="Dashed"/>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="62">
+		<element kind="staticText" uuid="133e54ca-55f8-4de2-b194-f5c58070ccfa" x="0" y="5" width="190" height="20" bold="true" hTextAlign="Center">
+			<text><![CDATA[Gracias por su pago]]></text>
+		</element>
+		<element kind="staticText" uuid="4f095b0d-92df-46d7-b56b-7a5fba6b2798" x="5" y="28" width="180" height="28" hTextAlign="Center">
+			<text><![CDATA[Conserve este comprobante para cualquier aclaración.]]></text>
+		</element>
+	</columnFooter>
+</jasperReport>
