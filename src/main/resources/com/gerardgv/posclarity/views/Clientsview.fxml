@@ -38,7 +38,7 @@
 
             <content>
                 <VBox spacing="14"
-                      styleClass="clients-form-card">
+                      styleClass="pos-form-card">
 
                     <!-- TÍTULO -->
 

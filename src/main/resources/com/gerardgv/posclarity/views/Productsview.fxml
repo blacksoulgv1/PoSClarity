@@ -19,175 +19,368 @@
            xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="com.gerardgv.posclarity.controllers.ProductsController">
 
-    <HBox spacing="18"  maxHeight="Infinity" styleClass="products-layout">
+    <HBox spacing="18"
+          fillHeight="true"
+          maxWidth="Infinity"
+          maxHeight="Infinity"
+          styleClass="pos-view">
 
-        <!-- FORMULARIO -->
-        <VBox prefWidth="390"
-              minWidth="390"
-              maxWidth="390"
-              spacing="14"
-              styleClass="pos-card">
+        <!-- =====================================================
+             FORMULARIO
+             ===================================================== -->
 
-            <HBox alignment="CENTER_LEFT" spacing="8">
-                <FontIcon iconLiteral="fas-box" iconSize="18" styleClass="clarity-section-icon"/>
-                <Label text="Producto" styleClass="clarity-title"/>
-            </HBox>
+        <ScrollPane fitToWidth="true"
+                    fitToHeight="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    prefWidth="430"
+                    minWidth="430"
+                    maxWidth="430"
+                    maxHeight="Infinity"
+                    styleClass="transparent-scroll">
 
-            <Label text="Alta y edición de productos del inventario"
-                   styleClass="pos-form-subtitle"/>
+            <content>
 
-            <Separator/>
+                <VBox spacing="14"
+                      styleClass="pos-form-card">
 
-            <GridPane hgap="14" vgap="12" styleClass="pos-form-grid">
-                <columnConstraints>
-                    <ColumnConstraints percentWidth="32"/>
-                    <ColumnConstraints percentWidth="68"/>
-                </columnConstraints>
+                    <!-- TÍTULO -->
 
-                <children>
-                    <Label text="Modelo" styleClass="pos-form-label"/>
-                    <TextField fx:id="txtModelo"
-                               promptText="Modelo del producto"
-                               GridPane.columnIndex="1"/>
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
 
-                    <Label text="Marca" styleClass="pos-form-label" GridPane.rowIndex="1"/>
-                    <TextField fx:id="txtMarca"
-                               promptText="Marca"
-                               GridPane.columnIndex="1"
-                               GridPane.rowIndex="1"/>
+                        <FontIcon iconLiteral="fas-box"
+                                  iconSize="18"
+                                  styleClass="clarity-section-icon"/>
 
-                    <Label text="Categoría" styleClass="pos-form-label" GridPane.rowIndex="2"/>
-                    <ComboBox fx:id="cbCategoria"
-                              maxWidth="Infinity"
-                              GridPane.columnIndex="1"
-                              GridPane.rowIndex="2"/>
+                        <Label text="Producto"
+                               styleClass="clarity-title"/>
 
-                    <Label text="Tipo" styleClass="pos-form-label" GridPane.rowIndex="3"/>
-                    <ComboBox fx:id="cbTipo"
-                              maxWidth="Infinity"
-                              GridPane.columnIndex="1"
-                              GridPane.rowIndex="3"/>
-
-                    <Label text="Precio" styleClass="pos-form-label" GridPane.rowIndex="4"/>
-                    <HBox styleClass="input-icon"
-                          GridPane.columnIndex="1"
-                          GridPane.rowIndex="4">
-                        <children>
-                            <FontIcon iconLiteral="fas-dollar-sign" iconSize="14"/>
-                            <TextField fx:id="txtPrecio"
-                                       promptText="0.00"
-                                       HBox.hgrow="ALWAYS"/>
-                        </children>
                     </HBox>
 
-                    <Label text="Stock" styleClass="pos-form-label" GridPane.rowIndex="5"/>
-                    <HBox styleClass="input-icon"
-                          GridPane.columnIndex="1"
-                          GridPane.rowIndex="5">
+                    <Label text="Alta y edición de productos del inventario"
+                           styleClass="pos-form-subtitle"/>
+
+                    <Separator/>
+
+
+                    <!-- INFORMACIÓN DEL PRODUCTO -->
+
+                    <VBox spacing="4">
+
+                        <HBox styleClass="pos-section-header">
+
+                            <FontIcon iconLiteral="fas-boxes"
+                                      iconSize="16"
+                                      styleClass="pos-section-icon"/>
+
+                            <Label text="Información del producto"
+                                   styleClass="pos-section-title"/>
+
+                        </HBox>
+
+                        <Separator styleClass="pos-section-separator"/>
+
+                    </VBox>
+
+
+                    <!-- CAMPOS -->
+
+                    <GridPane hgap="14"
+                              vgap="12"
+                              styleClass="pos-form-grid">
+
+                        <columnConstraints>
+
+                            <ColumnConstraints percentWidth="30"/>
+
+                            <ColumnConstraints percentWidth="70"/>
+
+                        </columnConstraints>
+
                         <children>
-                            <FontIcon iconLiteral="fas-cubes" iconSize="14"/>
-                            <TextField fx:id="txtStock"
-                                       promptText="0"
-                                       HBox.hgrow="ALWAYS"/>
+
+                            <!-- MODELO -->
+
+                            <Label text="Modelo"
+                                   styleClass="pos-form-label"/>
+
+                            <TextField fx:id="txtModelo"
+                                       promptText="Modelo del producto"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"/>
+
+
+                            <!-- MARCA -->
+
+                            <Label text="Marca"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="1"/>
+
+                            <TextField fx:id="txtMarca"
+                                       promptText="Marca"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"
+                                       GridPane.rowIndex="1"/>
+
+
+                            <!-- CATEGORÍA -->
+
+                            <Label text="Categoría"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="2"/>
+
+                            <ComboBox fx:id="cbCategoria"
+                                      maxWidth="Infinity"
+                                      GridPane.columnIndex="1"
+                                      GridPane.rowIndex="2"/>
+
+
+                            <!-- TIPO -->
+
+                            <Label text="Tipo"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="3"/>
+
+                            <ComboBox fx:id="cbTipo"
+                                      maxWidth="Infinity"
+                                      GridPane.columnIndex="1"
+                                      GridPane.rowIndex="3"/>
+
+
+                            <!-- PRECIO -->
+
+                            <Label text="Precio"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="4"/>
+
+                            <HBox styleClass="input-icon"
+                                  GridPane.columnIndex="1"
+                                  GridPane.rowIndex="4">
+
+                                <children>
+
+                                    <FontIcon iconLiteral="fas-dollar-sign"
+                                              iconSize="14"/>
+
+                                    <TextField fx:id="txtPrecio"
+                                               promptText="0.00"
+                                               maxWidth="Infinity"
+                                               HBox.hgrow="ALWAYS"/>
+
+                                </children>
+
+                            </HBox>
+
+
+                            <!-- STOCK -->
+
+                            <Label text="Stock"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="5"/>
+
+                            <HBox styleClass="input-icon"
+                                  GridPane.columnIndex="1"
+                                  GridPane.rowIndex="5">
+
+                                <children>
+
+                                    <FontIcon iconLiteral="fas-cubes"
+                                              iconSize="14"/>
+
+                                    <TextField fx:id="txtStock"
+                                               promptText="0"
+                                               maxWidth="Infinity"
+                                               HBox.hgrow="ALWAYS"/>
+
+                                </children>
+
+                            </HBox>
+
                         </children>
+
+                    </GridPane>
+
+
+                    <Separator/>
+
+
+                    <!-- BOTONES -->
+
+                    <HBox styleClass="pos-form-footer">
+
+                        <Button fx:id="btnClear"
+                                text="Limpiar"
+                                minWidth="115"
+                                styleClass="pos-btn">
+
+                            <graphic>
+
+                                <FontIcon iconLiteral="fas-eraser"
+                                          iconSize="14"/>
+
+                            </graphic>
+
+                        </Button>
+
+                        <Button fx:id="btnGuardar"
+                                text="Guardar"
+                                minWidth="115"
+                                styleClass="pos-btn-primary">
+
+                            <graphic>
+
+                                <FontIcon iconLiteral="fas-save"
+                                          iconSize="14"/>
+
+                            </graphic>
+
+                        </Button>
+
                     </HBox>
-                </children>
-            </GridPane>
 
-            <HBox styleClass="pos-form-footer">
-                <Button fx:id="btnClear"
-                        text="Limpiar"
-                        minWidth="110"
-                        styleClass="pos-btn">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-eraser" iconSize="14"/>
-                    </graphic>
-                </Button>
+                </VBox>
 
-                <Button fx:id="btnGuardar"
-                        text="Guardar"
-                        minWidth="110"
-                        styleClass="pos-btn-primary">
-                    <graphic>
-                        <FontIcon iconLiteral="fas-save" iconSize="14"/>
-                    </graphic>
-                </Button>
-            </HBox>
-        </VBox>
+            </content>
 
-        <!-- TABLA -->
-        <BorderPane minHeight="0"
-            styleClass="pos-card"
-            HBox.hgrow="ALWAYS">
+        </ScrollPane>
 
-    <top>
-        <VBox spacing="14">
 
-            <HBox alignment="CENTER_LEFT" spacing="8">
-                <FontIcon iconLiteral="fas-list"
-                          iconSize="18"
-                          styleClass="clarity-section-icon"/>
-                <Label text="Productos registrados"
-                       styleClass="clarity-title"/>
-            </HBox>
+        <!-- =====================================================
+             PRODUCTOS REGISTRADOS
+             ===================================================== -->
 
-            <HBox alignment="CENTER_LEFT" spacing="12">
-                <HBox styleClass="clarity-search"
-                      HBox.hgrow="ALWAYS">
-                    <children>
-                        <FontIcon iconLiteral="fas-search"
+        <BorderPane minWidth="0"
+                    minHeight="0"
+                    maxWidth="Infinity"
+                    maxHeight="Infinity"
+                    styleClass="pos-card"
+                    HBox.hgrow="ALWAYS">
+
+            <!-- ENCABEZADO -->
+
+            <top>
+
+                <VBox spacing="14">
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
+
+                        <FontIcon iconLiteral="fas-boxes"
+                                  iconSize="18"
+                                  styleClass="clarity-section-icon"/>
+
+                        <Label text="Productos registrados"
+                               styleClass="clarity-title"/>
+
+                    </HBox>
+
+
+                    <!-- BUSCADOR -->
+
+                    <HBox styleClass="clarity-search"
+                          HBox.hgrow="ALWAYS">
+
+                        <children>
+
+                            <FontIcon iconLiteral="fas-search"
+                                      iconSize="15"/>
+
+                            <TextField fx:id="txtBuscar"
+                                       promptText="Buscar por modelo o marca..."
+                                       HBox.hgrow="ALWAYS"/>
+
+                        </children>
+
+                    </HBox>
+
+                    <padding>
+                        <Insets bottom="14"/>
+                    </padding>
+
+                </VBox>
+
+            </top>
+
+
+            <!-- TABLA -->
+
+            <center>
+
+                <TableView fx:id="tblProductos"
+                           minWidth="0"
+                           minHeight="0"
+                           maxWidth="Infinity"
+                           maxHeight="Infinity"
+                           styleClass="pos-table">
+
+                    <columns>
+
+                        <TableColumn fx:id="colId"
+                                     text="ID"/>
+
+                        <TableColumn fx:id="colModelo"
+                                     text="Modelo"/>
+
+                        <TableColumn fx:id="colMarca"
+                                     text="Marca"/>
+
+                        <TableColumn fx:id="colCategoria"
+                                     text="Categoría"/>
+
+                        <TableColumn fx:id="colTipo"
+                                     text="Tipo"/>
+
+                        <TableColumn fx:id="colPrecio"
+                                     text="Precio"/>
+
+                        <TableColumn fx:id="colStock"
+                                     text="Stock"/>
+
+                        <TableColumn fx:id="colActivo"
+                                     text="Estado"/>
+
+                        <TableColumn fx:id="colAcciones"
+                                     text="Acciones"/>
+
+                    </columns>
+
+                </TableView>
+
+            </center>
+
+
+            <!-- FOOTER + PAGINACIÓN -->
+
+            <bottom>
+
+                <HBox alignment="CENTER_LEFT"
+                      minHeight="46"
+                      prefHeight="46"
+                      maxHeight="46"
+                      styleClass="clarity-table-footer">
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
+
+                        <FontIcon iconLiteral="fas-boxes"
                                   iconSize="15"/>
-                        <TextField fx:id="txtBuscar"
-                                   promptText="Buscar por modelo o marca..."
-                                   HBox.hgrow="ALWAYS"/>
-                    </children>
+
+                        <Label text="Catálogo de productos"
+                               styleClass="clarity-table-footer-label"/>
+
+                    </HBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <fx:include source="PaginationView.fxml"
+                                fx:id="pagination"/>
+
                 </HBox>
-            </HBox>
 
-            <padding>
-                <Insets bottom="14"/>
-            </padding>
+            </bottom>
 
-        </VBox>
-    </top>
-
-    <center>
-        <TableView fx:id="tblProductos"
-                   minHeight="0">
-            <columns>
-                <TableColumn fx:id="colId" text="ID"/>
-                <TableColumn fx:id="colModelo" text="Modelo"/>
-                <TableColumn fx:id="colMarca" text="Marca"/>
-                <TableColumn fx:id="colCategoria" text="Categoría"/>
-                <TableColumn fx:id="colTipo" text="Tipo"/>
-                <TableColumn fx:id="colPrecio" text="Precio"/>
-                <TableColumn fx:id="colStock" text="Stock"/>
-                <TableColumn fx:id="colActivo" text="Estado"/>
-                <TableColumn fx:id="colAcciones" text="Acciones"/>
-            </columns>
-        </TableView>
-    </center>
-
-    <bottom>
-        <HBox minHeight="38"
-              prefHeight="38"
-              styleClass="clarity-table-footer">
-
-            <children>
-                <FontIcon iconLiteral="fas-boxes"
-                          iconSize="15"/>
-                <Label text="Catálogo de productos"
-                       styleClass="clarity-table-footer-label"/>
-            </children>
-
-            <BorderPane.margin>
-                <Insets top="8"/>
-            </BorderPane.margin>
-
-        </HBox>
-    </bottom>
-
-</BorderPane>
+        </BorderPane>
 
     </HBox>
 

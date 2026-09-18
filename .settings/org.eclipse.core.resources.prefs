@@ -1,4 +1,6 @@
 eclipse.preferences.version=1
+encoding//src/main/resources/com/gerardgv/posclarity/reports/OrdenGarantia.jrxml=UTF-8
 encoding//src/main/resources/com/gerardgv/posclarity/reports/Order.jrxml=UTF-8
 encoding//src/main/resources/com/gerardgv/posclarity/reports/ReportePendientes.jrxml=UTF-8
-encoding//src/main/resources/com/gerardgv/posclarity/reports/ticket_venta.jrxml=UTF-8
+encoding//src/main/resources/com/gerardgv/posclarity/reports/cierre_caja.jrxml=UTF-8
+encoding//src/main/resources/com/gerardgv/posclarity/reports/ticketAbono.jrxml=UTF-8

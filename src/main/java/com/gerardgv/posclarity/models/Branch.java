@@ -1,23 +1,32 @@
-
 package com.gerardgv.posclarity.models;
+
 
 public class Branch {
     
     private int id;
-    private String sucursal;
-    private String telefono;
-    private String direccion;
-    private boolean activo;
+    private String name;
+    private String phone;
+    private String address;
+    private boolean active;
+    private String code;
 
     public Branch() {
     }
 
-    public Branch(int id, String sucursal, String telefono, String direccion, boolean activo) {
+    public Branch(
+            int id,
+            String name,
+            String phone,
+            String address,
+            boolean active,
+            String code
+    ) {
         this.id = id;
-        this.sucursal = sucursal;
-        this.telefono = telefono;
-        this.direccion = direccion;
-        this.activo = activo;
+        this.name = name;
+        this.phone = phone;
+        this.address = address;
+        this.active = active;
+        this.code = code;
     }
 
     public int getId() {
@@ -28,40 +37,48 @@ public class Branch {
         this.id = id;
     }
 
-    public String getSucursal() {
-        return sucursal;
+    public String getName() {
+        return name;
     }
 
-    public void setSucursal(String sucursal) {
-        this.sucursal = sucursal;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTelefono() {
-        return telefono;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public String getDireccion() {
-        return direccion;
+    public String getAddress() {
+        return address;
     }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public boolean isActivo() {
-        return activo;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setActivo(boolean activo) {
-        this.activo = activo;
+    public void setActive(boolean active) {
+        this.active = active;
     }
-    
-    public String toString(){
-        return sucursal;
+
+    public String getCode() {
+        return code;
     }
-        
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    } 
 }

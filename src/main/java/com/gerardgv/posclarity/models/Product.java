@@ -1,113 +1,115 @@
 package com.gerardgv.posclarity.models;
 
+
 public class Product {
     
-    private int id_product;
-    private String modelo;
-    private String marca;
-    private String categoria;
-    private double precio;
-    private boolean manejaStock;
-    private int stock;
-    private boolean micaBase;
-    private String tipo_producto; // elemento fisico o bajo_pedido
-    private boolean activo = true;
+    private Integer id;
+    private String model;
+    private String brand;
+    private String category;
+    private double  price;
+    private Boolean manageStock;
+    private Boolean baseLens;
+    private String productType;
+    private Boolean active;
    
+    private Integer stock;
+    
     public Product(){
     }
 
-    public Product(int id_product, String modelo, String marca, String categoria, double precio, boolean manejaStock, int stock, boolean micaBase, String tipo_producto) {
-        this.id_product = id_product;
-        this.modelo = modelo;
-        this.marca = marca;
-        this.categoria = categoria;
-        this.precio = precio;
-        this.manejaStock = manejaStock;
-        this.stock = stock;
-        this.micaBase = micaBase;
-        this.tipo_producto = tipo_producto;
+    public Product(Integer id, String model, String brand, String category, double price, Boolean manageStock, Boolean baseLens, String productType, Boolean active) {
+        this.id = id;
+        this.model = model;
+        this.brand = brand;
+        this.category = category;
+        this.price = price;
+        this.manageStock = manageStock;
+        this.baseLens = baseLens;
+        this.productType = productType;
+        this.active = active;
+    }
+   
+
+    public Integer getId() {
+        return id;
     }
 
-    public int getId_product() {
-        return id_product;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public void setId_product(int id_product) {
-        this.id_product = id_product;
+    public String getModel() {
+        return model;
     }
 
-    public String getModelo() {
-        return modelo;
+    public void setModel(String model) {
+        this.model = model;
     }
 
-    public void setModelo(String modelo) {
-        this.modelo = modelo;
+    public String getBrand() {
+        return brand;
     }
 
-    public String getMarca() {
-        return marca;
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
-    public void setMarca(String marca) {
-        this.marca = marca;
+    public String getCategory() {
+        return category;
     }
 
-    public String getCategoria() {
-        return categoria;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public void setCategoria(String categoria) {
-        this.categoria = categoria;
+    public double getPrice() {
+        return price;
     }
 
-    public double getPrecio() {
-        return precio;
+    public void setPrice(double price) {
+        this.price = price;
+    }    
+
+    public Boolean getManageStock() {
+        return manageStock;
     }
 
-    public void setPrecio(double precio) {
-        this.precio = precio;
+    public void setManageStock(Boolean manageStock) {
+        this.manageStock = manageStock;
     }
 
-    public boolean isManejaStock() {
-        return manejaStock;
+    public Boolean getBaseLens() {
+        return baseLens;
     }
 
-    public void setManejaStock(boolean manejaStock) {
-        this.manejaStock = manejaStock;
+    public void setBaseLens(Boolean baseLens) {
+        this.baseLens = baseLens;
     }
 
-    public int getStock() {
+    public String getProductType() {
+        return productType;
+    }
+
+    public void setProductType(String productType) {
+        this.productType = productType;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public Integer getStock() {
         return stock;
     }
 
-    public void setStock(int stock) {
+    public void setStock(Integer stock) {
         this.stock = stock;
     }
 
-    public boolean isMicaBase() {
-        return micaBase;
-    }
-
-    public void setMicaBase(boolean micaBase) {
-        this.micaBase = micaBase;
-    }
-
-    public String getTipo_producto() {
-        return tipo_producto;
-    }
-
-    public void setTipo_producto(String tipo_producto) {
-        this.tipo_producto = tipo_producto;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
-    }
     
-    
-
  }

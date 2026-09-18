@@ -1,7 +1,7 @@
 package com.gerardgv.posclarity.controllers;
 
+import com.gerardgv.posclarity.api.BranchApiClient;
 import com.gerardgv.posclarity.app.App;
-import com.gerardgv.posclarity.database.BranchDAO;
 import com.gerardgv.posclarity.models.Branch;
 import com.gerardgv.posclarity.utils.Configuracion;
 import com.gerardgv.posclarity.utils.Session;
@@ -18,27 +18,45 @@ import javafx.stage.Stage;
 public class SelectBranchController implements Initializable {
     
     @FXML private ComboBox<Branch> cbBranch;
-    private BranchDAO branchDAO = new BranchDAO();
+    private final BranchApiClient branchApiClient = new BranchApiClient();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
+        try {
+
         cbBranch.setItems(
                 FXCollections.observableArrayList(
-                        branchDAO.getAll()));
+                        branchApiClient.getAll()
+                )
+        );
+
+    } catch (InterruptedException e) {
+
+        Thread.currentThread().interrupt();
+        mostrarError("La consulta de sucursales fue interrumpida.");
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+        mostrarError(
+                "No se pudieron cargar las sucursales.\n"
+                + e.getMessage()
+        );
+    }
         
         cbBranch.setCellFactory(lv -> new ListCell<>(){
         @Override
         protected void updateItem(Branch item, boolean empty){
             super.updateItem(item,empty);
-            setText(empty || item == null ? null :item.getSucursal());
+            setText(empty || item == null ? null :item.getName());
         }
     });
         cbBranch.setButtonCell(new ListCell<>(){
             @Override
             protected void updateItem(Branch item,boolean empty){
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getSucursal());
+                setText(empty || item == null ? null : item.getName());
             }
         });        
     }
@@ -61,9 +79,7 @@ public class SelectBranchController implements Initializable {
         } catch(Exception e){
             e.printStackTrace();
         }               
-        
-        Stage stage = (Stage) cbBranch.getScene().getWindow();
-        stage.close();        
+
     }   
     
     private void mostrarError(String mensaje){

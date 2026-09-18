@@ -1,12 +1,14 @@
 package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.Ui.*;
-import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.api.SaleApiClient;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.utils.*;
+import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -28,27 +30,28 @@ public class PendingController implements Initializable {
     @FXML private Label lblSaldoEntregar;
     @FXML private Label lblTotalRegistros;
     
-    @FXML private TableView<Venta> tblVentas;
-    @FXML private TableColumn<Venta,String> colFolio;
-    @FXML private TableColumn<Venta,String> colCliente;
-    @FXML private TableColumn<Venta,String> colFecha;
-    @FXML private TableColumn<Venta,Double> colTotal;
-    @FXML private TableColumn<Venta,Double> colPagado;
-    @FXML private TableColumn<Venta,Double> colRestante;
-    @FXML private TableColumn<Venta,String> colEstadoPago;
-    @FXML private TableColumn<Venta,String> colEstadoTrabajo;
-    @FXML private TableColumn<Venta,Void> colAcciones;
+    @FXML private TableView<Sale> tblVentas;
+    @FXML private TableColumn<Sale,String> colFolio;
+    @FXML private TableColumn<Sale,String> colCliente;
+    @FXML private TableColumn<Sale,String> colFecha;
+    @FXML private TableColumn<Sale,Double> colTotal;
+    @FXML private TableColumn<Sale,Double> colPagado;
+    @FXML private TableColumn<Sale,Double> colRestante;
+    @FXML private TableColumn<Sale,String> colEstadoPago;
+    @FXML private TableColumn<Sale,String> colEstadoTrabajo;
+    @FXML private TableColumn<Sale,Void> colAcciones;
     @FXML private StackPane root;
     
-    private final ObservableList<Venta> listaVentas =
+    @FXML private PaginationController paginationController;
+    private TablePagination<Sale> tablePagination;
+    
+    private final ObservableList<Sale> listaVentas =
         FXCollections.observableArrayList();
 
-    private final FilteredList<Venta> listaFiltrada =
-        new FilteredList<>(listaVentas, venta -> true);
+    private FilteredList<Sale> listaFiltrada;
     
-    
-    private final PendingDAO pendingDAO = new PendingDAO();
-    private final SaleDAO saleDAO = new SaleDAO();
+
+    private final SaleApiClient saleApiClient = new SaleApiClient();
     
     public static final DateTimeFormatter FECHA_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
@@ -57,6 +60,7 @@ public class PendingController implements Initializable {
         
         configurarTabla();
         configurarAcciones();
+        configurarPaginacion();
         configurarBusqueda();
         suscribirEventos();
         cargarVentasPendientes();    
@@ -78,29 +82,29 @@ public class PendingController implements Initializable {
                     data.getValue().getFolio()));
         colCliente.setCellValueFactory(data ->
             new SimpleStringProperty(
-                    data.getValue().getCliente() == null
+                    data.getValue().getClient()== null
                             ? "Cliente no disponible"
-                            : data.getValue().getCliente().getNombre()));
+                            : data.getValue().getClient().getName()));
         colFecha.setCellValueFactory(data ->
             new SimpleStringProperty(
-                    data.getValue().getFecha() == null
+                    data.getValue().getSaleDate() == null
                             ? "-"
                             : data.getValue()
-                                    .getFecha()
+                                    .getSaleDate()
                                     .format(FECHA_FORMATTER)));
         colTotal.setCellValueFactory(data ->
             new SimpleDoubleProperty(
-                    data.getValue().getTotal()).asObject());
+                    data.getValue().getFinalTotal()).asObject());
         colPagado.setCellValueFactory(data ->
             new SimpleDoubleProperty(
-                    data.getValue().getPagado()).asObject());
+                    data.getValue().getPaid()).asObject());
         colRestante.setCellValueFactory(data ->
             new SimpleDoubleProperty(
-                    data.getValue().getRestante()).asObject());
+                    data.getValue().getRemaining()).asObject());
         colEstadoPago.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getEstadoPago()));
+            new SimpleStringProperty(data.getValue().getPaymentStatus()));
         colEstadoTrabajo.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getEstadoTrabajo()));
+            new SimpleStringProperty(data.getValue().getWorkStatus()));
 
     // ==============================
     // FORMATO DE LAS COLUMNAS
@@ -142,73 +146,92 @@ public class PendingController implements Initializable {
 
     private void cargarVentasPendientes() {
                 
-        listaVentas.setAll(
-            pendingDAO.obtenerTrabajosActivos()
-        );
-        actualizarContador();
-        cargarResumen();
+        try {
+
+            List<Sale> trabajosPorRealizar =
+                saleApiClient.getSalesToDo();
+
+            List<Sale> trabajosPorEntregar =
+                saleApiClient.getSalesToDeliver();
+
+            listaVentas.clear();
+            listaVentas.addAll(trabajosPorRealizar);
+            listaVentas.addAll(trabajosPorEntregar);
+            actualizarContador();
+            cargarResumen();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            mostrarError("No se pudieron cargar las ventas desde el API.");
+        }
     }
 
     private void configurarBusqueda() {
         
-        txtBuscarVenta.textProperty().addListener((obs, oldValue, newValue) -> {
+        listaFiltrada = SearchUtils.setupSearch(
+            txtBuscarVenta,
+            listaVentas,
+            Sale::getFolio,
+            sale -> sale.getClient() != null
+                    ? sale.getClient().getName()
+                    : null
+        );
 
-        String filtro = newValue == null
-                ? ""
-                : newValue.trim().toLowerCase();
+        listaFiltrada.addListener(
+            (javafx.collections.ListChangeListener<Sale>) change -> {
 
-        listaFiltrada.setPredicate(venta -> {
+                tablePagination.setFilteredItems(
+                        listaFiltrada
+                );
 
-            if (filtro.isBlank()) {
-                return true;
+                actualizarContador();
             }
-
-            return venta.getFolio().toLowerCase().contains(filtro)
-                    || venta.getCliente().getNombre().toLowerCase().contains(filtro);
-        });
-
-        actualizarContador();
-    });
-
-    tblVentas.setItems(listaFiltrada);
+        );                
     }
         
-    private void entregarVenta(Venta venta){
+    private void entregarVenta(Sale sale){
         
-        if (venta == null) {
+        if (sale == null) {
             return;
         }
 
-        if (!"COMPLETA".equalsIgnoreCase(venta.getEstadoPago())) {
+        if (!"COMPLETA".equalsIgnoreCase(sale.getPaymentStatus())) {
             mostrarError(
                 "No puedes entregar una venta que todavía tiene saldo pendiente."
         );
             return;
         }
 
-        if ("ENTREGADO".equalsIgnoreCase(venta.getEstadoTrabajo())) {
+        if ("ENTREGADO".equalsIgnoreCase(sale.getWorkStatus())) {
             mostrarInfo("La venta ya fue entregada.");
             return;
         }
 
-        boolean resultado = pendingDAO.entregarVenta(venta.getId());
+        boolean resultado;
+        
+        try{
+            resultado = saleApiClient.deliverSale(sale.getId());
+        }catch(IOException | InterruptedException e){
+            e.printStackTrace();
+            mostrarError("No se pudo entregar la venta.");
+            return;
+        }
 
         if (!resultado) {
             mostrarError("No se pudo entregar la venta.");
             return;
         }
 
-        EventBus.publishVenta(venta.getId());
+        EventBus.publishVenta(sale.getId());
         mostrarExito("Venta entregada correctamente.");
     }
     
-    private void abonarVenta(Venta venta){
+    private void abonarVenta(Sale sale){
         
-        if (venta == null) {
+        if (sale == null) {
             return;
         }
 
-        if ("COMPLETA".equalsIgnoreCase(venta.getEstadoPago())) {
+        if ("COMPLETA".equalsIgnoreCase(sale.getWorkStatus())) {
             mostrarInfo("La venta ya está liquidada.");
             return;
         }
@@ -221,7 +244,7 @@ public class PendingController implements Initializable {
             Parent vista = loader.load();
 
             AbonosController controller = loader.getController();
-            controller.setVenta(venta);
+            controller.setVenta(sale);
 
             Stage stage = new Stage();
             stage.setScene(new Scene(vista));
@@ -237,61 +260,77 @@ public class PendingController implements Initializable {
         }
     }
 
-    private void recepcionarVenta(Venta venta){
+    private void recepcionarVenta(Sale sale){
         
-        if (venta == null) {
+        if (sale == null) {
             return;
         }
 
-        if ("RECIBIDO".equalsIgnoreCase(venta.getEstadoTrabajo())) {
+        if ("RECIBIDO".equalsIgnoreCase(sale.getWorkStatus())) {
             mostrarInfo("La venta ya fue recibida en óptica.");
             return;
         }
 
-        if ("ENTREGADO".equalsIgnoreCase(venta.getEstadoTrabajo())) {
+        if ("ENTREGADO".equalsIgnoreCase(sale.getWorkStatus())) {
             mostrarError(
                 "No puedes recepcionar una venta que ya fue entregada."
             );
             return;
         }
 
-        boolean resultado = pendingDAO.recepcionarVenta(venta.getId());
+        boolean resultado;
+        
+        try{
+            resultado = saleApiClient.receiveSale(sale.getId());
+        } catch(IOException | InterruptedException e){
+            e.printStackTrace();
+            mostrarError("No se pudo actualizar la recepción.");
+            return;
+        }
 
         if (!resultado) {
             mostrarError("No se pudo actualizar la recepción.");
             return;
         }
 
-        EventBus.publishVenta(venta.getId());
+        EventBus.publishVenta(sale.getId());
         mostrarExito("Producto recibido en óptica.");        
     }
     
-    private void cancelarVenta(Venta venta){
+    private void cancelarVenta(Sale sale){
         
-        if(venta == null){
+        if(sale == null){
             return;
         }
         
-        Optional<Empleados> autorizado = AuthorizationDialog.solicitarGerente();
+        Optional<Seller> autorizado = AuthorizationDialog.solicitarGerente();
         
         if(autorizado.isEmpty()){
             return;
         }
         
-        Empleados responsable = autorizado.get();
-        
-        boolean resultado = saleDAO.cancelarVenta(venta.getId());
-        
-        if(!resultado){
-            mostrarError("No se Puede Cancelar Venta");
-            return;
+        Seller responsable = autorizado.get();
+                        
+        try{
+            
+           boolean resultado = saleApiClient.cancelSale(sale.getId());
+           
+           if(!resultado){
+                mostrarError("No Se Puede Cancelar La Venta");
+                return;
+            }
+           
+            EventBus.publishVenta(sale.getId());
+            mostrarExito(
+                "Venta cancelada correctamente por "
+                + responsable.getName()
+                + "."
+            );
+            cargarVentasPendientes();
+        }catch(IOException | InterruptedException e)  {
+            e.printStackTrace();
+            mostrarError("No Se Puede Cancelar Venta");
         }
-        
-        EventBus.publishVenta(venta.getId());
-        
-        mostrarExito("Venta cancelada correctamente por "
-            + responsable.getNombre()
-            + ".");       
     }
     
     private void mostrarError(String mensaje) {
@@ -334,12 +373,20 @@ public class PendingController implements Initializable {
     
     private void cargarResumen() {
 
-        ReportPendientes resumen = pendingDAO.obtenerResumenPendientes();
-
-        lblTrabajosRealizar.setText(String.valueOf(resumen.getTrabajosRealizar()));
-        lblTrabajosEntregar.setText(String.valueOf(resumen.getTrabajosEntregar()));
-        lblSaldoRealizar.setText(MONEDA.format(resumen.getSaldoRealizar()));
-        lblSaldoEntregar.setText(MONEDA.format(resumen.getSaldoEntregar()));
+        try{
+            PendingReport summary =saleApiClient.getPendingSummary();
+            
+            lblTrabajosRealizar.setText(String.valueOf(summary.getSalesToDo()));
+            lblTrabajosEntregar.setText(String.valueOf(summary.getSalesToDeliver()));
+            lblSaldoRealizar.setText(MONEDA.format(summary.getBalanceToDo()));
+            lblSaldoEntregar.setText(MONEDA.format(summary.getBalanceToDeliver()));
+            
+        } catch(IOException | InterruptedException e){
+            e.printStackTrace();
+            mostrarError(
+                "No se pudo cargar el resumen de ventas pendientes."
+            );
+        }        
 
     }
 
@@ -359,7 +406,7 @@ public class PendingController implements Initializable {
         colEstadoTrabajo.setCellFactory(column -> crearCeldaBadgeTrabajo());
     }
     
-    private TableCell<Venta, String> crearCeldaBadgePago() {
+    private TableCell<Sale, String> crearCeldaBadgePago() {
 
     return new TableCell<>() {
 
@@ -415,7 +462,7 @@ public class PendingController implements Initializable {
         };
     }
     
-    private TableCell<Venta, String> crearCeldaBadgeTrabajo() {
+    private TableCell<Sale, String> crearCeldaBadgeTrabajo() {
 
         return new TableCell<>() {
 
@@ -499,8 +546,8 @@ public class PendingController implements Initializable {
         tblVentas.setRowFactory(table -> new TableRow<>() {
 
         @Override
-        protected void updateItem(Venta venta, boolean empty) {
-            super.updateItem(venta, empty);
+        protected void updateItem(Sale sale, boolean empty) {
+            super.updateItem(sale, empty);
 
             getStyleClass().removeAll(
                     "pending-row-process",
@@ -510,12 +557,12 @@ public class PendingController implements Initializable {
                     "pending-row-default"
             );
 
-            if (empty || venta == null) {
+            if (empty || sale == null) {
                 return;
             }
 
-            String estadoTrabajo = venta.getEstadoTrabajo();
-            String estadoPago = venta.getEstadoPago();
+            String estadoTrabajo = sale.getWorkStatus();
+            String estadoPago = sale.getPaymentStatus();
 
             if ("PENDIENTE".equalsIgnoreCase(estadoPago)
                     && ("RECIBIDO".equalsIgnoreCase(estadoTrabajo)
@@ -546,6 +593,16 @@ public class PendingController implements Initializable {
             }
         }
     });
+    }
+    
+    private void configurarPaginacion() {
+
+        tablePagination = new TablePagination<>(
+        tblVentas,
+        paginationController
+        );
+        paginationController.setItemsPerPage(6);
+        paginationController.setShowItemsPerPageSelector(false); 
     }
     
 }

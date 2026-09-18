@@ -1,15 +1,18 @@
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.database.BranchDAO;
+import com.gerardgv.posclarity.Ui.PosNotification;
+import com.gerardgv.posclarity.api.BranchApiClient;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.utils.*;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.beans.property.*;
 import javafx.collections.*;
-import javafx.collections.transformation.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 
 public class BranchController implements Initializable {
     
@@ -27,10 +30,12 @@ public class BranchController implements Initializable {
     @FXML private TableColumn<Branch, String> colTelefono;
     @FXML private TableColumn<Branch, Boolean> colEstatus;
     @FXML private TableColumn<Branch, Void> colAcciones;
-
-    private final BranchDAO branchDAO = new BranchDAO();
+    @FXML private StackPane root;
+    
+    private final BranchApiClient branchApiClient = new BranchApiClient();
+        
     private ObservableList<Branch> listaSucursales = FXCollections.observableArrayList();
-    private FilteredList<Branch> filteredData;
+
 
     private Branch sucursalSeleccionada = null;
     private boolean modoEdicion = false;
@@ -41,19 +46,12 @@ public class BranchController implements Initializable {
         
         configurarTabla();
         cargarSucursales();
+        formatearCombos();
         
         SearchUtils.setupSearch(txtBuscar, tblSucursales, listaSucursales,
-                s -> s.getSucursal(),
-                s -> s.getDireccion());
-                
-        colEstatus.setCellFactory(column ->
-                TableUtils.createActiveToggle(
-                Branch::getId,
-                branchDAO::updateEstado));
-        
-        colAcciones.setCellFactory(param ->
-            TableUtils.createEditButton(this::seleccionarSucursalDesdeTabla));
-        
+                s -> s.getName(),
+                s -> s.getAddress());
+
         txtBuscar.sceneProperty().addListener((obs,oldScene,scene)->{
             if(scene != null){
                 scene.setOnKeyPressed(e->{
@@ -64,10 +62,28 @@ public class BranchController implements Initializable {
             }
         });
     }
+    
+    /*
+    TABLA YA CONECTADA A "POSAPI"
+    */
 
     private void cargarSucursales() {
-        listaSucursales.clear();
-        listaSucursales.addAll(branchDAO.getAll());
+        
+        try{
+            
+            listaSucursales.setAll(branchApiClient.getAll());
+            
+        } catch( IOException  e){
+            
+            mostrarError("No Fue Posible Consultar las Sucursales Desde la API.\n"            
+                    + e.getMessage());
+            
+        } catch(InterruptedException e){
+            
+            Thread.currentThread().interrupt();
+            mostrarError("La consulta de sucursales fue interrumpida.");
+            
+        }
     }
     
     private void configurarTabla(){
@@ -76,16 +92,16 @@ public class BranchController implements Initializable {
             new SimpleIntegerProperty(data.getValue().getId()).asObject());
         
         colSucursal.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getSucursal()));
+            new SimpleStringProperty(data.getValue().getName()));
         
         colDireccion.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getDireccion()));
+            new SimpleStringProperty(data.getValue().getAddress()));
         
         colTelefono.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getTelefono()));
+            new SimpleStringProperty(data.getValue().getPhone()));
         
         colEstatus.setCellValueFactory(data ->
-            new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
+            new SimpleBooleanProperty(data.getValue().isActive()).asObject());
         
         tblSucursales.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
@@ -98,29 +114,66 @@ public class BranchController implements Initializable {
             return;
         }
         
-        Branch b = new Branch();
+        Branch branch = new Branch();
 
-        b.setSucursal(txtSucursal.getText());
-        b.setTelefono(txtTelefono.getText());
-        b.setDireccion(txtDireccion.getText());
+        branch.setName(txtSucursal.getText());
+        branch.setPhone(txtTelefono.getText());
+        branch.setAddress(txtDireccion.getText());
 
-        boolean resultado;
+        boolean result;
         
         if(modoEdicion){
-            b.setId(sucursalSeleccionada.getId());
-            b.setActivo(sucursalSeleccionada.isActivo());
-            resultado = branchDAO.update(b);
+            
+            branch.setId(sucursalSeleccionada.getId());
+            branch.setCode(sucursalSeleccionada.getCode());
+            branch.setActive(sucursalSeleccionada.isActive());
+            
+            try{
+                
+                Branch updateBranch = branchApiClient.update(branch);
+                result = updateBranch != null;
+                
+            } catch (IOException e){
+                
+                mostrarError(
+                "No fue posible actualizar la sucursal mediante la API.\n"
+                + e.getMessage());
+                return;
+                
+            } catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+                mostrarError("La actualización de la sucursal fue interrumpida.");
+                return;
+            }
+            
         } else {
-            b.setActivo(true);
-            resultado = branchDAO.insert(b);
+            
+            branch.setActive(true);
+
+            try {
+                
+                Branch createdBranch = branchApiClient.create(branch);
+                result = createdBranch != null;
+                
+            } catch (IOException e) {
+                
+                mostrarError("No fue posible guardar la sucursal mediante la API.\n"
+                    + e.getMessage());
+                return;
+            } catch (InterruptedException e){
+                Thread.currentThread().interrupt();
+                mostrarError("El registro de la sucursal fue interrumpido.");
+                return;
+            }
         }
         
-        if(resultado){
-            mostrarInfo("Sucursal Guardada");
+        if(result){
+            mostrarExito(modoEdicion ? "Sucursal Actualizada Correctamente."
+                    : "Sucursal Guardada Correctamente.");
             clearform();
             cargarSucursales();
         } else {
-            mostrarError("No se Pudo Guardar");
+            mostrarError("No se Pudo Guardar Sucursal");
         }
     }
 
@@ -146,26 +199,18 @@ public class BranchController implements Initializable {
         sucursalSeleccionada = b;
         modoEdicion = true;
         
-        txtSucursal.setText(b.getSucursal());
-        txtTelefono.setText(b.getTelefono());
-        txtDireccion.setText(b.getDireccion()); 
+        txtSucursal.setText(b.getName());
+        txtTelefono.setText(b.getPhone());
+        txtDireccion.setText(b.getAddress()); 
         btnGuardar.setText("Actualizar");
     }
     
     private void mostrarError(String mensaje){
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+        PosNotification.error(root, "Atención", mensaje);
     }
     
-    private void mostrarInfo(String mensaje){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Información");
-        alert.setHeaderText(null);
-        alert.setContentText(mensaje);
-        alert.showAndWait();
+    private void mostrarExito(String mensaje){
+        PosNotification.success(root, "Listo", mensaje);
     }
     
     private boolean validarCampos(){
@@ -199,5 +244,18 @@ public class BranchController implements Initializable {
     private void nuevoRegistro(){
         clearform();
    }
+
+    private void formatearCombos() {
+        
+        colEstatus.setCellFactory(column ->
+                TableUtils.createActiveToggle(
+                Branch::getId,
+                (id,active) ->
+                 branchApiClient.updateStatus(id, active)!= null));
+        
+        colAcciones.setCellFactory(param ->
+            TableUtils.createEditButton(this::seleccionarSucursalDesdeTabla));
+        
+    }
 
 }

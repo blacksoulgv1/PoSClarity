@@ -2,111 +2,126 @@ package com.gerardgv.posclarity.models;
 
 public class TicketData {
     
-    private String sucursal;
-    private String telefono_suc;
-    private String direccion_suc;
-    private String cliente;
-    private String telefono_clien;
-    private String direccion_clien;
-    private String vendedor;
-    private String fecha;
-    private String nota;
+    private String branch;
+    private String branchPhone;
+    private String branchAddress;
+    private String client;
+    private String clientPhone;
+    private String clientAddress;
+    private String seller;
+    private String date;
+    private String note;
     private double subtotal;
-    private double descuento;
+    private double discount;
     private double total;
-    private double pago;
-    private double pendiente;
+    private double payment;
+    private double pending;
 
     public TicketData() {
     }    
   
-    public TicketData(String sucursal, String telefono_suc, String direccion_suc, String cliente, String telefono_clien, String direccion_clien, String vendedor, String fecha, String nota, double subtotal, double descuento, double total, double pago, double pendiente) {
-        this.sucursal = sucursal;
-        this.telefono_suc = telefono_suc;
-        this.direccion_suc = direccion_suc;
-        this.cliente = cliente;
-        this.telefono_clien = telefono_clien;
-        this.direccion_clien = direccion_clien;
-        this.vendedor = vendedor;
-        this.fecha = fecha;
-        this.nota = nota;
+    public TicketData(
+            String branch,
+            String branchPhone,
+            String branchAddress,
+            String client,
+            String clientPhone,
+            String clientAddress,
+            String seller,
+            String date,
+            String note,
+            double subtotal,
+            double discount,
+            double total,
+            double payment,
+            double pending) {
+        
+        this.branch = branch;
+        this.branchPhone = branchPhone;
+        this.branchAddress = branchAddress;
+        this.client = client;
+        this.clientPhone = clientPhone;
+        this.clientAddress = clientAddress;
+        this.seller = seller;
+        this.date = date;
+        this.note = note;
         this.subtotal = subtotal;
-        this.descuento = descuento;
+        this.discount = discount;
         this.total = total;
-        this.pago = pago;
-        this.pendiente = pendiente;
+        this.payment = payment;
+        this.pending = pending;
     }
 
-    public String getSucursal() {
-        return sucursal;
+    public String getBranch() {
+        return branch;
     }
 
-    public void setSucursal(String sucursal) {
-        this.sucursal = sucursal;
+    public void setBranch(String branch) {
+        this.branch = branch;
     }
 
-    public String getTelefono_suc() {
-        return telefono_suc;
+    public String getBranchPhone() {
+        return branchPhone;
     }
 
-    public void setTelefono_suc(String telefono_suc) {
-        this.telefono_suc = telefono_suc;
+    public void setBranchPhone(String branchPhone) {
+        this.branchPhone = branchPhone;
     }
 
-    public String getDireccion_suc() {
-        return direccion_suc;
+    public String getBranchAddress() {
+        return branchAddress;
     }
 
-    public void setDireccion_suc(String direccion_suc) {
-        this.direccion_suc = direccion_suc;
+    public void setBranchAddress(String branchAddress) {
+        this.branchAddress = branchAddress;
     }
 
-    public String getCliente() {
-        return cliente;
+    public String getClient() {
+        return client;
     }
 
-    public void setCliente(String cliente) {
-        this.cliente = cliente;
+    public void setClient(String client) {
+        this.client = client;
     }
 
-    public String getTelefono_clien() {
-        return telefono_clien;
+    public String getClientPhone() {
+        return clientPhone;
     }
 
-    public void setTelefono_clien(String telefono_clien) {
-        this.telefono_clien = telefono_clien;
+    public void setClientPhone(String clientPhone) {
+        this.clientPhone = clientPhone;
     }
 
-    public String getDireccion_clien() {
-        return direccion_clien;
+    public String getClientAddress() {
+        return clientAddress;
     }
 
-    public void setDireccion_clien(String direccion_clien) {
-        this.direccion_clien = direccion_clien;
+    public void setClientAddress(String clientAddress) {
+        this.clientAddress = clientAddress;
     }
 
-    public String getVendedor() {
-        return vendedor;
+    public String getSeller() {
+        return seller;
     }
 
-    public void setVendedor(String vendedor) {
-        this.vendedor = vendedor;
+    public void setSeller(String seller) {
+        this.seller = seller;
     }
 
-    public String getFecha() {
-        return fecha;
+    public String getDate() {
+        return date;
     }
 
-    public void setFecha(String fecha) {
-        this.fecha = fecha;
+    public void setDate(String date) {
+        this.date = date;
     }
 
-    public String getNota() {
-        return nota;
+    public String getNote() {
+        return note;
     }
 
-    public void setNota(String nota) {
-        this.nota = nota;
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public double getSubtotal() {
@@ -117,12 +132,12 @@ public class TicketData {
         this.subtotal = subtotal;
     }
 
-    public double getDescuento() {
-        return descuento;
+    public double getDiscount() {
+        return discount;
     }
 
-    public void setDescuento(double descuento) {
-        this.descuento = descuento;
+    public void setDiscount(double discount) {
+        this.discount = discount;
     }
 
     public double getTotal() {
@@ -133,22 +148,19 @@ public class TicketData {
         this.total = total;
     }
 
-    public double getPago() {
-        return pago;
+    public double getPayment() {
+        return payment;
     }
 
-    public void setPago(double pago) {
-        this.pago = pago;
+    public void setPayment(double payment) {
+        this.payment = payment;
     }
 
-    public double getPendiente() {
-        return pendiente;
+    public double getPending() {
+        return pending;
     }
 
-    public void setPendiente(double pendiente) {
-        this.pendiente = pendiente;
-    }
-    
-    
-    
+    public void setPending(double pending) {
+        this.pending = pending;
+    }           
 }

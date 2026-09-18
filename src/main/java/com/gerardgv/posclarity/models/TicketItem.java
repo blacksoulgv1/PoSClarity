@@ -2,61 +2,65 @@ package com.gerardgv.posclarity.models;
 
 public class TicketItem {
     
-    private int cantidad;
-    private String descripcion;
-    private double precio;
-    private double monto;
-    private String promo;
+    private int quantity;
+    private String description;
+    private double price;
+    private double amount;
+    private String promotion;
 
     public TicketItem() {
     }
 
-    public TicketItem(int cantidad, String descripcion, double precio, double monto, String promo) {
-        this.cantidad = cantidad;
-        this.descripcion = descripcion;
-        this.precio = precio;
-        this.monto = monto;
-        this.promo = promo;
+    public TicketItem(
+            int quantity,
+            String description,
+            double price,
+            double amount,
+            String promotion) {
+        this.quantity = quantity;
+        this.description = description;
+        this.price = price;
+        this.amount = amount;
+        this.promotion = promotion;
     }
 
-    public int getCantidad() {
-        return cantidad;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
-    public String getDescripcion() {
-        return descripcion;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public double getPrecio() {
-        return precio;
+    public double getPrice() {
+        return price;
     }
 
-    public void setPrecio(double precio) {
-        this.precio = precio;
+    public void setPrice(double price) {
+        this.price = price;
     }
 
-    public double getMonto() {
-        return monto;
+    public double getAmount() {
+        return amount;
     }
 
-    public void setMonto(double monto) {
-        this.monto = monto;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
 
-    public String getPromo() {
-        return promo;
+    public String getPromotion() {
+        return promotion;
     }
 
-    public void setPromo(String promo) {
-        this.promo = promo;
-    }        
-    
+    public void setPromotion(String promotion) {
+        this.promotion = promotion;
+    }
 }

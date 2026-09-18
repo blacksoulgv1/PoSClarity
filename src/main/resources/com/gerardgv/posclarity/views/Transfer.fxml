@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/23.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.gerardgv.posclarity.controllers.TransferController">
+   <center>
+      <HBox spacing="15.0">
+         <children>
+            <TableView fx:id="tblInventarioOrigen" prefHeight="200.0" prefWidth="400.0">
+              <columns>
+                <TableColumn fx:id="colModelo" prefWidth="75.0" text="Modelo" />
+                <TableColumn fx:id="colMarca" prefWidth="75.0" text="Marca" />
+                  <TableColumn fx:id="colCategoria" prefWidth="75.0" text="Categoría" />
+                  <TableColumn fx:id="colStock" prefWidth="75.0" text="Stock" />
+              </columns>
+               <HBox.margin>
+                  <Insets left="5.0" />
+               </HBox.margin>
+            </TableView>
+            <VBox alignment="CENTER" prefHeight="200.0" prefWidth="100.0" spacing="10.0">
+               <children>
+                  <TextField fx:id="txtCantidad" prefWidth="100.0" promptText="Cantidad" />
+                  <Button fx:id="btnAgregar" mnemonicParsing="false" prefWidth="100.0" text="&gt;&gt;" />
+               </children>
+            </VBox>
+            <TableView fx:id="tblDetalle" prefHeight="200.0" prefWidth="400.0">
+              <columns>
+                <TableColumn fx:id="colProductoDetalle" prefWidth="75.0" text="Producto" />
+                <TableColumn fx:id="colCantidadDetalle" prefWidth="75.0" text="Cantidad" />
+              </columns>
+               <HBox.margin>
+                  <Insets right="5.0" />
+               </HBox.margin>
+            </TableView>
+         </children>
+         <padding>
+            <Insets top="15.0" />
+         </padding>
+      </HBox>
+   </center>
+   <top>
+      <HBox prefHeight="100.0" prefWidth="200.0" spacing="15.0" BorderPane.alignment="CENTER_LEFT">
+         <padding>
+            <Insets left="15.0" top="15.0" />
+         </padding>
+         <children>
+            <Label text="Sucursal origen" />
+            <ComboBox fx:id="cmbOrigen" prefWidth="150.0" />
+            <Label text="Sucursal Destino" />
+            <ComboBox fx:id="cmbDestino" prefWidth="150.0" />
+         </children>
+      </HBox>
+   </top>
+   <bottom>
+      <HBox prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER_RIGHT">
+         <padding>
+            <Insets left="15.0" top="15.0" />
+         </padding>
+         <children>
+            <Button fx:id="btnTraspasar" mnemonicParsing="false" prefWidth="180.0" text="Realizar Traspaso" />
+         </children>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+      </HBox>
+   </bottom>
+</BorderPane>

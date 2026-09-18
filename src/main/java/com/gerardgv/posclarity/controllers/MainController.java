@@ -1,15 +1,12 @@
 package com.gerardgv.posclarity.controllers;
 
 //Librerias Java
-import com.gerardgv.posclarity.models.Empleados;
-import com.gerardgv.posclarity.utils.AuthorizationDialog;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.HashMap;
 import java.util.Map;
 import com.gerardgv.posclarity.utils.ViewInf;
-import java.util.Optional;
 
 //Librerias Java Fx
 import javafx.fxml.FXML;
@@ -60,13 +57,22 @@ public class MainController implements Initializable {
             
             //Se Guarda Vista & Controlador.
             Showviews.put(vista, new ViewInf(root, controller));
-            stackContent.getChildren().setAll(root);
+            mostrarVista(root);
         }catch(IOException e){
             System.out.println("Error al Cargar la Vista:" + vista);
             e.printStackTrace();
         }       
     }
     
+    private void mostrarVista(Parent root) {
+        
+        StackPane.setAlignment(root, javafx.geometry.Pos.TOP_LEFT);
+        stackContent.getChildren().setAll(root);
+        System.out.println("Stack width: " + stackContent.getWidth());
+System.out.println("Stack height: " + stackContent.getHeight());
+System.out.println("View width: " + root.getBoundsInParent().getWidth());
+System.out.println("View height: " + root.getBoundsInParent().getHeight());
+    }
     // Funcionamiento de botonos para ventanas
     
     @FXML
@@ -92,12 +98,12 @@ public class MainController implements Initializable {
     @FXML
     private void abrirProductos(){
         
-        Optional<Empleados> autorizado =
+        /*Optional<Empleados> autorizado =
         AuthorizationDialog.solicitarGerente();
 
         if (autorizado.isEmpty()) {
             return;
-        }
+        }*/
         
         viewVista("Productsview");
     }
@@ -110,30 +116,30 @@ public class MainController implements Initializable {
     @FXML
     private void abrirSucursales(){
         
-        Optional<Empleados> autorizado =
+        /*Optional<Empleados> autorizado =
         AuthorizationDialog.solicitarGerente();
 
         if (autorizado.isEmpty()) {
             return;
-        }
+        }*/
         
         viewVista("Branch");
     }
     @FXML
     private void abrirTraspaso(){
-        viewVista("Traspaso");
+        viewVista("Transfer");
     }
     
     @FXML
     private void abrirDescuento(){
-        Optional<Empleados> autorizado =
+        /*Optional<Empleados> autorizado =
         AuthorizationDialog.solicitarGerente();
 
         if (autorizado.isEmpty()) {
             return;
-        }
+        }*/
         
-        viewVista("Descuento");
+        viewVista("Discount");
     }
     @FXML
     private void abrirAbono(){
@@ -142,7 +148,7 @@ public class MainController implements Initializable {
     
     @FXML
     private void abrirEmpleados(){
-        viewVista("Empleados");
+        viewVista("Sellers");
     }
     @FXML
     private void abrirReportes(){

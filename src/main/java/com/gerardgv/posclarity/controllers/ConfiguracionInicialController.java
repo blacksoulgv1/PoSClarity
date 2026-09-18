@@ -1,8 +1,9 @@
 package com.gerardgv.posclarity.controllers;
 
+import com.gerardgv.posclarity.api.InstallationApiClient;
 import com.gerardgv.posclarity.app.App;
-import com.gerardgv.posclarity.database.*;
 import com.gerardgv.posclarity.utils.Configuracion;
+import java.math.BigDecimal;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -11,7 +12,8 @@ public class ConfiguracionInicialController {
     
     @FXML private TextField txtSucursal;
     @FXML private TextField txtDireccion;
-    @FXML private TextField txtTelefono;   
+    @FXML private TextField txtTelefono;
+    @FXML private TextField txtCajaInicial; 
 
     private boolean procesando = false;
 
@@ -28,13 +30,39 @@ public class ConfiguracionInicialController {
                 String nombre = txtSucursal.getText().trim();
                 String direccion = txtDireccion.getText().trim();
                 String telefono = txtTelefono.getText().trim();
+                String cajaTexto = txtCajaInicial.getText().trim();
         
             if(nombre.isEmpty()){
                 mostrarError("El Nombre de la Sucursal es Obligatorio");
-            return;
-        }
+                return;
+            }
+            
+            BigDecimal cajaInicial = BigDecimal.ZERO;
+             
+            if (!cajaTexto.isEmpty()) {
+                try {
+                    cajaInicial = new BigDecimal(cajaTexto);
+                } catch (NumberFormatException e) {
+                    mostrarError("La Caja Inicial no es válida");
+                    return;
+                }
+            }
+
+            if (cajaInicial.compareTo(BigDecimal.ZERO) < 0) {
+                mostrarError("La Caja Inicial no puede ser negativa");
+                return;
+            }
+            
+             InstallationApiClient apiClient =
+                    new InstallationApiClient();
+
+            int idSucursal = apiClient.createInstallation(
+                    nombre,
+                    direccion,
+                    telefono,
+                    cajaInicial
+            );
         
-        int idSucursal = InstalacionDAO.crearSucursal(nombre, direccion, telefono);
         
         if(idSucursal <=0 ){
             mostrarError("No se pudo Crear El Sistema");
@@ -48,10 +76,11 @@ public class ConfiguracionInicialController {
         App.setRoot("main");
 
         } catch (Exception e) {
-         mostrarMensaje("Error");
+            e.printStackTrace();
+            mostrarMensaje("Error al configurar PosClarity");
         } finally{
-           procesando = false;  
-         }
+            procesando = false;  
+        }
     }
     
     private void mostrarMensaje(String msg){

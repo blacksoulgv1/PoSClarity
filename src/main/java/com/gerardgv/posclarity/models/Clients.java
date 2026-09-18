@@ -3,13 +3,13 @@ package com.gerardgv.posclarity.models;
 public class Clients {
     
     private int id;
-    private String nombre;
-    private String telefono;
-    private String direccion;
+    private String name;
+    private String phone;
+    private String address;
     private String odEsf, odCil, odEje;
     private String oiEsf, oiCil, oiEje;
     private String add;
-    private boolean activo = true;
+    private boolean active;
 
     public Clients() {
     }
@@ -19,12 +19,12 @@ public class Clients {
               "\nOI: " + oiEsf + " / " + oiCil + " x " + oiEje +
                 "\nADD: " + add;
     }
-    
-    public Clients(int id, String nombre, String telefono, String direccion, String odEsf, String odCil, String odEje, String oiEsf, String oiCil, String oiEje, String add) {
+
+    public Clients(int id, String name, String phone, String address, String odEsf, String odCil, String odEje, String oiEsf, String oiCil, String oiEje, String add, boolean active) {
         this.id = id;
-        this.nombre = nombre;
-        this.telefono = telefono;
-        this.direccion = direccion;
+        this.name = name;
+        this.phone = phone;
+        this.address = address;
         this.odEsf = odEsf;
         this.odCil = odCil;
         this.odEje = odEje;
@@ -32,6 +32,7 @@ public class Clients {
         this.oiCil = oiCil;
         this.oiEje = oiEje;
         this.add = add;
+        this.active = active;
     }
 
     public int getId() {
@@ -42,28 +43,28 @@ public class Clients {
         this.id = id;
     }
 
-    public String getNombre() {
-        return nombre;
+    public String getName() {
+        return name;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getTelefono() {
-        return telefono;
+    public String getPhone() {
+        return phone;
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
-    public String getDireccion() {
-        return direccion;
+    public String getAddress() {
+        return address;
     }
 
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getOdEsf() {
@@ -122,14 +123,13 @@ public class Clients {
         this.add = add;
     }
 
-    public boolean isActivo() {
-        return activo;
+    public boolean isActive() {
+        return active;
     }
 
-    public void setActivo(boolean activo) {
-        this.activo = activo;
+    public void setActive(boolean active) {
+        this.active = active;
     }
-
     
     
 }

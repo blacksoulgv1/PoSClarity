@@ -23,80 +23,133 @@
         </HBox>
     </top>
 
-    <left>
-        <VBox styleClass="side-menu">
-            
-            <ImageView fitWidth="95" fitHeight="95" preserveRatio="true">
-                <image>
-                    <Image url="@../img/Logo-Clarity.png"/>
-                </image>
-            </ImageView>
+   <left>
+    <ScrollPane fitToWidth="true"
+                fitToHeight="true"
+                hbarPolicy="NEVER"
+                vbarPolicy="AS_NEEDED"
+                styleClass="side-menu-scroll">
 
-            <Label text="PosClarity" styleClass="brand-title"/>
-            <Label text="VENTAS" styleClass="menu-section"/>
-            
-            <Button text="Ventas" onAction="#abrirNuevaVenta" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-shopping-cart" iconSize="18" />
-                </graphic>
-            </Button>
-            <Button text="Ventas Pendientes" onAction="#abrirAbono" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-clock" iconSize="18" />
-                </graphic>
-            </Button>
-            <Button text="Garantías" onAction="#AbrirGarantias" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-shield-alt" iconSize="18" />
-                </graphic>
-            </Button>
-            
-            <Label text="INVENTARIO" styleClass="menu-section"/>
-            
-            <Button text="Productos" onAction="#abrirProductos" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-box" iconSize="18" />
-                </graphic>
-            </Button>
-            <Button text="Traspaso" onAction="#abrirTraspaso" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-exchange-alt" iconSize="18" />
-                </graphic>
-            </Button>
-            <Button text="Descuentos" onAction="#abrirDescuento" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-tags" iconSize="18" />
-                </graphic>
-            </Button>
+        <content>
+            <VBox styleClass="side-menu">
 
-            <Label text="CATÁLOGOS" styleClass="menu-section"/>
-            
-            <Button text="Clientes" onAction="#abrirClientes" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-users" iconSize="18" />
-                </graphic>
-            </Button>
-            <Button text="Sucursales" onAction="#abrirSucursales" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-store" iconSize="18" />
-                </graphic>
-            </Button>
-            <Button text="Colaboradores" onAction="#abrirEmpleados" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-user-tie" iconSize="18" />
-                </graphic>
-            </Button>
+                <ImageView fitWidth="95"
+                           fitHeight="95"
+                           preserveRatio="true">
+                    <image>
+                        <Image url="@../img/Logo-Clarity.png"/>
+                    </image>
+                </ImageView>
 
-            <Label text="REPORTES" styleClass="menu-section"/>
-            
-            <Button text="Reportes" onAction="#abrirReportes" styleClass="menu-button">
-                <graphic>
-                    <FontIcon iconLiteral="fas-chart-line" iconSize="18" />
-                </graphic>
-            </Button>
+                <Label text="PosClarity"
+                       styleClass="brand-title"/>
 
-        </VBox>
-    </left>
+                <Label text="VENTAS"
+                       styleClass="menu-section"/>
+
+                <Button text="Ventas"
+                        onAction="#abrirNuevaVenta"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-shopping-cart"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Button text="Ventas Pendientes"
+                        onAction="#abrirAbono"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-clock"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Button text="Garantías"
+                        onAction="#AbrirGarantias"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-shield-alt"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Label text="INVENTARIO"
+                       styleClass="menu-section"/>
+
+                <Button text="Productos"
+                        onAction="#abrirProductos"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-box"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Button text="Traspaso"
+                        onAction="#abrirTraspaso"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-exchange-alt"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Button text="Descuentos"
+                        onAction="#abrirDescuento"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-tags"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Label text="CATÁLOGOS"
+                       styleClass="menu-section"/>
+
+                <Button text="Clientes"
+                        onAction="#abrirClientes"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-users"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Button text="Sucursales"
+                        onAction="#abrirSucursales"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-store"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Button text="Colaboradores"
+                        onAction="#abrirEmpleados"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-user-tie"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+                <Label text="REPORTES"
+                       styleClass="menu-section"/>
+
+                <Button text="Reportes"
+                        onAction="#abrirReportes"
+                        styleClass="menu-button">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-chart-line"
+                                  iconSize="18"/>
+                    </graphic>
+                </Button>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+</left>
 
     <center>
         <StackPane fx:id="stackContent" styleClass="content-area"/>

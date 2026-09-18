@@ -1,5 +1,4 @@
-.root,
-.pos-theme{
+.root{
     -pos-primary: #14b8a6;
     -pos-primary-dark: #0f766e;
     -pos-success: #10b981;
@@ -13,4 +12,13 @@
     -pos-soft: #f8fafc;
     -pos-text: #0f172a;
     -pos-muted: #64748b;
+}
+
+/* =========================================================
+   CONTENEDOR UNIVERSAL DE VISTAS
+   ========================================================= */
+
+.pos-view {
+    -fx-alignment: TOP_LEFT;
+    -fx-spacing: 18px;
 }

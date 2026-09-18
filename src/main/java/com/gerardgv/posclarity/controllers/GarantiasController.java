@@ -1,11 +1,12 @@
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.Ui.PosNotification;
-import com.gerardgv.posclarity.Ui.PosTable;
-import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.Ui.*;
+import com.gerardgv.posclarity.api.SaleApiClient;
+import com.gerardgv.posclarity.api.WarrantyApiClient;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.service.TicketService;
 import com.gerardgv.posclarity.utils.*;
+import java.io.IOException;
 import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -43,13 +44,13 @@ public class GarantiasController implements Initializable {
     @FXML private TextField txtEjeOI,txtEjeOI1;
     @FXML private TextField txtAdd,txtAdd1;
     
-    @FXML private TableView<Garantia> tblGarantias;
-    @FXML private TableColumn<Garantia, String> colFolio;
-    @FXML private TableColumn<Garantia, String> colCliente;
-    @FXML private TableColumn<Garantia, String> colProducto;
-    @FXML private TableColumn<Garantia, String> colEstado;
-    @FXML private TableColumn<Garantia, String> colFecha;
-    @FXML private TableColumn<Garantia, Void> colAcciones;
+    @FXML private TableView<Warranty> tblGarantias;
+    @FXML private TableColumn<Warranty, String> colFolio;
+    @FXML private TableColumn<Warranty, String> colCliente;
+    @FXML private TableColumn<Warranty, String> colProducto;
+    @FXML private TableColumn<Warranty, String> colEstado;
+    @FXML private TableColumn<Warranty, String> colFecha;
+    @FXML private TableColumn<Warranty, Void> colAcciones;
     
     @FXML private SplitPane splitGarantias;
     @FXML private ScrollPane scrollFormulario;
@@ -68,10 +69,11 @@ public class GarantiasController implements Initializable {
     private boolean procesando = false;
     
     private List<SaleItem> productosGarantia = new ArrayList<>();
-    private final GarantiasDAO garantiaDAO = new GarantiasDAO();
-    private final SaleDAO saleDAO = new SaleDAO();
-    private Venta ventaSeleccionada;
-    private final ObservableList<Garantia> garantiasActivas = FXCollections.observableArrayList();
+    private final SaleApiClient saleApiClient = new SaleApiClient();
+    private final WarrantyApiClient warrantyApiClient =new WarrantyApiClient();
+    
+    private Sale ventaSeleccionada;
+    private final ObservableList<Warranty> garantiasActivas = FXCollections.observableArrayList();
 
     private final Map<String,String> accionesPorMotivo = new HashMap<>();
     
@@ -97,31 +99,31 @@ public class GarantiasController implements Initializable {
 
     colCliente.setCellValueFactory(data ->
             new SimpleStringProperty(
-                    valorSeguro(data.getValue().getCliente())
+                    valorSeguro(data.getValue().getClientName())
             )
     );
 
     colProducto.setCellValueFactory(data ->
             new SimpleStringProperty(
-                    valorSeguro(data.getValue().getMotivo())
+                    valorSeguro(data.getValue().getReason())
             )
     );
 
     colEstado.setCellValueFactory(data ->
             new SimpleStringProperty(
-                    valorSeguro(data.getValue().getEstado())
+                    valorSeguro(data.getValue().getStatus())
             )
     );
 
     colFecha.setCellValueFactory(data -> {
 
-        if(data.getValue().getFechaSolicitud() == null){
+        if(data.getValue().getRequestDate() == null){
             return new SimpleStringProperty("");
         }
 
         return new SimpleStringProperty(
                 data.getValue()
-                        .getFechaSolicitud()
+                        .getRequestDate()
                         .format(
                                 DateTimeFormatter.ofPattern(
                                         "dd/MM/yyyy HH:mm"
@@ -141,7 +143,19 @@ public class GarantiasController implements Initializable {
 }
     
     private void cargarGarantiasActivas(){
-        garantiasActivas.setAll(garantiaDAO.obtenerGarantiasActivas());
+        
+        try{
+            
+            int branchId = Session.getSucursal().getId();
+
+            garantiasActivas.setAll(
+                warrantyApiClient.getActiveWarranties(branchId)
+            );
+        } catch(IOException | InterruptedException e){
+            
+            e.printStackTrace();
+            mostrarError("No se pudieron cargar las garantías.");
+        }
     }
     
     private void cargarCombos(){
@@ -165,41 +179,47 @@ public class GarantiasController implements Initializable {
             txtFolioVenta.requestFocus();
             return;
         }
-
-        ventaSeleccionada = saleDAO.buscarPorFolio(folio);
-
-        if(ventaSeleccionada == null){
+        
+        try{
             
+           ventaSeleccionada = saleApiClient.getByFolio(folio); 
+           
+        } catch(IOException | InterruptedException e){
+            
+            e.printStackTrace();
+            limpiarDatosVenta();
+            mostrarError("No se pudo consultar la venta: " + e.getMessage());
+            return;
+        }
+        
+        if (ventaSeleccionada == null) {
+
             limpiarDatosVenta();
             mostrarError("No se encontró una venta con el folio indicado.");
             return;
         }
+        
+        if (!"ENTREGADO".equalsIgnoreCase(
+            ventaSeleccionada.getWorkStatus())) {
 
-        if(!"ENTREGADO".equalsIgnoreCase(ventaSeleccionada.getEstadoTrabajo())){
-            
             limpiarDatosVenta();
-            mostrarAdvertencia( "Solo se pueden generar garantías " + "de ventas entregadas.");
-
+            mostrarAdvertencia("Solo se pueden generar garantías de ventas entregadas.");
             return;
         }
 
-        if(ventaSeleccionada.getCliente() == null){
-            
+        if (ventaSeleccionada.getClient() == null) {
+
             limpiarDatosVenta();
             mostrarError("La venta no tiene un cliente válido.");
-
             return;
         }
 
-        lblCliente.setText(ventaSeleccionada.getCliente().getNombre());
-
+        lblCliente.setText(ventaSeleccionada.getClient().getName());
         cargarProductosVenta();
         cargarGraduacionOriginal();
-
         btnGuardar.setDisable(productosGarantia.isEmpty());
-
         mostrarExito("Venta encontrada correctamente.");
-}
+    }
     
    private void guardarGarantia(){
 
@@ -254,43 +274,35 @@ public class GarantiasController implements Initializable {
 
     try{
 
-        Garantia garantia =
+        Warranty garantia =
                 construirGarantia(
                         motivo,
                         accion
                 );
 
-        List<GarantiaDetalle> detalles =
+        List<WarrantyDetail> detalles =
                 construirDetallesGarantia();
 
-        GarantiaGraduacion original =
+        WarrantyGraduation original =
                 construirGraduacionOriginal();
 
-        GarantiaGraduacion nueva =
+        WarrantyGraduation nueva =
                 construirGraduacionNueva();
 
-        boolean guardado =
-                garantiaDAO.crearGarantia(
-                        garantia,
-                        detalles,
-                        original,
-                        nueva
-                );
+        Warranty garantiaGuardada = 
+                warrantyApiClient.createWarranty(garantia, detalles, original, nueva);
+        
+        if(garantiaGuardada == null){
 
-        if(!guardado){
-
-            mostrarError(
-                    "No se pudo registrar la garantía."
-            );
+            mostrarError("No se pudo registrar la garantía.");
 
             return;
         }
+        garantia = garantiaGuardada;
         
             try{
                 List<SaleItem> itemsVenta =
-                    saleDAO.obtenerDetalleVenta(
-                            ventaSeleccionada.getId()
-                    );
+                    ventaSeleccionada.getItems();
 
                 TicketService ticketService =
                     new TicketService();                
@@ -316,10 +328,6 @@ public class GarantiasController implements Initializable {
         limpiarFormulario();
         cargarGarantiasActivas();
 
-        lblFolio.setText(
-                garantiaDAO.generarFolio()
-        );
-
     }catch(Exception ex){
 
         ex.printStackTrace();
@@ -340,9 +348,9 @@ public class GarantiasController implements Initializable {
     }
 }
     
-    private List<GarantiaDetalle> construirDetallesGarantia(){
+    private List<WarrantyDetail> construirDetallesGarantia(){
 
-    List<GarantiaDetalle> detalles =
+    List<WarrantyDetail> detalles =
             new ArrayList<>();
 
     for(SaleItem item : productosGarantia){
@@ -351,15 +359,15 @@ public class GarantiasController implements Initializable {
             continue;
         }
 
-        GarantiaDetalle detalle =
-                new GarantiaDetalle();
+        WarrantyDetail detalle =
+                new WarrantyDetail();
 
-        detalle.setIdDetalle(
-                item.getIdDetalle()
+        detalle.setDetailId(
+                item.getDetailId()
         );
 
-        detalle.setCantidad(
-                item.getCantidad()
+        detalle.setQuantity(
+                item.getQuantity()
         );
 
         detalles.add(detalle);
@@ -368,41 +376,41 @@ public class GarantiasController implements Initializable {
     return detalles;
 }
     
-    private GarantiaGraduacion construirGraduacionOriginal(){
+    private WarrantyGraduation construirGraduacionOriginal(){
 
-    GarantiaGraduacion original =
-            new GarantiaGraduacion();
+    WarrantyGraduation original =
+            new WarrantyGraduation();
 
-    original.setTipo("ORIGINAL");
+    original.setType("ORIGINAL");
 
-    original.setOdEsfera(valorCampo(txtEsfOD));
-    original.setOdCilindro(valorCampo(txtCylOD));
-    original.setOdEje(valorCampo(txtEjeOD));
+    original.setOdSphere(valorCampo(txtEsfOD));
+    original.setOdCylinder(valorCampo(txtCylOD));
+    original.setOdAxis(valorCampo(txtEjeOD));
     original.setOdAdd(valorCampo(txtAdd));
 
-    original.setOiEsfera(valorCampo(txtEsfOI));
-    original.setOiCilindro(valorCampo(txtCylOI));
-    original.setOiEje(valorCampo(txtEjeOI));
+    original.setOiSphere(valorCampo(txtEsfOI));
+    original.setOiCylinder(valorCampo(txtCylOI));
+    original.setOiAxis(valorCampo(txtEjeOI));
     original.setOiAdd(valorCampo(txtAdd));
 
     return original;
 }
     
-    private GarantiaGraduacion construirGraduacionNueva(){
+    private WarrantyGraduation construirGraduacionNueva(){
 
-    GarantiaGraduacion nueva =
-            new GarantiaGraduacion();
+    WarrantyGraduation nueva =
+            new WarrantyGraduation();
 
-    nueva.setTipo("NUEVA");
+    nueva.setType("NUEVA");
 
-    nueva.setOdEsfera(valorCampo(txtEsfOD1));
-    nueva.setOdCilindro(valorCampo(txtCylOD1));
-    nueva.setOdEje(valorCampo(txtEjeOD1));
+    nueva.setOdSphere(valorCampo(txtEsfOD1));
+    nueva.setOdCylinder(valorCampo(txtCylOD1));
+    nueva.setOdAxis(valorCampo(txtEjeOD1));
     nueva.setOdAdd(valorCampo(txtAdd1));
 
-    nueva.setOiEsfera(valorCampo(txtEsfOI1));
-    nueva.setOiCilindro(valorCampo(txtCylOI1));
-    nueva.setOiEje(valorCampo(txtEjeOI1));
+    nueva.setOiSphere(valorCampo(txtEsfOI1));
+    nueva.setOiCylinder(valorCampo(txtCylOI1));
+    nueva.setOiAxis(valorCampo(txtEjeOI1));
     nueva.setOiAdd(valorCampo(txtAdd1));
 
     return nueva;
@@ -416,10 +424,7 @@ public class GarantiasController implements Initializable {
     
     private void cargarProductosVenta(){
 
-    productosGarantia =
-            saleDAO.obtenerDetalleVenta(
-                    ventaSeleccionada.getId()
-            );
+    productosGarantia = ventaSeleccionada.getItems();
 
     if(productosGarantia == null){
         productosGarantia = new ArrayList<>();
@@ -438,18 +443,18 @@ public class GarantiasController implements Initializable {
         productosGarantia.stream()
                 .filter(item ->
                         item != null
-                        && item.getProducto() != null
+                        && item.getProduct()!= null
                 )
                 .map(item -> {
 
                     String modelo =
                             valorSeguro(
-                                    item.getProducto().getModelo()
+                                    item.getProduct().getModel()
                             );
 
                     String marca =
                             valorSeguro(
-                                    item.getProducto().getMarca()
+                                    item.getProduct().getBrand()
                             );
 
                     String descripcion =
@@ -459,7 +464,7 @@ public class GarantiasController implements Initializable {
 
                     return descripcion
                             + "  |  Cantidad: "
-                            + item.getCantidad();
+                            + item.getQuantity();
                 })
                 .collect(
                         Collectors.joining("\n")
@@ -503,7 +508,7 @@ txtProductosVenta.setText(textoProductos);
         txtEsfOI.setText(valorSeguro(ventaSeleccionada.getOiEsf()));
         txtCylOI.setText(valorSeguro(ventaSeleccionada.getOiCil()));
         txtEjeOI.setText(valorSeguro(ventaSeleccionada.getOiEje()));
-        txtAdd.setText(valorSeguro(ventaSeleccionada.getAdd()));
+        txtAdd.setText(valorSeguro(ventaSeleccionada.getAddLens()));
         
     }
 
@@ -533,77 +538,72 @@ txtProductosVenta.setText(textoProductos);
         btnGuardar.setDisable(true);       
     }
     
-    private void recepcionGarantia(Garantia garantia){
+    private void recepcionGarantia(Warranty garantia){
         
         if(garantia == null){
-        return;
-    }
+            return;
+        }
 
-    if(!"PROCESO".equalsIgnoreCase(garantia.getEstado())){
-        mostrarAdvertencia(
+        if(!"PROCESO".equalsIgnoreCase(garantia.getStatus())){
+            mostrarAdvertencia(
                 "Solo se pueden recibir garantías en proceso."
-        );
-        return;
-    }
+            );
+            return;
+        }
 
-    boolean actualizado =
-            garantiaDAO.recepcionGarantia(
-                    garantia.getIdgarantias()
+        try {
+
+            warrantyApiClient.receiveWarranty(
+                garantia.getId(),
+                Session.getSucursal().getId()
             );
 
-    if(!actualizado){
-        mostrarError(
-                "No se pudo actualizar la recepción."
-        );
-        return;
-    }
-
-    cargarGarantiasActivas();
-
-    EventBus.publishVenta(
-            garantia.getIdventas()
-    );
-
-    mostrarExito(
-            "Producto recibido correctamente en óptica."
-    );       
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            mostrarError("No se pudo actualizar la recepción.");
+            return;
+        }
+        cargarGarantiasActivas();
+        EventBus.publishVenta(garantia.getSaleId());
+        mostrarExito("Producto recibido correctamente en óptica.");       
     }
     
-    private void entregarGarantia(Garantia garantia){        
+    private void entregarGarantia(Warranty garantia){        
          
         if(garantia == null){
-        return;
-    }
+            return;
+        }
 
-    if(!"RECIBIDO".equalsIgnoreCase(garantia.getEstado())){
-        mostrarAdvertencia(
+        if(!"RECIBIDO".equalsIgnoreCase(garantia.getStatus())){
+            mostrarAdvertencia(
                 "La garantía debe estar recibida antes de entregarse."
-        );
+            );
         return;
-    }
+        }
 
-    boolean actualizado =
-            garantiaDAO.entregarGarantia(
-                    garantia.getIdgarantias()
+        try {
+
+            warrantyApiClient.deliverWarranty(
+                garantia.getId(),
+                Session.getSucursal().getId()
             );
 
-    if(!actualizado){
-        mostrarError(
-                "No se pudo entregar la garantía."
+        } catch (IOException | InterruptedException e) {
+
+            e.printStackTrace();
+            mostrarError("No se pudo entregar la garantía.");
+            return;
+        }
+
+        cargarGarantiasActivas();
+
+        EventBus.publishVenta(
+            garantia.getSaleId()
         );
-        return;
-    }
 
-    cargarGarantiasActivas();
-
-    EventBus.publishVenta(
-            garantia.getIdventas()
-    );
-
-    mostrarExito(
+        mostrarExito(
             "Garantía entregada correctamente."
-    );
-        
+        );       
         
     }
 
@@ -624,7 +624,7 @@ txtProductosVenta.setText(textoProductos);
 
     private void prepararFormulario() {
         
-        lblFolio.setText(garantiaDAO.generarFolio());
+        lblFolio.setText("Se generará al registrar");
         lblCliente.setText("Sin venta seleccionada");
         btnGuardar.setDisable(true);
     }
@@ -677,31 +677,31 @@ txtProductosVenta.setText(textoProductos);
         PosNotification.warning( root,"Atención",mensaje);
     }
     
-    private Garantia construirGarantia(
+    private Warranty construirGarantia(
         String motivo,
         String accion){
 
-    Garantia garantia = new Garantia();
+    Warranty garantia = new Warranty();
 
-    garantia.setIdventas(
+    garantia.setSaleId(
             ventaSeleccionada.getId()
     );
 
-    garantia.setIdcliente(
-            ventaSeleccionada.getCliente().getId()
+    garantia.setClientId(
+            ventaSeleccionada.getClient().getId()
     );
 
-    garantia.setIdsucursal(
+    garantia.setBranchId(
             Session.getSucursal().getId()
     );
 
-    garantia.setMotivo(motivo);
-    garantia.setAccion(accion);
-    garantia.setEstado("PROCESO");
+    garantia.setReason(motivo);
+    garantia.setAction(accion);
+    garantia.setStatus("PROCESO");
     
 
     // Después lo cambiaremos por el usuario autenticado
-    garantia.setUsuario(1);
+    garantia.setUserId(1);
 
     return garantia;
 }

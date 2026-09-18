@@ -1,21 +1,16 @@
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.charts.MetaChartBuilder;
-import com.gerardgv.posclarity.charts.ventasChartBuilder;
-import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.api.*;
+import com.gerardgv.posclarity.api.dto.report.ReportSalesSummaryResponse;
+import com.gerardgv.posclarity.charts.*;
 import com.gerardgv.posclarity.models.*;
-import com.gerardgv.posclarity.service.CierreCajaService;
-import com.gerardgv.posclarity.service.SaldosService;
+import com.gerardgv.posclarity.service.*;
 import com.gerardgv.posclarity.utils.Session;
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.fxml.Initializable;
+import java.util.*;
+import javafx.fxml.*;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.chart.*;
@@ -37,10 +32,11 @@ public class ReportsController implements Initializable {
     @FXML private LineChart<String,Number> chartVentas;
     @FXML private PieChart chartMeta;
     
-    private SaleDAO saleDAO = new SaleDAO();
-    private MetaDAO metaDAO = new MetaDAO();
-    private PendingDAO pendingDAO = new PendingDAO();
-    private CierrecajaDAO cierreDAO = new CierrecajaDAO();
+    private ReportApiClient reportApiClient = new ReportApiClient();
+    private SaleApiClient saleApiClient = new SaleApiClient();
+    private CashClosingApiClient  cashClosingApiClient = new CashClosingApiClient();
+    private GoalApiClient goalApiClient = new GoalApiClient();
+    
     private CierreCajaService cierreService = new CierreCajaService();
 
     @Override
@@ -60,96 +56,185 @@ public class ReportsController implements Initializable {
         
         try{
 
-        List<Venta> realizar = pendingDAO.obtenerTrabajosPorRealizar();
-        List<Venta> entregar = pendingDAO.obtenerTrabajosPorEntregar();
+            List<Sale> salesToDo = saleApiClient.getSalesToDo();
 
-        if(realizar.isEmpty() && entregar.isEmpty()){
-            mostrarAlerta("No hay trabajos pendientes");
-            return;
+            List<Sale> salesToDeliver = saleApiClient.getSalesToDeliver();
+
+            if(salesToDo.isEmpty() && salesToDeliver.isEmpty()){
+                mostrarAlerta("No hay trabajos pendientes");
+                return;
+            }
+
+            SaldosService.generatePendingReport(
+                salesToDo,
+                salesToDeliver
+            );
+
+            mostrarAlerta("Reporte generado correctamente");
+
+        }catch(Exception e){
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setHeaderText("Error al generar reporte");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
         }
-
-        SaldosService.generarReportePendientes(
-                realizar,
-                entregar
-        );
-
-        mostrarAlerta("Reporte generado correctamente");
-
-    }catch(Exception e){
-        e.printStackTrace();
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setHeaderText("Error al generar reporte");
-        alert.setContentText(e.getMessage());
-        alert.showAndWait();
-    }
         
     }
 
     @FXML
-    private void openCierreDia(){
-        
-        if (cierreDAO.existeCierreHoy(Session.getSucursal().getId())){
-            
-            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Cierre existente");
-            alert.setHeaderText("Ya existe un cierre para hoy");
-            alert.setContentText("Aceptar = Recalcular cierre\n" +
-                                    "Cancelar = Ver cierre existente");
-            
-            Optional<ButtonType> result = alert.showAndWait();
-            
-            if(result.isPresent() && result.get() == ButtonType.OK){
-                cierreDAO.eliminarCierreHoy(Session.getSucursal().getId());
-            } else {
-                CierreCaja cierre = cierreDAO.obtenerUltimoCierre();
-                cierreService.generarReporte(cierre);
-                return;
-            }
-            
-        }
-        
-        CierreCaja cierre = cierreDAO.obtenerCierreDelDia();
-        
-        if(cierre == null){
-            mostrarAlerta("No es Posible obtener informacion del Cierre");
+    private void openCierreDia() {
+
+        boolean existsToday;
+
+        try {
+            existsToday = cashClosingApiClient.existsToday();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            mostrarAlerta(
+                "No fue posible verificar el cierre del día"
+            );
             return;
         }
-        
+
+        if (existsToday) {
+
+            Alert alert =
+                new Alert(Alert.AlertType.CONFIRMATION);
+
+            alert.setTitle("Cierre existente");
+            alert.setHeaderText("Ya existe un cierre para hoy");
+            alert.setContentText(
+                "Aceptar = Recalcular cierre\n"
+                + "Cancelar = Ver cierre existente"
+            );
+
+            Optional<ButtonType> result =
+                alert.showAndWait();
+
+        if (result.isPresent()
+                && result.get() == ButtonType.OK) {
+
+            // No eliminamos el cierre.
+            // saveClosing() actualizará el cierre existente.
+
+        } else {
+
+            CashClosing closing;
+
+            try {
+                closing =
+                        cashClosingApiClient.getLatestClosing();
+
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                mostrarAlerta(
+                        "No fue posible obtener el cierre existente"
+                );
+                return;
+            }
+
+                if (closing == null) {
+                    mostrarAlerta(
+                        "No fue posible obtener el cierre existente"
+                    );
+                    return;
+                }
+
+                cierreService.generarReporte(closing);
+                return;
+            }
+        }
+
+        CashClosing closing;
+
+        try {
+            closing =
+                cashClosingApiClient.getTodayClosing();
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            mostrarAlerta(
+                "No fue posible obtener la información del cierre"
+            );
+            return;
+        }
+
+        if (closing == null) {
+            mostrarAlerta(
+                "No es Posible obtener informacion del Cierre"
+            );
+            return;
+        }
+
         double CAJA_OBJETIVO = 350.00;
-        
-        double efectivoDisponible = cierre.getCajaInicial() + cierre.getTotalEfectivo();
-        double deposito = Math.floor((efectivoDisponible - CAJA_OBJETIVO) / 50.0) * 50.0;
-        
-        if(deposito < 0){
+
+        double efectivoDisponible =
+            closing.getInitialCash()
+            + closing.getTotalCash();
+
+        double deposito =
+            Math.floor(
+                    (efectivoDisponible - CAJA_OBJETIVO) / 50.0
+            ) * 50.0;
+
+        if (deposito < 0) {
             deposito = 0;
         }
-        
-        double cajaFinal = efectivoDisponible - deposito;
-        
-        TextInputDialog obsDialog = new TextInputDialog();
+
+        double cajaFinal =
+            efectivoDisponible - deposito;
+
+        TextInputDialog obsDialog =
+            new TextInputDialog();
+
         obsDialog.setTitle("Cierre de Caja");
         obsDialog.setHeaderText("Observaciones");
         obsDialog.setContentText("Observaciones:");
 
-        String observaciones = obsDialog.showAndWait().orElse("");
+        String observaciones =
+            obsDialog.showAndWait().orElse("");
 
-        cierre.setDeposito(deposito);
-        cierre.setCajaFinal(cajaFinal);        
-        cierre.setDiferencia(0);
-        cierre.setObservaciones(observaciones);
+        closing.setDeposit(deposito);
+        closing.setFinalCash(cajaFinal);
+        closing.setDifference(0);
+        closing.setObservations(observaciones);
 
-        boolean guardado = cierreDAO.guardarCierre(cierre);
+        try {
 
-        if(!guardado){
-            mostrarAlerta("No fue posible guardar el cierre");
+            CashClosing savedClosing =
+                cashClosingApiClient.saveClosing(closing);
+
+            if (savedClosing == null) {
+                mostrarAlerta(
+                    "No fue posible guardar el cierre"
+                );
+                return;
+            }
+            
+            cierreService.generarReporte(savedClosing);
+
+        } catch (IOException | InterruptedException e) {
+
+            e.printStackTrace();
+
+            mostrarAlerta(
+                "No fue posible guardar el cierre"
+            );
+
             return;
         }
 
-        cierreService.generarReporte(cierre);
+        
 
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert =
+            new Alert(Alert.AlertType.INFORMATION);
+
         alert.setHeaderText(null);
-        alert.setContentText("Cierre generado correctamente");
+        alert.setContentText(
+            "Cierre generado correctamente"
+        );
+
         alert.showAndWait();
     }
 
@@ -200,30 +285,68 @@ public class ReportsController implements Initializable {
         int mes = hoy.getMonthValue();
         int anio = hoy.getYear();
         
-        lblSucursalActual.setText(Session.getSucursal().getSucursal());
+        lblSucursalActual.setText(Session.getSucursal().getName());
         lblPeriodo.setText(hoy.getMonth().name() + " " + anio);
         
-        ReporteVentas r = saleDAO.obtenerReporteMensual(idSucursal, mes, anio);
-        
-        lblTotalVentas.setText("$" + String.format("%.2f", r.getTotal()));
-        lblPagado.setText("$" + String.format("%.2f", r.getPagado()));
-        lblPendiente.setText("$" + String.format("%.2f", r.getPendiente()));
-        
-        Map<Integer,Double> ventaspordia = saleDAO.obtenerVentasporDia(idSucursal, mes, anio);
-        ventasChartBuilder.build(chartVentas, ventaspordia, hoy);        
-        double meta = metaDAO.obtenerMetaMensual(idSucursal, mes, anio);        
-        MetaChartBuilder.build(chartMeta, r.getTotal(), meta);
-        cargarResumenPendientes();       
-        
+        try{
+            
+            ReportSalesSummaryResponse response =
+                reportApiClient.getMonthlySalesSummary(
+                        mes,
+                        anio
+                );
+            
+            SalesReport r = new SalesReport(
+                response.getTotal() != null
+                        ? response.getTotal().doubleValue()
+                        : 0.0,
+                response.getPaid() != null
+                        ? response.getPaid().doubleValue()
+                        : 0.0,
+                response.getPending() != null
+                        ? response.getPending().doubleValue()
+                        : 0.0
+            );
+            
+            lblTotalVentas.setText("$" + String.format("%.2f", r.getTotal()));
+            lblPagado.setText("$" + String.format("%.2f", r.getPaid()));
+            lblPendiente.setText("$" + String.format("%.2f", r.getPending()));
+            
+            Map<Integer,Double> ventaspordia = 
+                    reportApiClient.getDailySales(mes,anio);
+            
+            ventasChartBuilder.build(chartVentas, ventaspordia, hoy);
+            
+            Goal goal = goalApiClient.getMonthly(
+                    idSucursal, mes, anio);
+            
+            double meta = goal != null ? goal.getAmount() : 0.0;            
+            MetaChartBuilder.build(chartMeta, r.getTotal(), meta);
+            cargarResumenPendientes();
+            
+        } catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void cargarResumenPendientes() {
         
-        ReportPendientes r = pendingDAO.obtenerResumenPendientes();
+        try{
+            PendingReport report = saleApiClient.getPendingSummary();
+            lblTrabajosRealizar.setText(report.getSalesToDo()+ " trabajos");
+            lblTrabajosEntregar.setText(report.getSalesToDeliver()+ " trabajos");
+            lblSaldoRealizar.setText("$" + String.format("%.2f", report.getBalanceToDo()));
+            lblSaldoEntregar.setText("$" + String.format("%.2f", report.getBalanceToDeliver()));
+        }catch(Exception e){
+            
+           e.printStackTrace();
+            lblTrabajosRealizar.setText("0 trabajos");
+            lblTrabajosEntregar.setText("0 trabajos");
+            lblSaldoRealizar.setText("$0.00");
+            lblSaldoEntregar.setText("$0.00"); 
+        }
 
-        lblTrabajosRealizar.setText(r.getTrabajosRealizar() + " trabajos");
-        lblTrabajosEntregar.setText(r.getTrabajosEntregar() + " trabajos");
-        lblSaldoRealizar.setText("$" + String.format("%.2f", r.getSaldoRealizar()));
-        lblSaldoEntregar.setText("$" + String.format("%.2f", r.getSaldoEntregar()));
-    }    
+    } 
+    
 }    
+

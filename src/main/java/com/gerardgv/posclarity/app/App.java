@@ -1,6 +1,6 @@
 package com.gerardgv.posclarity.app;
 
-import com.gerardgv.posclarity.database.BranchDAO;
+import com.gerardgv.posclarity.api.BranchApiClient;
 import com.gerardgv.posclarity.models.Branch;
 import com.gerardgv.posclarity.utils.*;
 import javafx.application.Application;
@@ -8,6 +8,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
 import javafx.stage.Stage;
 import java.io.IOException;
+import javafx.geometry.Rectangle2D;
+import javafx.stage.Screen;
 
 /**
  * JavaFX App
@@ -15,10 +17,11 @@ import java.io.IOException;
 public class App extends Application {
 
     private static Scene scene;
-    
+    private final BranchApiClient branchApiClient = new BranchApiClient();
 
     @Override
     public void start(Stage stage) throws IOException {
+        
         Parent root;
         boolean primeraInstalacion = false;
         
@@ -29,14 +32,20 @@ public class App extends Application {
             
         } else {
             
-            if(!Configuracion.existeSucursal()){
-                
-                root = loadFXML("SelectBranch");
-                
-            } else {
-                
+            if(!Configuracion.existeSucursal()){                
+                root = loadFXML("SelectBranch");                
+            } else {                
                 Integer idSucursal = Configuracion.obtenerSucursal();
-                Branch sucursal = BranchDAO.obtenerPorId(idSucursal);
+                Branch sucursal;                
+                try {                    
+                    sucursal = branchApiClient.getById(idSucursal);                    
+                } catch (InterruptedException e){                    
+                    Thread.currentThread().interrupt();
+                    sucursal = null;                    
+                } catch (IOException e){                    
+                    e.printStackTrace();
+                    sucursal = null;                    
+                }
                 
                     if(sucursal == null){
                         Configuracion.guardarSucursal(-1);
@@ -49,16 +58,38 @@ public class App extends Application {
         }       
         
         scene = new Scene(root);
+        scene.getStylesheets().add(
+            App.class.getResource(
+                "/com/gerardgv/posclarity/css/theme/PosTheme.css"
+                ).toExternalForm());
         stage.setScene(scene);
         
         if(primeraInstalacion){
             stage.setWidth(500);
             stage.setHeight(450);
             stage.setResizable(false);
+            stage.show();
         }else{
-            stage.setMaximized(true);
+            configurarVentanaPrincipal(stage);
         }       
-        stage.show();
+    }
+    
+    private static void configurarVentanaPrincipal(Stage stage){
+        
+     // Área disponible del escritorio, sin cubrir la barra de tareas
+    Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
+
+    stage.setResizable(true);
+
+    stage.setX(visualBounds.getMinX());
+    stage.setY(visualBounds.getMinY());
+    stage.setWidth(visualBounds.getWidth());
+    stage.setHeight(visualBounds.getHeight());
+
+    stage.show();
+
+    // Bloqueamos el redimensionamiento después de establecer el tamaño
+    stage.setResizable(false); 
     }
 
     public static void setRoot(String fxml) throws IOException {
@@ -66,11 +97,8 @@ public class App extends Application {
         
         Stage stage = (Stage) scene.getWindow();
         
-        if(fxml.equals("main")){
-            
-            stage.setResizable(true);
-            stage.setMaximized(true);
-            
+        if(fxml.equals("main")){            
+            configurarVentanaPrincipal(stage);
         }
         
     }
@@ -84,6 +112,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
+                
         launch();
     }
 

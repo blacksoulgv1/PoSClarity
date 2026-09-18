@@ -1,13 +1,9 @@
 package com.gerardgv.posclarity.utils;
 
-import com.gerardgv.posclarity.models.Garantia;
-import com.gerardgv.posclarity.models.Venta;
+import com.gerardgv.posclarity.models.*;
 import java.util.function.*;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -192,12 +188,12 @@ public class TableUtils {
 
             T itemTabla = obtenerItemActual();
 
-            if (!(itemTabla instanceof Venta venta)) {
+            if (!(itemTabla instanceof Sale sale)) {
                 setGraphic(null);
                 return;
             }
 
-            agregarAccionesValidas(venta);
+            agregarAccionesValidas(sale);
 
             setGraphic(
                     box.getChildren().isEmpty()
@@ -206,14 +202,14 @@ public class TableUtils {
             );
         }
 
-        private void agregarAccionesValidas(Venta venta) {
+        private void agregarAccionesValidas(Sale sale) {
 
             String estadoPago = normalizar(
-                    venta.getEstadoPago()
+                    sale.getPaymentStatus()
             );
 
             String estadoTrabajo = normalizar(
-                    venta.getEstadoTrabajo()
+                    sale.getWorkStatus()
             );
 
             boolean pagoCompleto =
@@ -268,19 +264,51 @@ public class TableUtils {
     //Funcion Button Active
     public static <T> TableCell <T,Boolean> createActiveToggle(
             Function <T,Integer> idGetter,
-            BiConsumer<Integer,Boolean> updateAction){
+            ActiveToggleHandler updateAction){
         
         return new TableCell<>(){
             
-            private final ToggleButton toggle = new ToggleButton();          
+            private final ToggleButton toggle = new ToggleButton();
+            private boolean updating = false;
+            
              {
                  toggle.setPrefWidth(45);
                  toggle.setStyle("-fx-background-radius: 20;");
-                 toggle.selectedProperty().addListener((obs,oldVal,newVal)->{
-                     T item = getTableView().getItems().get(getIndex());
-                     int id = idGetter.apply(item);
-                     updateAction.accept(id,newVal);
-                     actualizarEstilo(newVal);
+                 
+                 toggle.selectedProperty().addListener((obs,oldVal,newVal) -> {
+                     
+                     if(updating){
+                         return;
+                     }
+                     
+                    T item = getTableView().getItems().get(getIndex());
+                    
+                    if(item == null){
+                        return;
+                    }
+                    
+                    int id = idGetter.apply(item);
+                     
+                    try {
+                        boolean ok = updateAction.update(id,newVal);
+                        
+                        if(ok){
+                            actualizarEstilo(newVal);                            
+                        } else {
+                            updating = true;
+                            toggle.setSelected(oldVal);
+                            updating = false;
+                        }
+                    } catch (Exception ex){
+                        updating = true;
+                        toggle.setSelected(oldVal);
+                        updating = false;
+                        
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setHeaderText(null);
+                        alert.setContentText(ex.getMessage());
+                        alert.showAndWait();
+                    }
                  });                 
              }
              
@@ -309,6 +337,7 @@ public class TableUtils {
                  } else {
                      toggle.setSelected(activo);
                      actualizarEstilo(activo);
+                     updating = false;
                      setGraphic(toggle);
                  }
              }
@@ -361,11 +390,11 @@ public class TableUtils {
                     return;
                 } else {
                     T itemTable = getTableView().getItems().get(getIndex());
-                    Garantia g = (Garantia) itemTable;
+                    Warranty g = (Warranty) itemTable;
                     btnRecepcionG.setVisible(
-                    g.getEstado().equalsIgnoreCase("PROCESO"));
+                    g.getStatus().equalsIgnoreCase("PROCESO"));
                     btnEntregarG.setVisible(
-                    g.getEstado().equalsIgnoreCase("RECIBIDO"));
+                    g.getStatus().equalsIgnoreCase("RECIBIDO"));
                      setGraphic(boxG);
                 }                
             }

@@ -1,6 +1,5 @@
 package com.gerardgv.posclarity.service;
 
-import com.gerardgv.posclarity.database.SaleDAO;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.utils.*;
 import java.io.ByteArrayInputStream;
@@ -32,7 +31,7 @@ public class TicketService {
     //GENERAR & IMPRIMIR TICKET DE VENTA.
     */
     
-    public void imprimirTicket(Venta venta, List<SaleItem> items){
+    public void imprimirTicket(Sale sale, List<SaleItem> items){
         
         try{
             
@@ -53,7 +52,7 @@ public class TicketService {
             
             List<TicketItem> ticketItems = convertirItems(items);
             
-            Map<String,Object> params = construirParametros(venta, items);
+            Map<String,Object> params = construirParametros(sale, items);
             
             JRBeanCollectionDataSource dataSource= new JRBeanCollectionDataSource(ticketItems);
             
@@ -76,32 +75,40 @@ public class TicketService {
         }        
     }
     
-    private Map<String,Object> construirParametros(Venta venta, List<SaleItem> items){
+    private Map<String,Object> construirParametros(Sale sale, List<SaleItem> items){
         
         Map<String,Object> params = new HashMap<>();
         
+        System.out.println("===== DATOS CLIENTE PARA TICKET =====");
+        System.out.println("cliente: " + sale.getClient().getName());
+        System.out.println("telefono_clien: " + sale.getClient().getPhone());
+        System.out.println("direccion_clien: " + sale.getClient().getAddress());
+        System.out.println("======================================");
         //Sucursal
-        params.put("sucursal", venta.getSucursal().getSucursal());
-        params.put("telefono_suc", venta.getSucursal().getTelefono());
-        params.put("direccion_suc", venta.getSucursal().getDireccion());
+        params.put("sucursal", sale.getBranch().getName());
+        params.put("telefono_suc", sale.getBranch().getPhone());
+        params.put("direccion_suc", sale.getBranch().getAddress());
         //cliente
-        params.put("cliente", venta.getCliente().getNombre());
-        params.put("telefono_clien", venta.getCliente().getTelefono());
-        params.put("direccion_clien", venta.getCliente().getDireccion());
+        params.put("cliente", sale.getClient().getName());
+        params.put("telefono_clien", sale.getClient().getPhone());
+        params.put("direccion_clien", sale.getClient().getAddress());
         //Vendedor
-        params.put("vendedor", venta.getVendedor().getNombre());
-        params.put("fecha", venta.getFecha().
+        params.put("vendedor", sale.getSeller().getName());
+        params.put("fecha", sale.getSaleDate().
                 format(DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm")));
-        params.put("nota", String.valueOf(venta.getFolio()));
+        params.put("nota", String.valueOf(sale.getFolio()));
         //Totales & Descuentos
-        double subtotal = venta.getTotalBruto();        
-        double descuento = venta.getDescuentoTotal();        
-        double total = venta.getTotalFinal();
+        double subtotal = sale.getGrossTotal();        
+        double descuento = sale.getTotalDiscount();        
+        double total = sale.getFinalTotal();
         
-        SaleDAO saleDAO = new SaleDAO();
+        List<Payment> pagos = sale.getPayments();
+
+        double pagado = pagos != null
+            ? pagos.stream()
+                .mapToDouble(Payment::getAmount)
+                .sum(): 0;        
         
-        List<Pago> pagos = saleDAO.obtenerPagosPorVenta(venta.getId());
-        double pagado = pagos.stream().mapToDouble(Pago::getMonto).sum();
         double pendiente = total - pagado;
         
         if(pendiente < 0){
@@ -123,18 +130,18 @@ public class TicketService {
 
     private List<TicketItem> convertirItems(List<SaleItem> items) {
         return items.stream().map(i -> new TicketItem(
-            i.getCantidad(),
-            i.getProducto().getModelo(),
-            i.getProducto().getPrecio(),
+            i.getQuantity(),
+            i.getProduct().getModel(),
+            i.getProduct().getPrice(),
             i.getSubtotal(),
-            i.getNombreDescuento())).toList();
+            i.getDiscountName())).toList();
     }
     
     /*
     //GENERAR & IMPRIMIR ORDEN DE LABORATORIO.
     */
     
-    public void imprimirOrdenLaboratorio(Venta venta,List<SaleItem> items){
+    public void imprimirOrdenLaboratorio(Sale sale,List<SaleItem> items){
         try{
             InputStream reportStream = getClass().getResourceAsStream(Ruta_Orden);
             
@@ -151,7 +158,7 @@ public class TicketService {
 
             JasperReport report = JasperCompileManager.compileReport(limpio);
         
-            Map<String,Object> params = construirParametrosOrden(venta,items);
+            Map<String,Object> params = construirParametrosOrden(sale,items);
             
             JasperPrint print = JasperFillManager.fillReport(report, params, new JREmptyDataSource());
             
@@ -170,29 +177,29 @@ public class TicketService {
         }
     }
         
-    private Map<String,Object> construirParametrosOrden(Venta venta,List<SaleItem> items){
+    private Map<String,Object> construirParametrosOrden(Sale sale,List<SaleItem> items){
     
         Map<String,Object> params = new HashMap<>(); 
         
-        params.put("sucursal", venta.getSucursal().getSucursal());
+        params.put("sucursal", sale.getBranch().getName());
     // 🧾 Nombre + folio
-        params.put("cliente", venta.getCliente().getNombre() + " #" + venta.getFolio());
+        params.put("cliente", sale.getClient().getName()+ " #" + sale.getFolio());
     
     // 👓 Tipo de lente (ajústalo a tu modelo real)
         params.put("tipo_lente", construirTipo(items));
     
     // 👁️ OD
-        params.put("od_esf", venta.getOdEsf() != null ? venta.getOdEsf():"");
-        params.put("od_cil", venta.getOdCil() != null ? venta.getOdCil():"");
-        params.put("od_eje", venta.getOdEje() != null ? venta.getOdEje():"");
+        params.put("od_esf", sale.getOdEsf() != null ? sale.getOdEsf():"");
+        params.put("od_cil", sale.getOdCil() != null ? sale.getOdCil():"");
+        params.put("od_eje", sale.getOdEje() != null ? sale.getOdEje():"");
     
     // 👁️ OI
-        params.put("oi_esf", venta.getOiEsf() != null ? venta.getOiEsf():"");
-        params.put("oi_cil", venta.getOiCil() != null ? venta.getOiCil():"");
-        params.put("oi_eje", venta.getOiEje() != null ? venta.getOiEje():"");
+        params.put("oi_esf", sale.getOiEsf() != null ? sale.getOiEsf():"");
+        params.put("oi_cil", sale.getOiCil() != null ? sale.getOiCil():"");
+        params.put("oi_eje", sale.getOiEje() != null ? sale.getOiEje():"");
     
     // ➕ ADD
-        params.put("add", venta.getAdd() != null ? venta.getAdd():"");
+        params.put("add", sale.getAddLens()!= null ? sale.getAddLens():"");
         params.put("logo", getClass().getResourceAsStream(
                 "/com/gerardgv/posclarity/img/logo-removebg.png"));
     
@@ -201,16 +208,16 @@ public class TicketService {
     
     private String construirTipo(List<SaleItem> items){
 
-    String mica = "";
-    Set<String> tratamientos = new LinkedHashSet<>();
+        String mica = "";
+        Set<String> tratamientos = new LinkedHashSet<>();
 
     for(SaleItem item : items){
 
-        var producto = item.getProducto();
+        var producto = item.getProduct();
         if(producto == null) continue;
 
-        String categoria = producto.getCategoria();
-        String modelo = producto.getModelo();
+        String categoria = producto.getCategory();
+        String modelo = producto.getModel();
 
         if(categoria == null || modelo == null) continue;
 
@@ -240,7 +247,7 @@ public class TicketService {
     //GENERAR & IMPRIMIR TICKET DE ABONO.
     */
    
-    public void imprimirTicketAbono(Venta venta, double montoAbono, String metodoPago){
+    public void imprimirTicketAbono(Sale sale, double montoAbono, String metodoPago){
        
        try{
            
@@ -259,7 +266,7 @@ public class TicketService {
             JasperReport report =JasperCompileManager.compileReport(limpio);
 
             Map<String, Object> params =construirParametrosAbono(
-                        venta,
+                        sale,
                         montoAbono,
                         metodoPago);
             
@@ -300,24 +307,21 @@ public class TicketService {
        }       
    }
    
-    private Map<String, Object> construirParametrosAbono(Venta venta, double montoAbono, String metodoPago) {
+    private Map<String, Object> construirParametrosAbono(Sale sale, double montoAbono, String metodoPago) {
     
         Map<String, Object> params = new HashMap<>();
         
-        SaleDAO saleDAO = new SaleDAO();
+        List<Payment> pagos = sale.getPayments();
         
-        /*
-        * Se consultan nuevamente los pagos después de registrar
-        * el abono para obtener el total pagado actualizado.
-        */
-        List<Pago> pagos =
-            saleDAO.obtenerPagosPorVenta(venta.getId());
+        if(pagos == null){
+            pagos = new ArrayList<>();
+        }
 
         double pagadoAcumulado = pagos.stream()
-            .mapToDouble(Pago::getMonto)
+            .mapToDouble(Payment::getAmount)
             .sum();
 
-        double saldoPendiente = Math.max(venta.getRestante(), 0);
+        double saldoPendiente = Math.max(sale.getRemaining(), 0);
 
         /*
         * Evitamos saldos negativos por centavos o redondeos.
@@ -339,24 +343,24 @@ public class TicketService {
         Branch sucursalActual = Session.getSucursal();
         
         params.put("sucursal", sucursalActual != null ?
-                valorSeguro(sucursalActual.getSucursal()) : "" );
+                valorSeguro(sucursalActual.getName()) : "" );
 
         params.put("telefono_suc", sucursalActual != null ?
-                valorSeguro(sucursalActual.getTelefono()) : "" );
+                valorSeguro(sucursalActual.getPhone()) : "" );
 
         params.put("direccion_suc", sucursalActual != null ?
-                valorSeguro(sucursalActual.getDireccion()) : "" );
+                valorSeguro(sucursalActual.getAddress()) : "" );
 
         // Datos de la venta
         params.put("folio",
-            venta.getFolio() != null
-                    ? String.valueOf(venta.getFolio())
-                    : String.valueOf(venta.getId()));
+            sale.getFolio() != null
+                    ? String.valueOf(sale.getFolio())
+                    : String.valueOf(sale.getId()));
 
         params.put("cliente",
-            venta.getCliente() != null
+            sale.getClient() != null
                     ? valorSeguro(
-                            venta.getCliente().getNombre()
+                            sale.getClient().getName()
                     ) : "CLIENTE GENERAL" );
 
         // Fecha y hora del abono
@@ -391,9 +395,9 @@ public class TicketService {
     */
     
     public void imprimirOrdenGarantia(
-                            Garantia garantia,
-                            GarantiaGraduacion graduacionNueva,
-                            Venta venta, List<SaleItem> items){
+                            Warranty garantia,
+                            WarrantyGraduation graduacionNueva,
+                            Sale sale, List<SaleItem> items){
         
         try{
             InputStream reportStream = getClass().getResourceAsStream(Ruta_Orden_Garantia);
@@ -412,7 +416,7 @@ public class TicketService {
             JasperReport report = JasperCompileManager.compileReport(limpio);
 
             Map<String,Object> params =
-                construirParametrosOrdenGarantia(garantia,graduacionNueva,venta,items);
+                construirParametrosOrdenGarantia(garantia,graduacionNueva,sale,items);
 
             JasperPrint print = JasperFillManager.fillReport(
                 report,params,new JREmptyDataSource());
@@ -439,40 +443,40 @@ public class TicketService {
         }
     }
     
-    private Map<String, Object> construirParametrosOrdenGarantia(Garantia garantia,GarantiaGraduacion graduacionNueva , Venta venta, List<SaleItem> items)  {
+    private Map<String, Object> construirParametrosOrdenGarantia(Warranty garantia,WarrantyGraduation graduacionNueva , Sale sale, List<SaleItem> items)  {
 
         Map<String,Object> params = new HashMap<>();
         
         String nombreSucursal = "";
         
-        if(venta != null && venta.getSucursal() != null){
-            nombreSucursal = venta.getSucursal().getSucursal();
+        if(sale != null && sale.getBranch()!= null){
+            nombreSucursal = sale.getBranch().getName();
         }
 
         params.put("sucursal", valorSeguro(nombreSucursal));
-        params.put("cliente",valorSeguro(venta.getCliente().getNombre()));
+        params.put("cliente",valorSeguro(sale.getClient().getName()));
         params.put("folio_garantia",valorSeguro(garantia.getFolio()));
-        params.put("folio_venta",valorSeguro(venta.getFolio()));     
-        params.put("vendedor",venta.getVendedor()!= null ? valorSeguro(venta.getVendedor().getNombre()):"");
+        params.put("folio_venta",valorSeguro(sale.getFolio()));     
+        params.put("vendedor",sale.getSeller()!= null ? valorSeguro(sale.getSeller().getName()):"");
         params.put(
             "fecha",
-                garantia.getFechaSolicitud() != null
-                ? garantia.getFechaSolicitud().format(
+                garantia.getRequestDate() != null
+                ? garantia.getRequestDate().format(
                         DateTimeFormatter.ofPattern("dd/MM/yyyy")
                 ): LocalDate.now().format(
                         DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        params.put("motivo",valorSeguro(garantia.getMotivo()));
-        params.put("accion",formatearAccion(garantia.getAccion()));
+        params.put("motivo",valorSeguro(garantia.getReason()));
+        params.put("accion",formatearAccion(garantia.getAction()));
         params.put("tipo_lente",construirTipo(items));
         
         if(graduacionNueva != null){
 
-            params.put("od_esf",valorGraduacion(graduacionNueva.getOdEsfera()));
-            params.put("od_cil",valorGraduacion(graduacionNueva.getOdCilindro()));
-            params.put("od_eje",valorGraduacion(graduacionNueva.getOdEje()));
-            params.put("oi_esf",valorGraduacion(graduacionNueva.getOiEsfera()));
-            params.put("oi_cil",valorGraduacion(graduacionNueva.getOiCilindro()));
-            params.put("oi_eje",valorGraduacion(graduacionNueva.getOiEje()));
+            params.put("od_esf",valorGraduacion(graduacionNueva.getOdSphere()));
+            params.put("od_cil",valorGraduacion(graduacionNueva.getOdCylinder()));
+            params.put("od_eje",valorGraduacion(graduacionNueva.getOdAxis()));
+            params.put("oi_esf",valorGraduacion(graduacionNueva.getOiSphere()));
+            params.put("oi_cil",valorGraduacion(graduacionNueva.getOiCylinder()));
+            params.put("oi_eje",valorGraduacion(graduacionNueva.getOiAxis()));
             params.put("add",valorGraduacion(graduacionNueva.getOdAdd()));
 
         }else{

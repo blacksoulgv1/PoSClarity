@@ -1,5 +1,6 @@
 package com.gerardgv.posclarity.Ui;
 
+import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
 import javafx.geometry.Pos;

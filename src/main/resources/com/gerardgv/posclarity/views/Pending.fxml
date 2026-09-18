@@ -1,18 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <StackPane fx:id="root"
@@ -400,6 +390,11 @@
 
                             <Label text="La entrega solo se permite cuando la venta está liquidada."
                                    styleClass="pending-footer-text"/>
+                            
+                            <Region HBox.hgrow="ALWAYS"/>
+                            
+                            <fx:include source="PaginationView.fxml"
+                                fx:id="pagination"/>
 
                         </children>
 

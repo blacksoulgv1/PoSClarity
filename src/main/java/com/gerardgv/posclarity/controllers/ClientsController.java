@@ -2,7 +2,8 @@ package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.Ui.PosNotification;
 import com.gerardgv.posclarity.Ui.PosTable;
-import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.api.ClientApiClient;
+import com.gerardgv.posclarity.api.SaleApiClient;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.utils.*;
 import java.net.URL;
@@ -49,9 +50,10 @@ public class ClientsController implements Initializable {
     
     private Clients clienteSeleccionado = null;
     private boolean  modoEdicion = false;
+     
+    private final ClientApiClient clientApi = new ClientApiClient();
+    private final SaleApiClient saleApiClient= new SaleApiClient();
     
-    private final SaleDAO saleDAO = new SaleDAO();    
-    private final ClientsDAO clientsDAO = new ClientsDAO();
     private final ObservableList<Clients> listaClientes = FXCollections.observableArrayList();
     private final BooleanProperty formularioDeshabilitado = new SimpleBooleanProperty(false);
     
@@ -85,13 +87,13 @@ public class ClientsController implements Initializable {
             new SimpleIntegerProperty(data.getValue().getId()).asObject());
 
         colNombre.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getNombre()));
+            new SimpleStringProperty(data.getValue().getName()));
 
         colTelefono.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getTelefono()));
+            new SimpleStringProperty(data.getValue().getPhone()));
 
         colDireccion.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getDireccion()));
+            new SimpleStringProperty(data.getValue().getAddress()));
 
         colGraduacion.setCellValueFactory(data -> {
             Clients cliente = data.getValue();
@@ -113,7 +115,7 @@ public class ClientsController implements Initializable {
     });
 
     colEstado.setCellValueFactory(data ->
-            new SimpleBooleanProperty(data.getValue().isActivo()).asObject());
+            new SimpleBooleanProperty(data.getValue().isActive()).asObject());
 
     // ==============================
     // FORMATO DE LAS COLUMNAS
@@ -134,7 +136,17 @@ public class ClientsController implements Initializable {
     colEstado.setCellFactory(column ->
             TableUtils.createActiveToggle(
                     Clients::getId,
-                    clientsDAO::updateEstado));
+                    (id, active) -> {
+                        try{
+                            clientApi.updateStatus(id, active);
+                            cargarClientes();
+                            return true;
+                        } catch( Exception e ){
+                            e.printStackTrace();
+                            mostrarError("No Se Puede Actualizar Estado de Cliente");
+                            return false;
+                        }
+                    }));
 
     colAcciones.setCellFactory(column ->
             TableUtils.createEditButton(
@@ -154,7 +166,7 @@ public class ClientsController implements Initializable {
 
     PosTable.inactiveRows(
             tblClientes,
-            Clients::isActivo
+            Clients::isActive
     );
         
         
@@ -197,17 +209,22 @@ public class ClientsController implements Initializable {
     }
     
     private void cargarClientes(){
-        listaClientes.setAll(clientsDAO.findAll());
-        tblClientes.setItems(listaClientes);
+        try {
+            listaClientes.setAll(clientApi.getAll());
+            tblClientes.setItems(listaClientes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            mostrarError("No se pudieron cargar los clientes.");
+        }
     }
     
     private Clients construirCliente() {
         
         Clients cliente = new Clients();
 
-        cliente.setNombre(txtNombre.getText().trim());
-        cliente.setTelefono(txtTelefono.getText().trim());
-        cliente.setDireccion(txtDireccion.getText().trim());
+        cliente.setName(txtNombre.getText().trim());
+        cliente.setPhone(txtTelefono.getText().trim());
+        cliente.setAddress(txtDireccion.getText().trim());
 
         cliente.setOdEsf(txtOdEsf.getText().trim());
         cliente.setOdCil(txtOdCil.getText().trim());
@@ -221,15 +238,21 @@ public class ClientsController implements Initializable {
 
         if (modoEdicion && clienteSeleccionado != null) {
             cliente.setId(clienteSeleccionado.getId());
-            cliente.setActivo(clienteSeleccionado.isActivo());
+            cliente.setActive(clienteSeleccionado.isActive());
         } else {
-            cliente.setActivo(true);
+            cliente.setActive(true);
         }
             return cliente;      
     }
     
     private boolean guardarCliente(Clients cliente) {
-        return clientsDAO.insert(cliente);
+        try{
+            clientApi.create(cliente);
+            return true;
+        } catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
     
     private boolean actualizarCliente(Clients cliente) {
@@ -239,7 +262,13 @@ public class ClientsController implements Initializable {
             return false;
         }
 
-        return clientsDAO.update(cliente);
+        try{
+            clientApi.update(cliente);
+            return true;
+        } catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private void limpiarFormulario() {
@@ -322,9 +351,9 @@ public class ClientsController implements Initializable {
     clienteSeleccionado = cliente;
     modoEdicion = true;
 
-    txtNombre.setText(nvl(cliente.getNombre()));
-    txtTelefono.setText(nvl(cliente.getTelefono()));
-    txtDireccion.setText(nvl(cliente.getDireccion()));
+    txtNombre.setText(nvl(cliente.getName()));
+    txtTelefono.setText(nvl(cliente.getPhone()));
+    txtDireccion.setText(nvl(cliente.getAddress()));
 
     txtOdEsf.setText(nvl(cliente.getOdEsf()));
     txtOdCil.setText(nvl(cliente.getOdCil()));
@@ -338,7 +367,7 @@ public class ClientsController implements Initializable {
 
     btnGuardar.setText("Actualizar");
 
-    deshabilitarFormulario(!cliente.isActivo());
+    deshabilitarFormulario(!cliente.isActive());
     cargarEstadisticasCliente(cliente.getId());
 
     txtNombre.requestFocus();
@@ -346,8 +375,15 @@ public class ClientsController implements Initializable {
     
     private void cargarEstadisticasCliente(int idClient){
         
-       ClientStats stats = saleDAO.obtenerEstadisticasCliente(idClient);
-        actualizarEstadisticas(stats);
+        try{
+            ClientStats stats = saleApiClient.getClientStats(idClient);
+            actualizarEstadisticas(stats);
+        }catch(Exception e){
+            e.printStackTrace();
+            limpiarEstadisticas();
+            mostrarError("No Se Puedieron Cargar Las Estadísticas Del Cliente");
+        }
+     
     }
     
     public void refrescarStats(int idCliente){
@@ -372,9 +408,9 @@ public class ClientsController implements Initializable {
 
     private void configurarBusqueda() {
         SearchUtils.setupSearch(txtBuscar, tblClientes, listaClientes,
-                c-> c.getNombre(),
-                c-> c.getTelefono(),
-                c-> c.getDireccion());
+                c-> c.getName(),
+                c-> c.getPhone(),
+                c-> c.getAddress());
     }
 
     private void configurarGuardado() {
@@ -401,15 +437,15 @@ public class ClientsController implements Initializable {
             return;
         }
 
-        lblCompras.setText(String.valueOf(stats.getTotalCompras()));
-        lblTotalGastado.setText(String.format("$%,.2f", stats.getTotalGastado()));
+        lblCompras.setText(String.valueOf(stats.getTotalPurchases()));
+        lblTotalGastado.setText(String.format("$%,.2f", stats.getTotalSpent()));
 
         lblUltimaVisita.setText(
-            formatearFecha(stats.getUltimavisita())
+            formatearFecha(stats.getLastVisit())
         );
 
         lblClienteDesde.setText(
-            formatearFecha(stats.getClienteDesde())
+            formatearFecha(stats.getClientSince())
         );
     
     }

@@ -1,10 +1,11 @@
 package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.Ui.*;
-import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.api.*;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.service.TicketService;
 import com.gerardgv.posclarity.utils.*;
+import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,11 +13,8 @@ import java.util.*;
 import javafx.beans.property.*;
 import javafx.collections.*;
 import javafx.fxml.*;
-import javafx.geometry.Bounds;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
-import javafx.stage.Popup;
-
 
 public class SaleController implements Initializable {
     
@@ -60,27 +58,53 @@ public class SaleController implements Initializable {
     @FXML private TableColumn<SaleItem,Double> colSubtotal;
     @FXML private TableColumn<SaleItem,Void> colAcciones;
     @FXML private StackPane rootSale;
+    /*
+    API
+    */
+    private final ProductApiClient productApiClient = new ProductApiClient();
+    private final InventoryApiClient inventoryApiClient = new InventoryApiClient();
+    private final SaleApiClient saleApiClient = new SaleApiClient();
+    private final ClientApiClient clientApiClient = new ClientApiClient();
+    private final SellerApiClient sellerApiClient = new SellerApiClient();
+    private final DiscountApiClient discountApiClient = new DiscountApiClient();
     
-    private ProductDAO productDAO = new ProductDAO();    
     private ObservableList<SaleItem> carrito = FXCollections.observableArrayList(); 
-    private ClientsDAO clientsDAO = new ClientsDAO();    
-    private DescuentoDAO descuentoDAO = new DescuentoDAO();
-    private SaleDAO saleDAO = new SaleDAO(); 
-    private Clients clienteSeleccionado = null;
-    private FolioDAO folioDAO = new FolioDAO();    
-    private Empleados vendedorSeleccionado = null;
-    private EmpleadosDAO empleadosDAO = new EmpleadosDAO();
+    
+    
+    private Clients clienteSeleccionado = null;     
+    private Seller vendedorSeleccionado = null; 
+    
     
     private PosSearchPopup<Product> popupProductos = new PosSearchPopup<>();
     private PosSearchPopup<Clients> popupClientes  = new PosSearchPopup<>();
-    private PosSearchPopup<Empleados> popupVendedores  = new PosSearchPopup<>();
+    private PosSearchPopup<Seller> popupVendedores  = new PosSearchPopup<>();
+    
+   private static class ResultadoPromocion {
+       private final Discount promocion;
+        private final double descuento;
+
+        public ResultadoPromocion(
+            Discount promocion,
+            double descuento) {
+
+            this.promocion = promocion;
+            this.descuento = descuento;
+        }
+
+        public Discount getPromocion() {
+            return promocion;
+        }
+
+        public double getDescuento() {
+            return descuento;
+        }
+   }
                
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         aplicarComportamientos();
         cargarSucursal();
         cargarFecha();
-        cargarFolioVenta();
         configurarTabla();
         configurarPopupProductos();
         configurarPopupClientes();
@@ -119,15 +143,6 @@ public class SaleController implements Initializable {
         
     }
     
-    private void cargarFolioVenta(){
-        try{
-            String folio = folioDAO.ObtenerSiguienteFolio(Session.getSucursal().getId(), "VENTA");
-            txtFolio.setText(folio);            
-        } catch(Exception e){
-            e.printStackTrace();
-            txtFolio.setText("SIN FOLIO");
-        }
-    }
     
     private void actualizarPago(){
         double total = calcularTotalVenta();
@@ -166,7 +181,7 @@ public class SaleController implements Initializable {
         PosTable.apply(tableProduct);
         
         colCantidad.setCellValueFactory(data ->
-            new SimpleIntegerProperty(data.getValue().getCantidad()).asObject());
+            new SimpleIntegerProperty(data.getValue().getQuantity()).asObject());
         
         colCantidad.setCellFactory(
                 javafx.scene.control.cell.TextFieldTableCell.forTableColumn(
@@ -174,25 +189,25 @@ public class SaleController implements Initializable {
         
         colCantidad.setOnEditCommit(e ->{
             SaleItem item = e.getRowValue();
-            item.setCantidad(e.getNewValue());
+            item.setQuantity(e.getNewValue());
             tableProduct.refresh();
             actualizarTotal();
         });
         
         colModelo.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getProducto().getModelo()));
+            new SimpleStringProperty(data.getValue().getProduct().getModel()));
         
         colMarca.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getProducto().getMarca()));
+            new SimpleStringProperty(data.getValue().getProduct().getBrand()));
         
         colCategoria.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getProducto().getCategoria()));
+            new SimpleStringProperty(data.getValue().getProduct().getCategory()));
         
         colDescuento.setCellValueFactory(data -> 
-            new SimpleDoubleProperty(data.getValue().getDescuento()).asObject());
+            new SimpleDoubleProperty(data.getValue().getDiscount()).asObject());
         
         colPrecio.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getProducto().getPrecio()).asObject());
+            new SimpleDoubleProperty(data.getValue().getProduct().getPrice()).asObject());
         
         colSubtotal.setCellValueFactory(data ->
             new SimpleDoubleProperty(data.getValue().getSubtotal()).asObject());
@@ -276,36 +291,42 @@ public class SaleController implements Initializable {
         Branch suc = Session.getSucursal();
         
         if(suc != null){
-            txtSucursal.setText(suc.getSucursal());
-            txtDireccionSuc.setText(suc.getDireccion());
-            txtTelefonoSuc.setText(suc.getTelefono());            
+            txtSucursal.setText(suc.getName());
+            txtDireccionSuc.setText(suc.getAddress());
+            txtTelefonoSuc.setText(suc.getPhone());            
         }
     }
            
     private void configurarPopupProductos(){
         
         popupProductos.setTitleProvider(p ->
-            p.getModelo() + " - " + p.getMarca());
+            p.getModel()+ " - " + p.getBrand());
         
         popupProductos.setSubtitleProvider(p ->
-            p.getCategoria()+ " | $" + String.format("%.2f", p.getPrecio()) + " | stock:" + p.getStock());
+            p.getCategory()+ " | $" + String.format("%.2f", p.getPrice()) + " | stock:" + p.getStock());
         
         popupProductos.setIconProvider(p->"fas-box-open");
         popupProductos.setEmptyMessage("No Se Encontro Productos");
         
         popupProductos.setOnSelected(this::agregarProducto);
+        
         txtBuscarProductos.textProperty().addListener((obs, oldText, newText) -> {
             if(newText == null || newText.isBlank()){
                 popupProductos.hide();
                 return;
             }
 
-        List<Product> lista = productDAO.buscarPorNombre(
-                newText,
-                Session.getSucursal().getId());
+        try{
+            List<Product> lista =
+                    productApiClient.search(newText);
 
             popupProductos.setItems(lista);
             popupProductos.show(txtBuscarProductos);
+        }catch(IOException | InterruptedException e){
+
+            e.printStackTrace();
+            mostrarError("Error buscando productos");
+        }
         });
 
         txtBuscarProductos.setOnAction(e -> {
@@ -323,51 +344,71 @@ public class SaleController implements Initializable {
         String texto = txtBuscarProductos.getText();
         if(texto.isEmpty()) return;
         
-        Product p = productDAO.getByModel(texto);
-        
-        if(p != null){
-            agregarProducto(p);
+        try{
+            
+            Product p = productApiClient.getByModel(texto);
+
+            if (p != null) {
+                agregarProducto(p);
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            mostrarError("Error al buscar producto");
         }
     }
     
     private void agregarProducto(Product p){
         
-        Product productDB = productDAO.getById(p.getId_product(),
-                Session.getSucursal().getId());
+        Product productDB;
         
-        if(productDB == null){
+        try{
+            
+            productDB = productApiClient.getById(p.getId());
+            
+            if (productDB == null) {
+                mostrarError("Error al obtener producto");
+                return;
+            }
+
+            Inventory inventory = inventoryApiClient.getProductStock(
+                Session.getSucursal().getId(),
+                productDB.getId());
+
+            if (inventory != null) {
+                productDB.setStock(inventory.getStock());
+            } else {
+                productDB.setStock(0);
+            }           
+        } catch(IOException | InterruptedException e) {
+            e.printStackTrace();
             mostrarError("Error al obtener producto");
-            return;
+        return;
         }
         
-        productDB.setStock(p.getStock());
-        
-        if(productDB.isManejaStock() && productDB.getStock()<=0){
+        if(productDB.getManageStock()&& productDB.getStock()<=0){
             mostrarError("Sin Stock");
             return;
         }
-
         
         for(SaleItem item : carrito){
-            if(item.getProducto().getId_product() == productDB.getId_product()){
-                if(productDB.isManejaStock() && item.getCantidad() >= productDB.getStock()){
+            
+            if(item.getProduct().getId() == productDB.getId()){
+                
+                if(productDB.getManageStock() && item.getQuantity() 
+                        >= productDB.getStock()){
                   mostrarError("Stock Máximo");
                     return;  
                 }
-                item.setCantidad(item.getCantidad()+1);
-                tableProduct.refresh();
-                actualizarTotal();
+                item.setQuantity(item.getQuantity()+1);
+                recalcularPromociones();
                 return;
             }            
         }       
         
-        double descuento = calcularDescuento(productDB);
-        String nombreDescuento = obtenerNombrePromocion(productDB);
-        
-        carrito.add(new SaleItem(productDB,nombreDescuento,descuento));
-        mostrarExito("Producto Agregado Al Carrito");
+        carrito.add(new SaleItem(productDB,"Sin Descuento",0));
         tableProduct.setItems(carrito);
-        actualizarTotal();
+        recalcularPromociones();
+        mostrarExito("Producto Agregado Al Carrito");       
         txtBuscarProductos.clear();
         popupProductos.hide();
     }
@@ -378,17 +419,23 @@ public class SaleController implements Initializable {
         
         if(texto.isEmpty()) return;
         
-        Product p = productDAO.getByModel(texto);
-        
-        if(p != null){
+        try {
+
+            Product p = productApiClient.getByModel(texto);
+
+        if (p != null) {
             agregarProducto(p);
+        }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            mostrarError("Error al buscar producto");
         }
     }
     
     private void configurarPopupClientes(){
         
-        popupClientes.setTitleProvider(c -> c.getNombre());
-        popupClientes.setSubtitleProvider(c -> "Tel: " + c.getTelefono());
+        popupClientes.setTitleProvider(c -> c.getName());
+        popupClientes.setSubtitleProvider(c -> "Tel: " + c.getPhone());
         popupClientes.setIconProvider(c -> "fas-user");
         popupClientes.setEmptyMessage("No se encontraron clientes");
     
@@ -401,10 +448,19 @@ public class SaleController implements Initializable {
                 return;
             }
 
-            List<Clients> lista = clientsDAO.buscarPorNombre(newText);
-
-            popupClientes.setItems(lista);
-            popupClientes.show(txtCliente);
+            try{
+                List<Clients> lista = clientApiClient.search(newText);
+                
+                popupClientes.setItems(lista);
+                popupClientes.show(txtCliente);
+            } catch (IOException | InterruptedException e){
+                e.printStackTrace();
+                popupClientes.hide();
+                
+                if(e instanceof InterruptedException){
+                    Thread.currentThread().interrupt();
+                }
+            }
         });
 
         txtCliente.setOnAction(e -> {
@@ -418,9 +474,9 @@ public class SaleController implements Initializable {
 
     private void llenarDatosCliente(Clients c){
         clienteSeleccionado = c;
-        txtCliente.setText(c.getNombre());
-        txtTelefonoClient.setText(c.getTelefono());
-        txtDireccionClient.setText(c.getDireccion());
+        txtCliente.setText(c.getName());
+        txtTelefonoClient.setText(c.getPhone());
+        txtDireccionClient.setText(c.getAddress());
         txtEsfOD.setText(c.getOdEsf());
         txtCylOD.setText(c.getOdCil());
         txtEjeOD.setText(c.getOdEje());
@@ -432,107 +488,453 @@ public class SaleController implements Initializable {
         popupClientes.hide();
     }
 
-    private double calcularDescuento(Product p) {
+    private ResultadoPromocion evaluarPromocion(Product p) {
 
-        List<Descuento> promociones =
-            descuentoDAO.obtenerPromocionesCategoria(
-                    p.getCategoria());
+    try {
 
-    if(promociones.isEmpty()){
-        return 0;
+        List<Discount> promociones =
+                discountApiClient.getActiveByCategory(
+                        p.getCategory()
+                );
+System.out.println(
+        "\n===== PROMOCIONES PARA: "
+        + p.getModel()
+        + " | CATEGORIA: "
+        + p.getCategory()
+        + " ====="
+);
+
+if (promociones != null) {
+
+    System.out.println(
+            "Cantidad: " + promociones.size()
+    );
+
+    for (Discount promo : promociones) {
+
+        System.out.println(
+                "ID: " + promo.getId()
+                + " | Nombre: " + promo.getName()
+                + " | Tipo: " + promo.getValueType()
+                + " | Valor: " + promo.getValue()
+                + " | ProductoID: "
+                + promo.getBenefitProductId()
+                + " | Modelo: "
+                + promo.getBenefitProductModel()
+                + " | RequiereArmazon: "
+                + promo.isRequireFrame()
+                + " | MaxDioptria: "
+                + promo.getMaxDiopter()
+                + " | Prioridad: "
+                + promo.getPriority()
+                + " | Activo: "
+                + promo.isActive()
+        );
     }
+}
 
-    for(Descuento promo : promociones){
-
-        /*
-         * Modelo específico
-         */
-        if(promo.getModeloProducto() != null && !promo.getModeloProducto().isBlank()){
-            if(!p.getModelo().equalsIgnoreCase(promo.getModeloProducto())){
-                continue;
-            }
+        if (promociones == null || promociones.isEmpty()) {
+            return new ResultadoPromocion(null, 0);
         }
 
         /*
-         * Requiere armazón
+         * ==========================================
+         * ORDENAR POR PRIORIDAD
+         * ==========================================
+         *
+         * La prioridad más alta se evalúa primero.
          */
-        if(promo.isRequiereArmazon() && !ventaTieneArmazon()){
+        promociones.sort(
+                Comparator.comparingInt(
+                        Discount::getPriority
+                ).reversed()
+        );
+
+        for (Discount promo : promociones) {
+
+            /*
+             * ==========================================
+             * PRODUCTO BENEFICIADO
+             * ==========================================
+             *
+             * Si la promoción tiene un producto
+             * específico, debe coincidir con el producto
+             * que estamos evaluando.
+             */
+            if (promo.getBenefitProductId() != null) {
+
+                if (p.getId() != promo.getBenefitProductId()) {
+                    continue;
+                }
+            }
+
+            /*
+             * ==========================================
+             * MODELO BENEFICIADO
+             * ==========================================
+             *
+             * Compatibilidad con promociones que
+             * utilizan el modelo en lugar del ID.
+             */
+            if (promo.getBenefitProductModel() != null
+                    && !promo.getBenefitProductModel().isBlank()) {
+
+                if (!p.getModel().equalsIgnoreCase(
+                        promo.getBenefitProductModel())) {
+
+                    continue;
+                }
+            }
+
+            /*
+             * ==========================================
+             * REQUIERE ARMAZÓN
+             * ==========================================
+             */
+            if (promo.isRequireFrame()
+                    && !ventaTieneArmazon()) {
+
+                continue;
+            }
+
+            /*
+             * ==========================================
+             * DIÓPTRIA MÁXIMA
+             * ==========================================
+             */
+            if (promo.getMaxDiopter() != null) {
+
+                double dioptriaMayor =
+                        obtenerDioptriaMayor();
+
+                if (dioptriaMayor >
+                        promo.getMaxDiopter()) {
+
+                    continue;
+                }
+            }
+
+            /*
+             * ==========================================
+             * TIPO DE PROMOCIÓN
+             * ==========================================
+             */
+            String tipo = promo.getValueType();
+
+            if (tipo == null || tipo.isBlank()) {
+                continue;
+            }
+
+            switch (tipo.toUpperCase()) {
+
+                /*
+                 * --------------------------------------
+                 * PORCENTAJE
+                 * --------------------------------------
+                 */
+                case "PORCENTAJE":
+
+                    if (promo.getValue() == null) {
+                        continue;
+                    }
+
+                    double descuentoPorcentaje =
+                            p.getPrice()
+                            * (promo.getValue() / 100);
+
+                    return new ResultadoPromocion(
+                            promo,
+                            descuentoPorcentaje
+                    );
+
+                /*
+                 * --------------------------------------
+                 * MONTO
+                 * --------------------------------------
+                 */
+                case "MONTO":
+
+                    if (promo.getValue() == null) {
+                        continue;
+                    }
+
+                    /*
+                     * Nunca permitir que el descuento
+                     * sea mayor al precio del producto.
+                     */
+                    double descuentoMonto =
+                            Math.min(
+                                    promo.getValue(),
+                                    p.getPrice()
+                            );
+
+                    return new ResultadoPromocion(
+                            promo,
+                            descuentoMonto
+                    );
+
+                /*
+                 * --------------------------------------
+                 * GRATIS
+                 * --------------------------------------
+                 */
+                case "GRATIS":
+
+                    /*
+                     * En GRATIS el valor puede ser NULL.
+                     *
+                     * El descuento es el precio completo
+                     * del producto.
+                     */
+                    return new ResultadoPromocion(
+                            promo,
+                            p.getPrice()
+                    );
+
+                /*
+                 * --------------------------------------
+                 * TIPO DESCONOCIDO
+                 * --------------------------------------
+                 */
+                default:
+
+                    continue;
+            }
+        }
+
+    } catch (IOException | InterruptedException e) {
+
+        e.printStackTrace();
+
+        mostrarError(
+                "No se pudieron consultar las promociones."
+        );
+    }
+
+    return new ResultadoPromocion(null, 0);
+}
+    
+    private double calcularTotalVenta() {
+
+    double total = 0;
+
+    // ==============================
+    // 1. TOTAL DE PRODUCTOS
+    // ==============================
+
+    for (SaleItem item : carrito) {
+
+        if (item.getProduct() == null) {
             continue;
         }
 
-        /*
-         * Validar dioptría
-         */
-        if(promo.getDiotriaMax() != null){
-            double dioptriaMayor = obtenerDioptriaMayor();
-            if(dioptriaMayor >promo.getDiotriaMax()){
-                continue;
+        total += item.getSubtotal();
+    }
+
+    // ==============================
+    // 2. DESCUENTO GENERAL
+    // ==============================
+
+    try {
+
+        List<Discount> descuentosGenerales =
+                discountApiClient.getActiveGeneral();
+
+        if (descuentosGenerales != null
+                && !descuentosGenerales.isEmpty()) {
+
+            Discount descuentoGeneral =
+                    descuentosGenerales.stream()
+
+                            // IMPORTANTE:
+                            // Un GRATIS no es descuento general
+                            .filter(d ->
+                                    "PORCENTAJE".equalsIgnoreCase(
+                                            d.getValueType())
+                                    ||
+                                    "MONTO".equalsIgnoreCase(
+                                            d.getValueType())
+                            )
+
+                            .filter(d ->
+                                    d.getValue() != null
+                            )
+
+                            .max(
+                                    Comparator.comparingInt(
+                                            Discount::getPriority
+                                    )
+                            )
+
+                            .orElse(null);
+
+            if (descuentoGeneral != null) {
+
+                if ("PORCENTAJE".equalsIgnoreCase(
+                        descuentoGeneral.getValueType())) {
+
+                    total -= total *
+                            (descuentoGeneral.getValue() / 100);
+
+                } else if ("MONTO".equalsIgnoreCase(
+                        descuentoGeneral.getValueType())) {
+
+                    total -= Math.min(
+                            descuentoGeneral.getValue(),
+                            total
+                    );
+                }
             }
         }
 
-        /*
-         * Aplicar descuento
-         */
-        switch(promo.getTipoValor()){
-            case "PORCENTAJE":
-                return p.getPrecio()
-                        * (promo.getValor() / 100);
-            case "MONTO":
-                return promo.getValor();
-            case "GRATIS":
-                return p.getPrecio();
-        }
+    } catch (IOException | InterruptedException e) {
+
+        e.printStackTrace();
+
+        mostrarError(
+                "No se pudieron consultar los descuentos generales."
+        );
     }
-    return 0;
-    }
+
+    // Nunca permitir total negativo
+    return Math.max(total, 0);
+}
     
-   private double calcularTotalVenta(){
+    private void actualizarTotal() {
         
-        double total = 0;
+    double totalBruto = 0;
+    double descuentoProductos = 0;
+
+    /*
+     * ==============================
+     * CALCULAR PRODUCTOS
+     * ==============================
+     */
+    for (SaleItem item : carrito) {
         
-        for(SaleItem item : carrito){
-            total += item.getSubtotal();
+
+        if (item.getProduct() == null) {
+            continue;
         }
-        
-        Descuento dGeneral = descuentoDAO.obtenerGeneralActivo();
-        
-        if(dGeneral != null){
-            if(dGeneral.getTipoValor().equalsIgnoreCase("porcentaje")){
-            total -= total*(dGeneral.getValor()/100);
-        } else {
-            total -= dGeneral.getValor();
-        }
+
+        double precio = item.getProduct().getPrice();
+        int cantidad = item.getQuantity();
+        double descuento = item.getDiscount();
+
+        totalBruto += precio * cantidad;
+        descuentoProductos += descuento * cantidad;
     }
-        return total;
-    }
-    
-    private void actualizarTotal(){
-        double totalBruto = 0;
-        double descuentoProductos = 0;
-        
-        for(SaleItem item : carrito){
-            totalBruto += item.getProducto().getPrecio() * item.getCantidad();
-            descuentoProductos += item.getDescuento() *item.getCantidad();
-        }
-        
-        double totalconDescuento = totalBruto - descuentoProductos;
-        double descuentoGeneral = 0;
-        Descuento dGeneral = descuentoDAO.obtenerGeneralActivo();
-        
-        if(dGeneral != null){
-            if(dGeneral.getTipoValor().equalsIgnoreCase("PORCENTAJE")){
-                descuentoGeneral = totalconDescuento * (dGeneral.getValor()/100);
-            } else {
-                descuentoGeneral = dGeneral.getValor();
+
+    /*
+     * Total después de descuentos
+     * por producto
+     */
+    double totalConDescuento =
+            totalBruto - descuentoProductos;
+
+    double descuentoGeneral = 0;
+
+    /*
+     * ==============================
+     * DESCUENTO GENERAL
+     * ==============================
+     */
+    try {
+
+        List<Discount> descuentosGenerales =
+                discountApiClient.getActiveGeneral();
+
+        if (descuentosGenerales != null
+                && !descuentosGenerales.isEmpty()) {
+
+            Discount dGeneral =
+                    descuentosGenerales.stream()
+                            .max((d1, d2) ->
+                                    Integer.compare(
+                                            d1.getPriority(),
+                                            d2.getPriority()
+                                    ))
+                            .orElse(null);
+
+            if (dGeneral != null) {
+
+                if ("PORCENTAJE".equalsIgnoreCase(
+                        dGeneral.getValueType())) {
+
+                    descuentoGeneral =
+                            totalConDescuento
+                            * (dGeneral.getValue() / 100);
+
+                } else if ("MONTO".equalsIgnoreCase(
+                        dGeneral.getValueType())) {
+
+                    descuentoGeneral =
+                            dGeneral.getValue();
+                }
             }
         }
-        
-        double totalFinal = totalconDescuento - descuentoGeneral;
-        
-        lblTotalBruto.setText("$" + String.format("%.2f",totalBruto));
-        lblDescuento.setText("$" + String.format("%.2f", (descuentoProductos + descuentoGeneral)));
-        lblTotal.setText("$" + String.format("%.2f", totalFinal));
+
+    } catch (IOException | InterruptedException e) {
+
+        e.printStackTrace();
+
+        mostrarError(
+                "No se pudieron consultar los descuentos generales."
+        );
+
+    } catch (Exception e) {
+
+        /*
+         * Evitamos que un problema con promociones
+         * impida mostrar los totales de la venta.
+         */
+        e.printStackTrace();
+
+        mostrarError(
+                "Ocurrió un error al consultar las promociones."
+        );
     }
+
+    /*
+     * ==============================
+     * TOTAL FINAL
+     * ==============================
+     */
+    double totalFinal =
+            totalConDescuento - descuentoGeneral;
+
+    /*
+     * Nunca permitir negativos
+     */
+    if (totalFinal < 0) {
+        totalFinal = 0;
+    }
+
+    /*
+     * ==============================
+     * ACTUALIZAR INTERFAZ
+     * ==============================
+     */
+    lblTotalBruto.setText(
+            "$" + String.format("%.2f", totalBruto)
+    );
+
+    lblDescuento.setText(
+            "$" + String.format(
+                    "%.2f",
+                    descuentoProductos + descuentoGeneral
+            )
+    );
+
+    lblTotal.setText(
+            "$" + String.format("%.2f", totalFinal)
+    );
+
+    /*
+     * Actualizar restante/cambio
+     */
+    //actualizarPago();
+}
           
     @FXML
     private void guardarVenta(){
@@ -577,74 +979,97 @@ public class SaleController implements Initializable {
             }
         }       
                 
-        //==== ESTADO PAGO ====
-        String estadoPago = (monto >= total) ? "COMPLETA":"PENDIENTE";
-        //==== ESTADO DE TRABAJO ====
-        String estadoTrabajo = esBajoPedido ? "PROCESO":"ENTREGADO";
+        Payment payment = null;
         
-        List<Pago> pagos = new ArrayList<>();
-        Pago p = new Pago();
-        p.setMetodo(cbMetodoPago.getValue());
-        p.setMonto(monto);
-        p.setReferencia(null);
-        p.setTipoPago("VENTA");
-        pagos.add(p);
-        
-        double totalBruto = calcularTotalBruto();
-        double descuentoTotal = calcularDescuento();        
-        double totalFinal = calcularTotalVenta();
-        
-        VentaResultado resultado = saleDAO.guardarVenta(
-                new ArrayList<>(carrito),
-                pagos,
-                totalBruto,
-                descuentoTotal,
-                totalFinal,
-                estadoPago,
-                clienteSeleccionado.getId(),
-                vendedorSeleccionado.getId_vendedor(),
-                txtEsfOD.getText(),
-                txtCylOD.getText(),
-                txtEjeOD.getText(),
-                txtEsfOI.getText(),
-                txtCylOI.getText(),
-                txtEjeOI.getText(),
-                txtAdd.getText());
-        
-        if(resultado != null ){
+        if(monto > 0){
             
-            int idVenta = resultado.getIdVenta();
-            String folioReal = resultado.getFolio();
-            txtFolio.setText(folioReal);
-                       
-            Venta venta = saleDAO.obtenerVentaCompleta(idVenta);
-            List<SaleItem> items = saleDAO.obtenerDetalleVenta(idVenta);
+            payment = new Payment();
             
-            TicketService ticketService = new TicketService();
-            ticketService.imprimirTicket(venta, items);
-            ticketService.imprimirOrdenLaboratorio(venta,items);
-            EventBus.publishVenta(clienteSeleccionado.getId());
-            List<Integer> productosIds = carrito.stream()
-                    .map(item -> item.getProducto().getId_product()).toList();
-            EventBus.publishStock(productosIds);
-            mostrarExito("Venta Realizada Correctamente");
-            limpiarVenta();
-        } else{
-            mostrarError("Error al Guardar Venta");
+            payment.setPaymentMethod(cbMetodoPago.getValue());
+            payment.setAmount(monto);
+            payment.setReference(null);
+            payment.setPaymentType("VENTA");
         }
+        
+        Sale sale;
+        
+        try{
+            
+            sale = saleApiClient.create(
+                    new ArrayList<>(carrito),
+                    payment,
+                    clienteSeleccionado.getId(),
+                    vendedorSeleccionado.getId(),
+                    txtEsfOD.getText(),
+                    txtCylOD.getText(),
+                    txtEjeOD.getText(),
+                    txtEsfOI.getText(),
+                    txtCylOI.getText(),
+                    txtEjeOI.getText(),
+                    txtAdd.getText(),
+                    null );
+            
+            if(clienteSeleccionado != null){
+                sale.setClient(clienteSeleccionado);
+            }
+            
+        } catch (IOException | InterruptedException e){
+            e.printStackTrace();
+            mostrarError("No se Puede Guardar Venta Con El Servidor");
+            return;
+        }
+        
+        if(sale == null){
+            mostrarError("Error al Guardar Venta");
+            return;
+        }
+        
+        txtFolio.setText(sale.getFolio());
+        
+        List<SaleItem> items = sale.getItems();
+        
+        TicketService ticketService = new TicketService();
+
+        ticketService.imprimirTicket(
+            sale,
+            items
+        );
+
+        ticketService.imprimirOrdenLaboratorio(
+            sale,
+            items
+        );
+        
+        EventBus.publishVenta(
+            clienteSeleccionado.getId()
+        );
+
+        List<Integer> productosIds = carrito.stream()
+            .map(item -> item.getProduct().getId())
+            .toList();
+
+        EventBus.publishStock(
+            productosIds
+        );
+        
+        mostrarExito("Venta Realizada Correctamente");
+
+        limpiarVenta();
     }
     
     private void mostrarError(String msg){
-    PosNotification.error(rootSale, "Atención", msg);
+        PosNotification.error(rootSale, "Atención", msg);
     }
 
     private void mostrarExito(String msg){
-    PosNotification.success(rootSale, "Listo", msg);
+        PosNotification.success(rootSale, "Listo", msg);
     }
     
     
     private boolean contieneBajoPedido(List<SaleItem> carrito){
-        return carrito.stream().anyMatch(item -> !item.getProducto().isManejaStock());
+        
+        return carrito.stream().anyMatch(item -> 
+                !item.getProduct().getManageStock());
     }
     
     private void limpiarVenta(){
@@ -681,18 +1106,23 @@ public class SaleController implements Initializable {
         lblRestante.setText("$0.00");
         lblCambio.setText("$0.00");
         actualizarTotal();
-        cargarFolioVenta();
     }
     
     private double calcularTotalBruto(){
+        
         return carrito.stream()
-            .mapToDouble(i -> i.getProducto().getPrecio() * i.getCantidad())
+            .mapToDouble(item  -> 
+                    item.getProduct().getPrice()
+                    * item .getQuantity())
             .sum();
     }
 
     private double calcularDescuento(){
+        
         return carrito.stream()
-            .mapToDouble(item -> item.getDescuento() * item.getCantidad())
+            .mapToDouble(item ->
+                    item.getDiscount()
+                    * item.getQuantity())
             .sum();
     }
 
@@ -702,14 +1132,14 @@ public class SaleController implements Initializable {
     
     private void configurarPopupVendedores(){
         
-        popupVendedores.setTitleProvider(emp -> emp.getNombre());
-        popupVendedores.setSubtitleProvider(emp -> "Código: " + emp.getCodigo());
+        popupVendedores.setTitleProvider(emp -> emp.getName());
+        popupVendedores.setSubtitleProvider(emp -> "Código: " + emp.getCode());
         popupVendedores.setIconProvider(emp -> "fas-user-tie");
         popupVendedores.setEmptyMessage("No se encontraron colaboradores");
 
         popupVendedores.setOnSelected(emp -> {
             vendedorSeleccionado = emp;
-            txtColaborador.setText(emp.getNombre());
+            txtColaborador.setText(emp.getName());
         });
 
         txtColaborador.textProperty().addListener((obs, oldText, newText) -> {
@@ -719,18 +1149,30 @@ public class SaleController implements Initializable {
                 return;
             }
 
-            List<Empleados> lista = empleadosDAO.buscarPorNombre(newText);
+            try {
 
-                popupVendedores.setItems(lista);
-                popupVendedores.show(txtColaborador);
-        });
+                List<Seller> lista = sellerApiClient.getAll()
+                    .stream() .filter(emp ->
+                            emp.getName()
+                            .toLowerCase()
+                            .contains(newText.toLowerCase())
+                    ) .toList();
+                
+            popupVendedores.setItems(lista);
+            popupVendedores.show(txtColaborador);
+
+        } catch(IOException | InterruptedException e){
+
+            e.printStackTrace();
+            mostrarError("Error cargando vendedores");
+        } });
 
         txtColaborador.setOnAction(e -> {
-            Empleados emp = popupVendedores.getFirst();
+            Seller emp = popupVendedores.getFirst();
 
             if(emp != null){
                 vendedorSeleccionado = emp;
-                txtColaborador.setText(emp.getNombre());
+                txtColaborador.setText(emp.getName());
                 popupVendedores.hide();
             }
         });
@@ -740,8 +1182,8 @@ public class SaleController implements Initializable {
 
     return carrito.stream()
             .anyMatch(item ->
-                    item.getProducto()
-                            .getCategoria()
+                    item.getProduct()
+                            .getCategory()
                             .equalsIgnoreCase("armazon"));
     }
     
@@ -762,56 +1204,26 @@ public class SaleController implements Initializable {
     }
     
     private void recalcularPromociones(){
-        boolean tieneArmazon = ventaTieneArmazon();
-        double dioptriaMayor = obtenerDioptriaMayor();
-
-            for(SaleItem item : carrito){
-                Product producto = item.getProducto();
-                double descuento = calcularDescuento(producto);
-                item.setDescuento(descuento);
+        
+        for (SaleItem item : carrito) {
+            
+            Product product = item.getProduct();
+            ResultadoPromocion resultado = evaluarPromocion(product);
+            item.setDiscount(resultado.getDescuento());
+            
+            if(resultado.getPromocion() != null){
+                item.setDiscountName(
+                    resultado.getPromocion().getName()
+            );
+            }else{
+                item.setDiscountName(
+                    "Sin Descuento"
+            );
             }
+        }
+        
         tableProduct.refresh();
         actualizarTotal();
     }
-    
-    private String obtenerNombrePromocion(Product p) {
-
-    List<Descuento> promociones =
-            descuentoDAO.obtenerPromocionesCategoria(
-                    p.getCategoria());
-
-    for(Descuento promo : promociones){
-
-        if(promo.getModeloProducto() != null
-                && !promo.getModeloProducto().isBlank()
-                && !p.getModelo().equalsIgnoreCase(
-                        promo.getModeloProducto())){
-
-            continue;
-        }
-
-        if(promo.isRequiereArmazon()
-                && !ventaTieneArmazon()){
-
-            continue;
-        }
-
-        if(promo.getDiotriaMax() != null){
-
-            double dioptriaMayor =
-                    obtenerDioptriaMayor();
-
-            if(dioptriaMayor >
-                    promo.getDiotriaMax()){
-
-                continue;
-            }
-        }
-
-        return promo.getNombre();
-    }
-
-    return "Sin Descuento";
-}
-       
+      
 }

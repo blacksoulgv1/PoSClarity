@@ -1,25 +1,19 @@
 package com.gerardgv.posclarity.utils;
 
-import com.gerardgv.posclarity.database.DBConnection;
-import java.sql.*;
+import com.gerardgv.posclarity.api.BranchApiClient;
 
 public class Instalacion {
     
-    public static boolean existeSucursal() {
-    
-        String sql = "SELECT COUNT(*)FROM sucursal";
-    
-            try(Connection con = DBConnection.getConnection();
-                PreparedStatement ps = con.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()){
+    public static boolean existeSucursal(){
+        
+        try{
             
-                if(rs.next()){
-                return rs.getInt(1) > 0;
-                }
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-        return false;
+            BranchApiClient apiClient = new BranchApiClient();        
+            return apiClient.existsAnyBranch();
+        } catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
     
 }

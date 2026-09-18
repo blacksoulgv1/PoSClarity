@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<HBox fx:id="root"
+      alignment="CENTER_RIGHT"
+      spacing="6"
+      styleClass="pagination-container"
+      stylesheets="@/com/gerardgv/posclarity/css/components/pos-pagination.css"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.gerardgv.posclarity.controllers.PaginationController">
+
+    <Label text="Filas:"
+           styleClass="pagination-label"/>
+
+    <ComboBox fx:id="cbFilasPorPagina"
+              prefWidth="72"
+              styleClass="pagination-size"/>
+
+    <Separator orientation="VERTICAL"/>
+
+    <Button fx:id="btnPrimeraPagina"
+            styleClass="pagination-button">
+        
+        <tooltip>
+            <Tooltip text="Primera página"/>
+        </tooltip>
+
+        <graphic>
+            <FontIcon iconLiteral="fas-angle-double-left"
+                      iconSize="11"/>
+        </graphic>
+
+    </Button>
+
+    <Button fx:id="btnPaginaAnterior"
+            styleClass="pagination-button">
+        
+        <tooltip>
+            <Tooltip text="Página Anterior"/>
+        </tooltip>
+
+        <graphic>
+            <FontIcon iconLiteral="fas-angle-left"
+                      iconSize="11"/>
+        </graphic>
+
+    </Button>
+
+    <Label fx:id="lblPaginaActual"
+           text="1"
+           minWidth="28"
+           alignment="CENTER"
+           styleClass="pagination-current"/>
+
+    <Button fx:id="btnPaginaSiguiente"
+            styleClass="pagination-button">
+        
+        <tooltip>
+            <Tooltip text="Página Siguiente"/>
+        </tooltip>
+
+        <graphic>
+            <FontIcon iconLiteral="fas-angle-right"
+                      iconSize="11"/>
+        </graphic>
+
+    </Button>
+
+    <Button fx:id="btnUltimaPagina"
+            styleClass="pagination-button">
+        
+        <tooltip>
+            <Tooltip text="Última Página"/>
+        </tooltip>
+
+        <graphic>
+            <FontIcon iconLiteral="fas-angle-double-right"
+                      iconSize="11"/>
+        </graphic>
+
+    </Button>
+
+</HBox>

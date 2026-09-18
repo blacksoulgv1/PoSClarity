@@ -1,14 +1,17 @@
 package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.Ui.*;
-import com.gerardgv.posclarity.database.*;
+import com.gerardgv.posclarity.api.*;
+import com.gerardgv.posclarity.api.dto.product.ProductCreateRequest;
+import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.utils.*;
-import com.gerardgv.posclarity.models.Product;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.*;
 import javafx.collections.*;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -28,9 +31,8 @@ public class ProductsController implements Initializable {
     @FXML private ComboBox<String> cbCategoria;
     @FXML private ComboBox<String> cbTipo;
  
-    private final ProductDAO productDAO = new ProductDAO(); 
-    private final InventarioSucursalDAO inventarioSucursalDAO = new InventarioSucursalDAO();
-    
+    private final ProductApiClient productApi = new ProductApiClient();    
+    private final InventoryApiClient inventoryApi = new InventoryApiClient();
     // ===== Buttons =====
     @FXML private Button btnGuardar;
     @FXML private Button btnClear;
@@ -48,10 +50,13 @@ public class ProductsController implements Initializable {
     @FXML private TableColumn<Product, Void> colAcciones;
 
     @FXML private StackPane  root;
-    
+    @FXML private PaginationController paginationController;
+    private TablePagination<Product> tablePagination;
     private boolean modoEdicion = false;
     private Product productoSeleccionado;
+    
     private final ObservableList<Product> listaProductos = FXCollections.observableArrayList();
+    private FilteredList<Product> productosFiltrados;
 
 
     /**
@@ -63,7 +68,8 @@ public class ProductsController implements Initializable {
         configurarTabla();        
         configurarCombos();
         configurarEventos();
-        configurarBusqueda();
+        configurarPaginacion();
+        configurarBusqueda();        
         suscribirEventos();
         cargarProductos();
         formatearCombos();      
@@ -81,21 +87,21 @@ public class ProductsController implements Initializable {
     // ==============================
         
         colId.setCellValueFactory(data ->
-            new SimpleIntegerProperty(data.getValue().getId_product()).asObject());
+            new SimpleIntegerProperty(data.getValue().getId()).asObject());
         colModelo.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getModelo()));
+            new SimpleStringProperty(data.getValue().getModel()));
         colMarca.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getMarca()));
+            new SimpleStringProperty(data.getValue().getBrand()));
         colCategoria.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getCategoria()));
+            new SimpleStringProperty(data.getValue().getCategory()));
         colTipo.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getTipo_producto()));
+            new SimpleStringProperty(data.getValue().getProductType()));
         colPrecio.setCellValueFactory(data ->
-            new SimpleDoubleProperty(data.getValue().getPrecio()).asObject());
+            new SimpleObjectProperty<>(data.getValue().getPrice()));
         colStock.setCellValueFactory(data ->
             new SimpleIntegerProperty(data.getValue().getStock()).asObject());
         colActivo.setCellValueFactory(data ->
-            new SimpleBooleanProperty(data.getValue().isActivo()).asObject());        
+            new SimpleBooleanProperty(data.getValue().getActive()).asObject());        
         
     // ==============================
     // FORMATO DE LAS COLUMNAS
@@ -114,10 +120,32 @@ public class ProductsController implements Initializable {
     // ==============================
 
     colActivo.setCellFactory(column ->
-            TableUtils.createActiveToggle(
-                    Product::getId_product,
-                    productDAO::cambiarEstado
-            ));
+        TableUtils.createActiveToggle(
+                Product::getId,
+                (id, activo) -> {
+
+                    try {
+
+                        productApi.updateStatus(
+                                id,
+                                activo
+                        );
+
+                        cargarProductos();
+                        
+                        return true;
+
+                    } catch(Exception e){
+
+                        e.printStackTrace();
+
+                        mostrarError(
+                            "No se pudo actualizar el estado"
+                        );
+                        return false;
+                    }
+                }));
+    
     colAcciones.setCellFactory(column ->
             TableUtils.createEditButton(
                     this::editarProducto
@@ -132,39 +160,55 @@ public class ProductsController implements Initializable {
             "Agrega productos desde el formulario de la izquierda",
             "fas-box-open");
 
-        PosTable.inactiveRows(tblProductos,Product::isActivo);    
+        PosTable.inactiveRows(tblProductos,Product::getActive);    
     }
     
 
     //terminado 26-02
     private void editarProducto( Product p){
         
-        Product actualizado = productDAO.getById(p.getId_product(),
-                Session.getSucursal().getId());
-        
-        if(actualizado == null){
-            mostrarError("No se Pudo Cargar el Producto");
-            return;
+        try {
+
+            Product actualizado = productApi.getById(p.getId());
+
+            if(actualizado == null){
+                mostrarError( "No se pudo cargar el producto" );
+                return;
+            }
+            
+            productoSeleccionado = actualizado;
+            modoEdicion = true;
+            txtModelo.setText(actualizado.getModel());
+            txtMarca.setText(actualizado.getBrand());
+            txtPrecio.setText(String.valueOf(actualizado.getPrice()));
+            cbCategoria.setValue(actualizado.getCategory());
+            cbTipo.setValue(actualizado.getProductType());
+
+
+            if(actualizado.getManageStock()){
+                
+                Inventory inventory = inventoryApi.getProductStock(
+                        Session.getSucursal().getId(),
+                        actualizado.getId());
+                
+                txtStock.setText(inventory != null
+                    ? String.valueOf(inventory.getStock()) : "0");
+
+
+            }else{
+
+                txtStock.setText("0");
+            }
+
+            btnGuardar.setText("Actualizar");
+
+            aplicarComportamientoCategoria(actualizado.getCategory());
+
+        } catch(IOException | InterruptedException e){
+
+            e.printStackTrace();
+            mostrarError("Error conectando con la API");
         }
-        
-        productoSeleccionado = actualizado;
-        modoEdicion = true;
-        
-        txtModelo.setText(actualizado.getModelo());
-        txtMarca.setText(actualizado.getMarca());
-        txtPrecio.setText(String.valueOf(actualizado.getPrecio()));
-        cbCategoria.setValue(actualizado.getCategoria());
-        cbTipo.setValue(actualizado.getTipo_producto());
-        
-        if(actualizado.isManejaStock()){
-            txtStock.setText(String.valueOf(actualizado.getStock()));
-        } else {
-            txtStock.setText("0");
-        }
-        
-        btnGuardar.setText("Actualizar");
-        aplicarComportamientoCategoria(p.getCategoria());
- 
     }
     
     //26-02 terminado
@@ -297,43 +341,64 @@ public class ProductsController implements Initializable {
     String categoria = cbCategoria.getValue();
     String tipo = cbTipo.getValue().toLowerCase().replace(" ", "_");
     
-    p.setModelo(txtModelo.getText().trim());
-    p.setMarca(txtMarca.getText().trim());
-    p.setPrecio(precio);
-    p.setCategoria(categoria);
-    p.setTipo_producto(tipo);
+    p.setModel(txtModelo.getText().trim());
+    p.setBrand(txtMarca.getText().trim());
+    p.setPrice(precio);
+    p.setCategory(categoria);
+    p.setProductType(tipo);
     
-    p.setManejaStock(categoria.equals("producto") || categoria.equals("armazon"));
-    p.setMicaBase(categoria.equals("mica"));
-    p.setActivo(true);
+    p.setManageStock(categoria.equals("producto") || categoria.equals("armazon"));
+    p.setBaseLens(categoria.equals("mica"));
+    p.setActive(true);
     
     if(modoEdicion){
-        p.setId_product(productoSeleccionado.getId_product());
+        p.setId(productoSeleccionado.getId());
     }
     
     return p;
 }
     
     private boolean guardarProducto(Product p, int stock){
-    return productDAO.insert(p, Session.getSucursal().getId(), stock);
-}
+        
+        try {
+            
+            ProductCreateRequest request = new ProductCreateRequest();
+            
+            request.setProduct(p);
+            request.setBranchId(Session.getSucursal().getId());
+            request.setInitialStock(stock);
+
+            Product creado = productApi.create(request);       
+            return creado != null;
+
+        } catch(Exception e){
+
+            e.printStackTrace();
+            return false;
+        }        
+    }
+    
     private boolean actualizarProducto(Product p, int stock){
     
-    boolean productoActualizado = productDAO.update(p);
-    
-    if(!productoActualizado){
-        return false;
+        try {
+            
+            Product actualizado = productApi.update(p);
+
+            if(actualizado == null){
+                return false;
+            }
+            
+            if(p.getManageStock()){
+                
+                inventoryApi.updateStock(Session.getSucursal().getId(),
+                        p.getId(), stock);            
+            }
+            return true;
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
-    
-    if(p.isManejaStock()){
-        return inventarioSucursalDAO.actualizarStock(
-                Session.getSucursal().getId(),
-                p.getId_product(),
-                stock);
-    }
-    
-    return true;
-}
     
     private void limpiarFormulario() {
         txtModelo.clear();
@@ -349,12 +414,68 @@ public class ProductsController implements Initializable {
         btnGuardar.setText("Guardar");
         txtModelo.requestFocus();
     }
-
+    
+    //Funcionando con API
     private void cargarProductos() {
-        listaProductos.clear();
-        listaProductos.addAll(productDAO.getBySucursal(Session.getSucursal().getId()));
-        tblProductos.setItems(listaProductos);
-    }    
+
+    try {
+
+        List<Product> productos = productApi.getAll();
+
+        for (Product p : productos) {
+
+            try {
+
+                Inventory inventory =
+                        inventoryApi.getProductStock(
+                                Session.getSucursal().getId(),
+                                p.getId()
+                        );
+
+                if (inventory != null) {
+
+                    Integer stock = inventory.getStock();
+
+                    p.setStock(
+                            stock != null
+                                    ? stock
+                                    : 0
+                    );
+
+                } else {
+
+                    p.setStock(0);
+
+                }
+
+            } catch (Exception ex) {
+
+                ex.printStackTrace();
+                p.setStock(0);
+            }
+        }
+
+        // --------------------------------------------------------
+        // Actualizar lista principal
+        // --------------------------------------------------------
+
+        listaProductos.setAll(productos);
+
+        // --------------------------------------------------------
+        // Actualizar paginación
+        // --------------------------------------------------------
+
+        tablePagination.setItems(productos);
+
+    } catch (Exception e) {
+
+        e.printStackTrace();
+
+        mostrarError(
+                "Error cargando productos desde API"
+        );
+    }
+}    
     
     private void mostrarError(String msg){
         PosNotification.error(root, "Atención", msg);
@@ -438,22 +559,28 @@ public class ProductsController implements Initializable {
 }
 
     private void refrescarInventario(List<Integer> ids) {
-        for(Integer id : ids){
+        
+        try{
+            Integer branchId = Session.getSucursal().getId();
             
-            Product actualizado = productDAO.getById(id, Session.getSucursal().getId());
-            
-            if(actualizado == null || !actualizado.isManejaStock()){
-                continue;
-            }
-            
-            for(Product p : listaProductos){
-                if(p.getId_product() == id){
-                    p.setStock(actualizado.getStock());
-                    break;
+            for(Integer id : ids){
+                Inventory inventory = inventoryApi.getProductStock(
+                        branchId, id);
+                
+                for(Product p : listaProductos){
+                    if(p.getId().equals(id)){
+                         p.setStock(
+                        inventory != null
+                            ? inventory.getStock()
+                            : 0 );
+                        break;
+                    }
                 }
             }
+            tblProductos.refresh();
+        } catch(Exception e){
+            e.printStackTrace();
         }
-        tblProductos.refresh();
     }
 
     private void configurarEventos() {
@@ -470,9 +597,21 @@ public class ProductsController implements Initializable {
 
     private void configurarBusqueda() {
         
-        SearchUtils.setupSearch(txtBuscar, tblProductos, listaProductos,
-                Product::getModelo,
-                Product::getMarca);
+        productosFiltrados = SearchUtils.setupSearch(
+            txtBuscar,
+            listaProductos,
+            Product::getModel,
+            Product::getBrand
+        );
+
+        productosFiltrados.addListener(
+            (javafx.collections.ListChangeListener<Product>) change -> {
+
+                tablePagination.setFilteredItems(
+                        productosFiltrados
+                );
+            }
+        );
         
     }
 
@@ -480,4 +619,13 @@ public class ProductsController implements Initializable {
         EventBus.subscribeStock(this::refrescarInventario);
     }
     
+    private void configurarPaginacion(){
+        
+        tablePagination = new TablePagination<>(
+            tblProductos,
+            paginationController
+        );
+        paginationController.setItemsPerPage(12);
+        paginationController.setShowItemsPerPageSelector(false);
+    }
 }

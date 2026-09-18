@@ -1,103 +1,305 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.BranchController">
-   <center>
-      <SplitPane fx:id="splitPane" dividerPositions="0.35" styleClass="main-split">
-         <items>
-            <VBox prefWidth="250.0" spacing="10.0" styleClass="form-panel">
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-               <children>
-                  <Label styleClass="form-title" text="Alta &amp; Edición de Sucursales" />
-                  
-                  <GridPane hgap="15.0" prefHeight="213.0" prefWidth="333.0" vgap="18">
-                    <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="202.0" minWidth="10.0" prefWidth="86.0" />
-                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="322.0" minWidth="10.0" prefWidth="322.0" />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                        <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                    </rowConstraints>
-                     <children>
-                        <Label styleClass="form-label" text="Sucursal" />
-                        <TextField fx:id="txtSucursal" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
-                        <Label styleClass="form-label" text="Direccion" GridPane.rowIndex="1" />
-                        <TextField fx:id="txtDireccion" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" />
-                        <Label styleClass="form-label" text="Telefono" GridPane.rowIndex="2" />
-                        <TextField fx:id="txtTelefono" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-                     </children>
-                     <VBox.margin>
-                        <Insets left="10.0" right="15.0" />
-                     </VBox.margin>
-                     <padding>
-                        <Insets bottom="20" left="25" right="25" top="20" />
-                     </padding>
-                  </GridPane>
-                  <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                     <children>
-                        <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#saveBranch" styleClass="btn-primary" text="Guardar" />
-                        <Button fx:id="btnLimpiar" mnemonicParsing="false" onAction="#clearform" styleClass="btn-secondary" text="Limpiar" />
-                     </children>
-                  </HBox>
-               </children>
-            </VBox>
-            <VBox spacing="8.0">
-               <children>
-                  <HBox prefWidth="200.0" spacing="8.0" styleClass="table-panel">
-                     <children>
-                        <TextField fx:id="txtBuscar" promptText="Buscar por código o nombre" styleClass="search-field" />
-                     </children>
-                  </HBox>
-                  <TableView fx:id="tblSucursales" prefHeight="252.0" prefWidth="776.0">
+<StackPane fx:id="root"
+           styleClass="pos-theme branches-root"
+           stylesheets="@/com/gerardgv/posclarity/css/theme/PosTheme.css,
+                        @/com/gerardgv/posclarity/css/components/pos-card.css,
+                        @/com/gerardgv/posclarity/css/components/pos-form.css,
+                        @/com/gerardgv/posclarity/css/components/pos-buttons.css,
+                        @/com/gerardgv/posclarity/css/components/pos-table.css,
+                        @/com/gerardgv/posclarity/css/components/pos-textfield.css,
+                        @/com/gerardgv/posclarity/css/components/pos-toast.css"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.gerardgv.posclarity.controllers.BranchController">
+
+    <HBox spacing="18"
+          maxWidth="Infinity"
+          maxHeight="Infinity">
+
+        <!-- =====================================================
+             FORMULARIO
+             ===================================================== -->
+
+        <ScrollPane fitToWidth="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    prefWidth="430"
+                    minWidth="430"
+                    maxWidth="430"
+                    styleClass="transparent-scroll">
+
+            <content>
+
+                <VBox spacing="14"
+                      styleClass="pos-form-card">
+
+                    <!-- TÍTULO -->
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
+
+                        <FontIcon iconLiteral="fas-store"
+                                  iconSize="18"
+                                  styleClass="clarity-section-icon"/>
+
+                        <Label text="Sucursal"
+                               styleClass="clarity-title"/>
+
+                    </HBox>
+
+                    <Label text="Alta y edición de sucursales"
+                           styleClass="pos-form-subtitle"/>
+
+                    <Separator/>
+
+
+                    <!-- INFORMACIÓN GENERAL -->
+
+                    <VBox spacing="4">
+
+                        <HBox styleClass="pos-section-header">
+
+                            <FontIcon iconLiteral="fas-building"
+                                      iconSize="16"
+                                      styleClass="pos-section-icon"/>
+
+                            <Label text="Información general"
+                                   styleClass="pos-section-title"/>
+
+                        </HBox>
+
+                        <Separator styleClass="pos-section-separator"/>
+
+                    </VBox>
+
+
+                    <!-- CAMPOS -->
+
+                    <GridPane hgap="14"
+                              vgap="12"
+                              styleClass="pos-form-grid">
+
+                        <columnConstraints>
+
+                            <ColumnConstraints percentWidth="30"/>
+
+                            <ColumnConstraints percentWidth="70"/>
+
+                        </columnConstraints>
+
+                        <children>
+
+                            <!-- SUCURSAL -->
+
+                            <Label text="Sucursal"
+                                   styleClass="pos-form-label"/>
+
+                            <TextField fx:id="txtSucursal"
+                                       promptText="Nombre de la sucursal"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"/>
+
+
+                            <!-- TELÉFONO -->
+
+                            <Label text="Teléfono"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="1"/>
+
+                            <TextField fx:id="txtTelefono"
+                                       promptText="Número telefónico"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"
+                                       GridPane.rowIndex="1"/>
+
+
+                            <!-- DIRECCIÓN -->
+
+                            <Label text="Dirección"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="2"/>
+
+                            <TextField fx:id="txtDireccion"
+                                       promptText="Dirección de la sucursal"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"
+                                       GridPane.rowIndex="2"/>
+
+                        </children>
+
+                    </GridPane>
+
+
+                    <Separator/>
+
+
+                    <!-- BOTONES -->
+
+                    <HBox styleClass="pos-form-footer">
+
+                        <Button fx:id="btnLimpiar"
+                                text="Limpiar"
+                                minWidth="115"
+                                onAction="#clearform"
+                                styleClass="pos-btn">
+
+                            <graphic>
+
+                                <FontIcon iconLiteral="fas-eraser"
+                                          iconSize="14"/>
+
+                            </graphic>
+
+                        </Button>
+
+                        <Button fx:id="btnGuardar"
+                                text="Guardar"
+                                minWidth="115"
+                                onAction="#saveBranch"
+                                styleClass="pos-btn-primary">
+
+                            <graphic>
+
+                                <FontIcon iconLiteral="fas-save"
+                                          iconSize="14"/>
+
+                            </graphic>
+
+                        </Button>
+
+                    </HBox>
+
+                </VBox>
+
+            </content>
+
+        </ScrollPane>
+
+
+        <!-- =====================================================
+             SUCURSALES REGISTRADAS
+             ===================================================== -->
+
+        <BorderPane minWidth="0"
+                    minHeight="0"
+                    styleClass="pos-card"
+                    HBox.hgrow="ALWAYS">
+
+            <!-- ENCABEZADO Y BÚSQUEDA -->
+
+            <top>
+
+                <VBox spacing="14">
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
+
+                        <FontIcon iconLiteral="fas-store"
+                                  iconSize="18"
+                                  styleClass="clarity-section-icon"/>
+
+                        <Label text="Sucursales registradas"
+                               styleClass="clarity-title"/>
+
+                    </HBox>
+
+
+                    <!-- BUSCADOR -->
+
+                    <HBox styleClass="clarity-search"
+                          HBox.hgrow="ALWAYS">
+
+                        <children>
+
+                            <FontIcon iconLiteral="fas-search"
+                                      iconSize="15"/>
+
+                            <TextField fx:id="txtBuscar"
+                                       promptText="Buscar por nombre o dirección..."
+                                       HBox.hgrow="ALWAYS"/>
+
+                        </children>
+
+                    </HBox>
+
+                    <padding>
+                        <Insets bottom="14"/>
+                    </padding>
+
+                </VBox>
+
+            </top>
+
+
+            <!-- TABLA -->
+
+            <center>
+
+                <TableView fx:id="tblSucursales"
+                           minHeight="0"
+                           styleClass="pos-table">
+
                     <columns>
-                      <TableColumn fx:id="colId" prefWidth="60" text="Id" />
-                      <TableColumn fx:id="colSucursal" prefWidth="160" text="Sucursal" />
-                        <TableColumn fx:id="colDireccion" prefWidth="220" text="Direccion" />
-                        <TableColumn fx:id="colTelefono" prefWidth="140" text="Telefono" />
-                        <TableColumn fx:id="colEstatus" prefWidth="100" text="Estado" />
-                        <TableColumn fx:id="colAcciones" prefWidth="140" text="Acciones" />
+
+                        <TableColumn fx:id="colId"
+                                     text="ID"/>
+
+                        <TableColumn fx:id="colSucursal"
+                                     text="Sucursal"/>
+
+                        <TableColumn fx:id="colTelefono"
+                                     text="Teléfono"/>
+
+                        <TableColumn fx:id="colDireccion"
+                                     text="Dirección"/>
+
+                        <TableColumn fx:id="colEstatus"
+                                     text="Estado"/>
+
+                        <TableColumn fx:id="colAcciones"
+                                     text="Acciones"/>
+
                     </columns>
-                  </TableView>
-               </children>
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-            </VBox>
-         </items>
-      </SplitPane>
-   </center>
-   <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="10.0" styleClass="header-bar">
-         <padding>
-            <Insets left="25" right="25" />
-         </padding>
-         <children>
-            <Label styleClass="header-title" text="Sucursal" />
-         </children>
-      </HBox>
-   </top>
-   <bottom>
-      <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER_RIGHT">
-         <padding>
-            <Insets top="10.0" />
-         </padding>
-      </HBox>
-   </bottom>
-</BorderPane>
+
+                </TableView>
+
+            </center>
+
+
+            <!-- FOOTER -->
+
+            <bottom>
+
+                <HBox minHeight="38"
+                      prefHeight="38"
+                      styleClass="clarity-table-footer">
+
+                    <children>
+
+                        <FontIcon iconLiteral="fas-store"
+                                  iconSize="15"/>
+
+                        <Label text="Directorio de sucursales"
+                               styleClass="clarity-table-footer-label"/>
+
+                    </children>
+
+                    <BorderPane.margin>
+                        <Insets top="8"/>
+                    </BorderPane.margin>
+
+                </HBox>
+
+            </bottom>
+
+        </BorderPane>
+
+    </HBox>
+
+</StackPane>

@@ -15,7 +15,8 @@
 .pos-table .column-header,
 .clarity-table .column-header {
     -fx-background-color: transparent;
-    -fx-border-color: transparent transparent -pos-border transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -pos-border;
     -fx-padding: 8 6;
 }
 
@@ -29,7 +30,8 @@
 .pos-table .table-row-cell,
 .clarity-table .table-row-cell {
     -fx-background-color: white;
-    -fx-border-color: transparent transparent #eef2f7 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #eef2f7;
     -fx-cell-size: 54px;
 }
 

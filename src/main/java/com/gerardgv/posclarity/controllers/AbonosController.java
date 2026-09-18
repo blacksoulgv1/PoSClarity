@@ -2,10 +2,11 @@ package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.Ui.PosNotification;
 import com.gerardgv.posclarity.Ui.PosTable;
-import com.gerardgv.posclarity.database.SaleDAO;
+import com.gerardgv.posclarity.api.PaymentApiClient;
+import com.gerardgv.posclarity.api.SaleApiClient;
 import com.gerardgv.posclarity.models.*;
-import com.gerardgv.posclarity.service.TicketService;
 import com.gerardgv.posclarity.utils.EventBus;
+import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
@@ -36,14 +37,16 @@ public class AbonosController implements Initializable {
     @FXML private Button btnAbonar;
     
 
-    @FXML private TableView<Pago> tblPagos;
-    @FXML private TableColumn<Pago,String> colFecha;
-    @FXML private TableColumn<Pago,String> colMetodo;
-    @FXML private TableColumn<Pago,Double> colMonto;
+    @FXML private TableView<Payment> tblPagos;
+    @FXML private TableColumn<Payment,String> colFecha;
+    @FXML private TableColumn<Payment,String> colMetodo;
+    @FXML private TableColumn<Payment,Double> colMonto;
 
-    private Venta venta;
-    private final SaleDAO saleDAO = new SaleDAO();
-    private final ObservableList<Pago> listaPagos = FXCollections.observableArrayList();
+    private Sale sale;
+    private final PaymentApiClient paymentApiClient = new PaymentApiClient();
+    private final SaleApiClient saleApiClient = new SaleApiClient();
+    
+    private final ObservableList<Payment> listaPagos = FXCollections.observableArrayList();
     
     private static final DateTimeFormatter FECHA_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final NumberFormat MONEDA = NumberFormat.getCurrencyInstance(new Locale("es","MX"));
@@ -57,8 +60,8 @@ public class AbonosController implements Initializable {
                 
     }
     
-    public void setVenta(Venta v){
-        this.venta = v;
+    public void setVenta(Sale sale){
+        this.sale = sale;
         cargarDatos();
     }
 
@@ -67,7 +70,7 @@ public class AbonosController implements Initializable {
         PosTable.apply(tblPagos);
         
         colFecha.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getFecha() == null ? "-" : data.getValue().getFecha().format(FECHA_FORMATTER)));
+            new SimpleStringProperty(data.getValue().getDate()== null ? "-" : data.getValue().getFecha().format(FECHA_FORMATTER)));
         colMetodo.setCellValueFactory(data ->
             new SimpleStringProperty(data.getValue().getMetodo() == null ? "-": data.getValue().getMetodo()));
         colMonto.setCellValueFactory(data ->
@@ -86,17 +89,17 @@ public class AbonosController implements Initializable {
 
     private void cargarDatos() {
         
-        if(venta == null){
+        if(sale == null){
             return;
         }
-        lblFolio.setText(textoSeguro(venta.getFolio(),"-"));
+        lblFolio.setText(textoSeguro(sale.getFolio(),"-"));
         
         lblCliente.setText(
-            venta.getCliente() == null ? "Cliente no disponible"
-            : textoSeguro(venta.getCliente().getNombre(), "Cliente no Disponible"));
-        lblTotal.setText(MONEDA.format(venta.getTotal()));
-        lblPagado.setText(MONEDA.format(venta.getPagado()));
-        lblRestante.setText(MONEDA.format(Math.max(venta.getRestante(), 0)));
+            sale.getClient() == null ? "Cliente no disponible"
+            : textoSeguro(sale.getClient().getName(), "Cliente no Disponible"));
+        lblTotal.setText(MONEDA.format(sale.getFinalTotal()));
+        lblPagado.setText(MONEDA.format(sale.getPaid()));
+        lblRestante.setText(MONEDA.format(Math.max(sale.getRemaining(), 0)));
 
         cargarHistorial();
         actualizarEstadoVisual();
@@ -106,7 +109,7 @@ public class AbonosController implements Initializable {
     @FXML
     private void handleAbonar(){
 
-        if(venta == null){
+        if(sale  == null){
             mostrarError("No Se Encontró la Venta Seleccionada.");
             return;
         }
@@ -135,7 +138,7 @@ public class AbonosController implements Initializable {
             return;
         }
         
-        double saldoActual = Math.max(venta.getRestante(), 0);
+        double saldoActual = Math.max(sale.getRemaining(), 0);
         
         if(saldoActual <= 0.009){
             mostrarInfo("La Venta Ya Está Liquidada.");
@@ -156,22 +159,33 @@ public class AbonosController implements Initializable {
             return;
         }
         
-        boolean registrado = saleDAO.registrarAbono(venta.getId(), metodo, monto);
-        
-        if(!registrado){
-            mostrarError("No Se Pudo Registrar El Abono");
+        try {
+            
+            paymentApiClient.create(
+                sale.getId(),
+                metodo,
+                monto,
+                null
+            );
+        } catch (IOException | InterruptedException ex) {
+            mostrarError("No Se Pudo Registrar El Abono.");
             return;
         }
         
-        actualizarVentaDespuesDelAbono(monto);
-        
+        try{
+            sale = saleApiClient.getById(sale.getId());
+        } catch(IOException | InterruptedException ex){
+            mostrarError("El Abono Se Registró, Pero No Se Pudo Actualizar La Venta.");
+            return;
+        }
+        /*
         TicketService ticketService = new TicketService();
         
-        ticketService.imprimirTicketAbono(venta, monto, metodo);
+        ticketService.imprimirTicketAbono(sale, monto, metodo);
+        */
+        EventBus.publishVenta(sale.getId());
         
-        EventBus.publishVenta(venta.getId());
-        
-        boolean liquidada = venta.getRestante() <= 0.009;
+        boolean liquidada = sale.getRemaining() <= 0.009;
         
         mostrarExito(liquidada ? " La Venta Quedó Completamente Liquidada." : "Abono Registrado Correctamente.");
         
@@ -222,19 +236,28 @@ public class AbonosController implements Initializable {
 
     private void cargarHistorial() {
         
-        listaPagos.setAll(saleDAO.obtenerPagosPorVenta(venta.getId()));
-        
-        int totalPagos = listaPagos.size();
-        
-        lblTotalPagos.setText(totalPagos == 1 ? "1 pago" : totalPagos + "pagos" );
-        
+        try {
+
+            listaPagos.setAll(paymentApiClient.getBySale(sale.getId()));
+            int totalPagos = listaPagos.size();
+            lblTotalPagos.setText(
+                totalPagos == 1
+                        ? "1 pago"
+                        : totalPagos + " pagos"
+            );
+        } catch (IOException | InterruptedException ex) {
+            listaPagos.clear();
+            lblTotalPagos.setText("0 pagos");
+            mostrarError("No Se Pudo Cargar El Historial De Pagos.");
+        }        
     }
 
     private void actualizarEstadoVisual() {
         
         lblEstado.getStyleClass().removeAll("abonos-status-pending","abonos-status-complete");
         
-        boolean liquidada = venta.getRestante() <= 0.009 || "completa".equalsIgnoreCase(venta.getEstadoPago());
+        boolean liquidada = sale.getRemaining() <= 0.009 ||
+                "completa".equalsIgnoreCase(sale.getPaymentStatus());
         
         if(liquidada){
             lblEstado.setText("Liquidada");
@@ -248,7 +271,8 @@ public class AbonosController implements Initializable {
 
     private void actualizarDisponibilidadAbono() {
         
-        boolean liquidada = venta.getRestante() <= 0.009 || "completa".equalsIgnoreCase(venta.getEstadoPago());
+        boolean liquidada = sale.getRemaining() <= 0.009 || 
+                "completa".equalsIgnoreCase(sale.getPaymentStatus());
         
         txtMonto.setDisable(liquidada);
         cbMetodo.setDisable(liquidada);
@@ -261,19 +285,4 @@ public class AbonosController implements Initializable {
         }        
     }
 
-    private void actualizarVentaDespuesDelAbono(double monto) {
-        
-        double nuevoPagado = venta.getPagado() + monto;        
-        double nuevoRestante = Math.max(venta.getTotal() - nuevoPagado, 0);
-        
-        venta.setPagado(nuevoPagado);
-        venta.setRestante(nuevoRestante);
-        
-        if(nuevoRestante <= 0.009){
-            venta.setEstadoPago("COMPLETA");
-        }
-        
-    }
-    
-    
 }

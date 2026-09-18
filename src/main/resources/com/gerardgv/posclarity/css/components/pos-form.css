@@ -71,3 +71,26 @@
 .pos-section-separator{
     -fx-padding: 0 0 8 0;
 }
+
+/* SCROLLPANE TRANSPARENTE Y SIN BORDE */
+.transparent-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-effect: none;
+}
+
+.transparent-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.transparent-scroll > .corner {
+    -fx-background-color: transparent;
+}
+
+.transparent-scroll:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}

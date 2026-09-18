@@ -2,83 +2,157 @@ package com.gerardgv.posclarity.models;
 
 public class SaleItem {
     
-    private Product producto;
-    private String nombreDescuento;
-    private int cantidad;
-    private double descuento;
-    private String descripcion;
-    private double precio;
-    private int idDetalle;
+    private Product product;
+    private String discountName;
+    private int quantity;
+    private double discount;
+    private String description;
+    private double price;
+    private int detailId;
 
     public SaleItem() {
     }
 
-    public SaleItem(Product producto, String nombreDescuento, double descuento) {
-        this.producto = producto;
-        this.nombreDescuento = nombreDescuento;
-        this.cantidad = 1;
-        this.descuento = descuento;
+    public SaleItem(Product product, String discountName, double discount) {
+        this.product = product;
+        this.discountName = discountName;
+        this.quantity = 1;
+        this.discount = discount;
     }
 
-    public String getNombreDescuento() {
-        return nombreDescuento;
+     public Product getProduct() {
+        return product;
     }
 
-    public void setNombreDescuento(String nombreDescuento) {
-        this.nombreDescuento = nombreDescuento;
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public String getDiscountName() {
+        return discountName;
+    }
+
+    public void setDiscountName(String discountName) {
+        this.discountName = discountName;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public double getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(double discount) {
+        this.discount = discount;
+    }
+
+    public double getSubtotal() {
+        double total = getPrice() * quantity;
+        return total - (discount * quantity);
+    }
+
+    public String getDescription() {
+        return description != null ? description : product.getModel();
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getPrice() {
+        return price != 0 ? price : product.getPrice();
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getDetailId() {
+        return detailId;
+    }
+
+    public void setDetailId(int detailId) {
+        this.detailId = detailId;
     }
     
-    public Product getProducto() {
-        return producto;
-    }
+    // =====================================================
+// COMPATIBILIDAD TEMPORAL
+// =====================================================
 
-    public void setProducto(Product producto) {
-        this.producto = producto;
-    }
+@Deprecated
+public Product getProducto() {
+    return getProduct();
+}
 
-    public int getCantidad() {
-        return cantidad;
-    }
+@Deprecated
+public void setProducto(Product producto) {
+    setProduct(producto);
+}
 
-    public void setCantidad(int cantidad) {
-        this.cantidad = cantidad;
-    }
+@Deprecated
+public int getCantidad() {
+    return getQuantity();
+}
 
-    public double getDescuento() {
-        return descuento;
-    }
+@Deprecated
+public void setCantidad(int cantidad) {
+    setQuantity(cantidad);
+}
 
-    public void setDescuento(double descuento) {
-        this.descuento = descuento;
-    }
-    
-    public double getSubtotal(){
-        double total = producto.getPrecio() * cantidad;
-        return total - (descuento * cantidad);
-    }
-    
-    public String getDescripcion(){
-        return descripcion != null ? descripcion : producto.getModelo();
-    }
-    
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-    
-    public double getPrecio(){
-        return precio != 0 ? precio : producto.getPrecio();
-    }
-    
-    public void setPrecio(double precio) {
-        this.precio = precio;
-    }
+@Deprecated
+public double getDescuento() {
+    return getDiscount();
+}
 
-    public int getIdDetalle() {
-        return idDetalle;
-    }
+@Deprecated
+public void setDescuento(double descuento) {
+    setDiscount(descuento);
+}
 
-    public void setIdDetalle(int idDetalle) {
-        this.idDetalle = idDetalle;
-    }
+@Deprecated
+public String getNombreDescuento() {
+    return getDiscountName();
+}
+
+@Deprecated
+public void setNombreDescuento(String nombreDescuento) {
+    setDiscountName(nombreDescuento);
+}
+
+@Deprecated
+public int getIdDetalle() {
+    return getDetailId();
+}
+
+@Deprecated
+public void setIdDetalle(int idDetalle) {
+    setDetailId(idDetalle);
+}
+
+@Deprecated
+public String getDescripcion() {
+    return getDescription();
+}
+
+@Deprecated
+public void setDescripcion(String descripcion) {
+    setDescription(descripcion);
+}
+
+@Deprecated
+public double getPrecio() {
+    return getPrice();
+}
+
+@Deprecated
+public void setPrecio(double precio) {
+    setPrice(precio);
+}
     
 }

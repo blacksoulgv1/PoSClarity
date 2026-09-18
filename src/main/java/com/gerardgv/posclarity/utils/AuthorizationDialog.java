@@ -1,7 +1,12 @@
 package com.gerardgv.posclarity.utils;
 
-import com.gerardgv.posclarity.database.EmpleadosDAO;
-import com.gerardgv.posclarity.models.Empleados;
+import com.gerardgv.posclarity.api.AuthApiClient;
+import com.gerardgv.posclarity.api.SellerApiClient;
+import com.gerardgv.posclarity.api.dto.auth.LoginRequest;
+import com.gerardgv.posclarity.api.dto.auth.LoginResponse;
+import com.gerardgv.posclarity.models.Role;
+import com.gerardgv.posclarity.models.Seller;
+import java.io.IOException;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -15,9 +20,9 @@ public final class AuthorizationDialog {
     private AuthorizationDialog() {
     }
 
-    public static Optional<Empleados> solicitarGerente() {
+    public static Optional<Seller> solicitarGerente() {
 
-        Dialog<Empleados> dialog = new Dialog<>();
+        Dialog<Seller> dialog = new Dialog<>();
 
         dialog.setTitle("Acceso restringido");
         dialog.setHeaderText(null);
@@ -129,7 +134,7 @@ public final class AuthorizationDialog {
         empleadoBox.setVisible(false);
         empleadoBox.setManaged(false);
         
-        EmpleadosDAO dao = new EmpleadosDAO();
+        SellerApiClient sellerApi = new SellerApiClient();
         
         txtCodigo.textProperty().addListener((obs, oldValue, newValue) -> {
 
@@ -152,21 +157,24 @@ public final class AuthorizationDialog {
         try {
 
             int codigo = Integer.parseInt(codigoTexto);
-            Empleados empleado = dao.buscarPorCodigo(codigo);
-
+            Seller empleado = sellerApi.getByCode(codigo);
+                    
             if (empleado == null) {
                 return;
             }
 
-            lblEmpleado.setText(empleado.getNombre());
+            lblEmpleado.setText(empleado.getName());
 
-            lblRol.setText( formatearRol(empleado.getRol()) );
+            lblRol.setText( empleado.getRole() != null 
+                ? empleado.getRole().getDisplayName() : "" );
 
             empleadoBox.setManaged(true);
             empleadoBox.setVisible(true);
         } catch (NumberFormatException ex) {
         // Mientras escribe no mostramos error.
-        // La validación definitiva se hace al autorizar.
+        
+        } catch (IOException | InterruptedException ex){
+            ex.printStackTrace();
         }
     });
         
@@ -237,18 +245,15 @@ public final class AuthorizationDialog {
 
     private static void validarCredenciales(
             ActionEvent event,
-            Dialog<Empleados> dialog,
+            Dialog<Seller> dialog,
             TextField txtCodigo,
             PasswordField txtPassword,
             Label lblError) {
 
         lblError.setText("");
 
-        String codigoTexto =
-                txtCodigo.getText().trim();
-
-        String password =
-                txtPassword.getText();
+        String codigoTexto = txtCodigo.getText().trim();
+        String password = txtPassword.getText();
 
         int codigo;
 
@@ -257,56 +262,42 @@ public final class AuthorizationDialog {
 
         } catch (NumberFormatException ex) {
 
-            lblError.setText(
-                    "El código debe contener solo números."
-            );
-
+            lblError.setText("El código debe contener solo números.");
             txtCodigo.requestFocus();
             event.consume();
             return;
         }
+        
+        try{
+            
+            AuthApiClient authApi = new AuthApiClient();
+            
+            LoginResponse response = authApi.login(
+                new LoginRequest(codigo,password));
+            
+            Seller empleado = response.getSeller().toSeller();
+            
+            Role rol = empleado.getRole();
+            
+            boolean autorizado = rol == Role.MANAGER || rol == Role.DIRECTOR;
+            
+            if(!autorizado){
+                lblError.setText("No cuentas con permisos de gerente o directivo.");
+                txtPassword.clear();
+                txtPassword.requestFocus();
 
-        EmpleadosDAO dao = new EmpleadosDAO();
-
-        Empleados empleado =
-                dao.validarAcceso(codigo, password);
-
-        if (empleado == null) {
-
-            lblError.setText(
-                    "Código o contraseña incorrectos."
-            );
-
+                event.consume();
+                return;
+            }
+            dialog.setResult(empleado);            
+        } catch(Exception e){
+            lblError.setText("Código o contraseña incorrectos.");
             txtPassword.clear();
             txtPassword.requestFocus();
 
             event.consume();
-            return;
         }
-
-        String rol = empleado.getRol();
-
-        boolean autorizado =
-                rol != null
-                && (
-                    rol.equalsIgnoreCase("gerente")
-                    || rol.equalsIgnoreCase("directivo")
-                );
-
-        if (!autorizado) {
-
-            lblError.setText(
-                    "No cuentas con permisos de gerente o directivo."
-            );
-
-            txtPassword.clear();
-            txtPassword.requestFocus();
-
-            event.consume();
-            return;
-        }
-
-        dialog.setResult(empleado);
+        
     }
 
     private static void cargarCss(

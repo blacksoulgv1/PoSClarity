@@ -6,8 +6,7 @@
 
 <StackPane  fx:id="rootSale"
             styleClass="pos-theme sale-root"
-            stylesheets="@/com/gerardgv/posclarity/css/pages/SaleView.css,
-                         @/com/gerardgv/posclarity/css/theme/PosTheme.css,
+            stylesheets="@/com/gerardgv/posclarity/css/pages/SaleView.css,                         
                          @/com/gerardgv/posclarity/css/components/pos-card.css,
                          @/com/gerardgv/posclarity/css/components/pos-buttons.css,
                          @/com/gerardgv/posclarity/css/components/pos-table.css,

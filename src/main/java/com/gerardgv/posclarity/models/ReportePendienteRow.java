@@ -28,7 +28,4 @@ public class ReportePendienteRow {
     public void setRealizarTexto(String realizarTexto) {
         this.realizarTexto = realizarTexto;
     }
-    
-    
-    
 }
