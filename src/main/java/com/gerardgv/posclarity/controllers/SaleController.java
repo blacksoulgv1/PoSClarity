@@ -38,6 +38,7 @@ public class SaleController implements Initializable {
     @FXML private TextField txtEjeOI;
     @FXML private TextField txtAdd;
     @FXML private TextField txtMonto;
+    @FXML private TextField txtCupon;
     
     // ====== PRODUCTO ======    
     @FXML private TextField txtBuscarProductos;  
@@ -72,34 +73,16 @@ public class SaleController implements Initializable {
     
     
     private Clients clienteSeleccionado = null;     
-    private Seller vendedorSeleccionado = null; 
+    private Seller vendedorSeleccionado = null;
+    private Discount cuponSeleccionado = null;
+    private String codigoCuponValidado = "";
     
     
     private PosSearchPopup<Product> popupProductos = new PosSearchPopup<>();
     private PosSearchPopup<Clients> popupClientes  = new PosSearchPopup<>();
     private PosSearchPopup<Seller> popupVendedores  = new PosSearchPopup<>();
-    
-   private static class ResultadoPromocion {
-       private final Discount promocion;
-        private final double descuento;
 
-        public ResultadoPromocion(
-            Discount promocion,
-            double descuento) {
-
-            this.promocion = promocion;
-            this.descuento = descuento;
-        }
-
-        public Discount getPromocion() {
-            return promocion;
-        }
-
-        public double getDescuento() {
-            return descuento;
-        }
-   }
-               
+           
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         aplicarComportamientos();
@@ -118,6 +101,15 @@ public class SaleController implements Initializable {
             actualizarPago();
         });
         
+        txtCupon.setOnAction(e -> validarCupon());
+
+        txtCupon.focusedProperty().addListener((obs, oldVal, newVal) -> {
+
+        if (!newVal) {
+            validarCupon();
+        }
+        });
+        
         cbMetodoPago.setOnAction(e ->{
             if(cbMetodoPago.getValue().equals("EFECTIVO")){
                 txtMonto.setText(String.valueOf(calcularTotalVenta()));
@@ -128,19 +120,10 @@ public class SaleController implements Initializable {
             PosActions.delete(item ->{
                 carrito.remove(item);
                 recalcularPromociones();
-                actualizarTotal();
                 actualizarPago();
+                mostrarExito("Producto eliminado del carrito.");
             })
-        ); 
-        
-        PosActions.delete(item ->{
-            carrito.remove(item);
-            recalcularPromociones();
-            actualizarTotal();
-            actualizarPago();
-            mostrarExito("Producto Eliminado Del Carrito");
-        });
-        
+        );        
     }
     
     
@@ -187,11 +170,42 @@ public class SaleController implements Initializable {
                 javafx.scene.control.cell.TextFieldTableCell.forTableColumn(
                 new javafx.util.converter.IntegerStringConverter()));
         
-        colCantidad.setOnEditCommit(e ->{
+        colCantidad.setOnEditCommit(e -> {
             SaleItem item = e.getRowValue();
-            item.setQuantity(e.getNewValue());
+
+            int nuevaCantidad = e.getNewValue();
+
+            // ==========================================
+            // VALIDAR CANTIDAD
+            // ==========================================
+
+            if (nuevaCantidad <= 0) {
+                mostrarError("La cantidad debe ser mayor a 0.");
             tableProduct.refresh();
-            actualizarTotal();
+            return;
+            }
+
+            // ==========================================
+            // VALIDAR STOCK
+            // ==========================================
+
+            Product producto = item.getProduct();
+
+            if (producto.getManageStock()
+                && nuevaCantidad > producto.getStock()) {
+
+                mostrarError("Stock máximo disponible: " + producto.getStock() );
+                tableProduct.refresh();
+                return;
+            }
+
+            // ==========================================
+            // ACTUALIZAR
+            // ==========================================
+
+            item.setQuantity(nuevaCantidad);
+            recalcularPromociones();
+            actualizarPago();
         });
         
         colModelo.setCellValueFactory(data ->
@@ -401,6 +415,7 @@ public class SaleController implements Initializable {
                 }
                 item.setQuantity(item.getQuantity()+1);
                 recalcularPromociones();
+                actualizarPago();
                 return;
             }            
         }       
@@ -408,6 +423,7 @@ public class SaleController implements Initializable {
         carrito.add(new SaleItem(productDB,"Sin Descuento",0));
         tableProduct.setItems(carrito);
         recalcularPromociones();
+        actualizarPago();
         mostrarExito("Producto Agregado Al Carrito");       
         txtBuscarProductos.clear();
         popupProductos.hide();
@@ -486,6 +502,7 @@ public class SaleController implements Initializable {
         txtAdd.setText(c.getAdd());        
        
         popupClientes.hide();
+        recalcularPromociones();
     }
 
     private ResultadoPromocion evaluarPromocion(Product p) {
@@ -714,104 +731,63 @@ if (promociones != null) {
     return new ResultadoPromocion(null, 0);
 }
     
-    private double calcularTotalVenta() {
+    private static class ResumenVenta {
 
-    double total = 0;
+    private final double totalBruto;
+    private final double descuentoProductos;
+    private final double descuentoGeneral;
+    private final double descuentoCupon;
+    private final double totalFinal;
 
-    // ==============================
-    // 1. TOTAL DE PRODUCTOS
-    // ==============================
+    public ResumenVenta(
+            double totalBruto,
+            double descuentoProductos,
+            double descuentoGeneral,
+            double descuentoCupon,
+            double totalFinal) {
 
-    for (SaleItem item : carrito) {
-
-        if (item.getProduct() == null) {
-            continue;
-        }
-
-        total += item.getSubtotal();
+        this.totalBruto = totalBruto;
+        this.descuentoProductos = descuentoProductos;
+        this.descuentoGeneral = descuentoGeneral;
+        this.descuentoCupon = descuentoCupon;
+        this.totalFinal = totalFinal;
     }
 
-    // ==============================
-    // 2. DESCUENTO GENERAL
-    // ==============================
-
-    try {
-
-        List<Discount> descuentosGenerales =
-                discountApiClient.getActiveGeneral();
-
-        if (descuentosGenerales != null
-                && !descuentosGenerales.isEmpty()) {
-
-            Discount descuentoGeneral =
-                    descuentosGenerales.stream()
-
-                            // IMPORTANTE:
-                            // Un GRATIS no es descuento general
-                            .filter(d ->
-                                    "PORCENTAJE".equalsIgnoreCase(
-                                            d.getValueType())
-                                    ||
-                                    "MONTO".equalsIgnoreCase(
-                                            d.getValueType())
-                            )
-
-                            .filter(d ->
-                                    d.getValue() != null
-                            )
-
-                            .max(
-                                    Comparator.comparingInt(
-                                            Discount::getPriority
-                                    )
-                            )
-
-                            .orElse(null);
-
-            if (descuentoGeneral != null) {
-
-                if ("PORCENTAJE".equalsIgnoreCase(
-                        descuentoGeneral.getValueType())) {
-
-                    total -= total *
-                            (descuentoGeneral.getValue() / 100);
-
-                } else if ("MONTO".equalsIgnoreCase(
-                        descuentoGeneral.getValueType())) {
-
-                    total -= Math.min(
-                            descuentoGeneral.getValue(),
-                            total
-                    );
-                }
-            }
-        }
-
-    } catch (IOException | InterruptedException e) {
-
-        e.printStackTrace();
-
-        mostrarError(
-                "No se pudieron consultar los descuentos generales."
-        );
+    public double getTotalBruto() {
+        return totalBruto;
     }
 
-    // Nunca permitir total negativo
-    return Math.max(total, 0);
+    public double getDescuentoProductos() {
+        return descuentoProductos;
+    }
+
+    public double getDescuentoGeneral() {
+        return descuentoGeneral;
+    }
+    
+    public double getDescuentoCupon() {
+        return descuentoCupon;
+    }
+
+    public double getDescuentoTotal() {
+        return descuentoProductos + descuentoGeneral + descuentoCupon;
+    }
+
+    public double getTotalFinal() {
+        return totalFinal;
+    }
 }
     
-    private void actualizarTotal() {
-        
+   private ResumenVenta calcularResumenVenta() {
+
     double totalBruto = 0;
     double descuentoProductos = 0;
 
-    /*
-     * ==============================
-     * CALCULAR PRODUCTOS
-     * ==============================
-     */
+    // ==========================================
+    // 1. PRODUCTOS
+    // ==========================================
+
     for (SaleItem item : carrito) {
-        
 
         if (item.getProduct() == null) {
             continue;
@@ -825,20 +801,23 @@ if (promociones != null) {
         descuentoProductos += descuento * cantidad;
     }
 
-    /*
-     * Total después de descuentos
-     * por producto
-     */
+    // ==========================================
+    // 2. TOTAL DESPUÉS DE DESCUENTOS
+    //    POR PRODUCTO
+    // ==========================================
+
     double totalConDescuento =
-            totalBruto - descuentoProductos;
+            Math.max(
+                    totalBruto - descuentoProductos,
+                    0
+            );
+
+    // ==========================================
+    // 3. DESCUENTO GENERAL
+    // ==========================================
 
     double descuentoGeneral = 0;
 
-    /*
-     * ==============================
-     * DESCUENTO GENERAL
-     * ==============================
-     */
     try {
 
         List<Discount> descuentosGenerales =
@@ -847,29 +826,43 @@ if (promociones != null) {
         if (descuentosGenerales != null
                 && !descuentosGenerales.isEmpty()) {
 
-            Discount dGeneral =
+            Discount descuento =
                     descuentosGenerales.stream()
-                            .max((d1, d2) ->
-                                    Integer.compare(
-                                            d1.getPriority(),
-                                            d2.getPriority()
-                                    ))
+                            .filter(Objects::nonNull)
+                            .filter(d ->
+                                    "PORCENTAJE".equalsIgnoreCase(
+                                            d.getValueType())
+                                    ||
+                                    "MONTO".equalsIgnoreCase(
+                                            d.getValueType())
+                            )
+                            .filter(d ->
+                                    d.getValue() != null
+                            )
+                            .max(
+                                    Comparator.comparingInt(
+                                            Discount::getPriority
+                                    )
+                            )
                             .orElse(null);
 
-            if (dGeneral != null) {
+            if (descuento != null) {
 
                 if ("PORCENTAJE".equalsIgnoreCase(
-                        dGeneral.getValueType())) {
+                        descuento.getValueType())) {
 
                     descuentoGeneral =
                             totalConDescuento
-                            * (dGeneral.getValue() / 100);
+                            * (descuento.getValue() / 100);
 
                 } else if ("MONTO".equalsIgnoreCase(
-                        dGeneral.getValueType())) {
+                        descuento.getValueType())) {
 
                     descuentoGeneral =
-                            dGeneral.getValue();
+                            Math.min(
+                                    descuento.getValue(),
+                                    totalConDescuento
+                            );
                 }
             }
         }
@@ -878,62 +871,110 @@ if (promociones != null) {
 
         e.printStackTrace();
 
+        if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+        }
+
         mostrarError(
                 "No se pudieron consultar los descuentos generales."
         );
 
     } catch (Exception e) {
 
-        /*
-         * Evitamos que un problema con promociones
-         * impida mostrar los totales de la venta.
-         */
         e.printStackTrace();
 
         mostrarError(
-                "Ocurrió un error al consultar las promociones."
+                "Ocurrió un error al calcular el total de la venta."
         );
     }
 
-    /*
-     * ==============================
-     * TOTAL FINAL
-     * ==============================
-     */
-    double totalFinal =
-            totalConDescuento - descuentoGeneral;
+    // ==========================================
+    // 4. TOTAL DESPUÉS DEL DESCUENTO GENERAL
+    // ==========================================
 
-    /*
-     * Nunca permitir negativos
-     */
-    if (totalFinal < 0) {
-        totalFinal = 0;
+    double totalDespuesGeneral =
+            Math.max(
+                    totalConDescuento - descuentoGeneral,
+                    0
+            );
+
+    // ==========================================
+    // 5. CUPÓN
+    // ==========================================
+
+    double descuentoCupon = 0;
+
+    if (cuponSeleccionado != null) {
+
+        String tipo = cuponSeleccionado.getValueType();
+        Double valor = cuponSeleccionado.getValue();
+
+        if (valor != null) {
+
+            if ("PORCENTAJE".equalsIgnoreCase(tipo)) {
+
+                descuentoCupon =
+                        totalDespuesGeneral
+                        * (valor / 100);
+
+            } else if ("MONTO".equalsIgnoreCase(tipo)) {
+
+                descuentoCupon =
+                        Math.min(
+                                valor,
+                                totalDespuesGeneral
+                        );
+            }
+        }
     }
 
-    /*
-     * ==============================
-     * ACTUALIZAR INTERFAZ
-     * ==============================
-     */
+    // ==========================================
+    // 6. TOTAL FINAL
+    // ==========================================
+
+    double totalFinal =
+            Math.max(
+                    totalDespuesGeneral - descuentoCupon,
+                    0
+            );
+
+    return new ResumenVenta(
+            totalBruto,
+            descuentoProductos,
+            descuentoGeneral,
+            descuentoCupon,
+            totalFinal
+    );
+}
+    
+    private double calcularTotalVenta() {
+        return calcularResumenVenta().getTotalFinal();
+    }
+    
+    private void actualizarTotal() {
+
+    ResumenVenta resumen = calcularResumenVenta();
+
     lblTotalBruto.setText(
-            "$" + String.format("%.2f", totalBruto)
+            "$" + String.format(
+                    "%.2f",
+                    resumen.getTotalBruto()
+            )
     );
 
     lblDescuento.setText(
             "$" + String.format(
                     "%.2f",
-                    descuentoProductos + descuentoGeneral
+                    resumen.getDescuentoTotal()
             )
     );
 
     lblTotal.setText(
-            "$" + String.format("%.2f", totalFinal)
+            "$" + String.format(
+                    "%.2f",
+                    resumen.getTotalFinal()
+            )
     );
-
-    /*
-     * Actualizar restante/cambio
-     */
-    //actualizarPago();
 }
           
     @FXML
@@ -1007,7 +1048,8 @@ if (promociones != null) {
                     txtCylOI.getText(),
                     txtEjeOI.getText(),
                     txtAdd.getText(),
-                    null );
+                    null,
+                    txtCupon.getText());
             
             if(clienteSeleccionado != null){
                 sale.setClient(clienteSeleccionado);
@@ -1092,42 +1134,20 @@ if (promociones != null) {
         //==== PRODUCTOS ====
         carrito.clear();
         tableProduct.refresh();
-        tableProduct.refresh();
         txtBuscarProductos.clear();
         
         //==== PAGO ====
         txtMonto.clear();
+        txtCupon.clear();
+        cuponSeleccionado = null;
+        codigoCuponValidado = "";
         cbMetodoPago.setValue("EFECTIVO");
         
         //==== PAGO ====
-        lblTotalBruto.setText("$0.00");
-        lblDescuento.setText("$0.00");
-        lblTotal.setText("$0.00");
+        actualizarTotal();
         lblRestante.setText("$0.00");
         lblCambio.setText("$0.00");
-        actualizarTotal();
-    }
-    
-    private double calcularTotalBruto(){
         
-        return carrito.stream()
-            .mapToDouble(item  -> 
-                    item.getProduct().getPrice()
-                    * item .getQuantity())
-            .sum();
-    }
-
-    private double calcularDescuento(){
-        
-        return carrito.stream()
-            .mapToDouble(item ->
-                    item.getDiscount()
-                    * item.getQuantity())
-            .sum();
-    }
-
-    private double calcularTotalFinal(){
-        return calcularTotalBruto() - calcularDescuento();
     }
     
     private void configurarPopupVendedores(){
@@ -1225,5 +1245,104 @@ if (promociones != null) {
         tableProduct.refresh();
         actualizarTotal();
     }
+    
+    private void validarCupon() {
+        
+        String codigo = txtCupon.getText();
+
+        /*
+        * Si el campo está vacío
+        */
+        if (codigo == null || codigo.isBlank()) {
+
+            cuponSeleccionado = null;
+            codigoCuponValidado = "";
+            actualizarTotal();
+            actualizarPago();
+            return;
+        }
+
+        codigo = codigo.trim();
+
+        /*
+        * Si el código no cambió
+        */
+        if (codigo.equalsIgnoreCase(codigoCuponValidado)
+            && cuponSeleccionado != null) {
+
+            actualizarTotal();
+            actualizarPago();
+            return;
+        }
+
+        try {
+
+            Discount coupon = discountApiClient.getActiveCoupon(codigo);
+
+            if (coupon == null) {
+
+                cuponSeleccionado = null;
+                codigoCuponValidado = "";
+                actualizarTotal();
+                actualizarPago();
+                mostrarError("Cupón no encontrado.");
+                return;
+            }
+
+            cuponSeleccionado = coupon;
+            codigoCuponValidado = codigo;
+            actualizarTotal();
+            actualizarPago();
+            mostrarExito("Cupón aplicado: " + coupon.getName());
+
+        } catch (IOException | InterruptedException e) {
+
+            e.printStackTrace();
+            cuponSeleccionado = null;
+            codigoCuponValidado = "";
+            actualizarTotal();
+            actualizarPago();
+
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
+            mostrarError("No se pudo validar el cupón con el servidor.");
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            cuponSeleccionado = null;
+            codigoCuponValidado = "";
+            actualizarTotal();
+            actualizarPago();
+            mostrarError(
+                e.getMessage() != null
+                        ? e.getMessage()
+                        : "Cupón no válido."
+            );
+        }
+    }
+    
+   private static class ResultadoPromocion {
+       private final Discount promocion;
+        private final double descuento;
+
+        public ResultadoPromocion(
+            Discount promocion,
+            double descuento) {
+
+            this.promocion = promocion;
+            this.descuento = descuento;
+        }
+
+        public Discount getPromocion() {
+            return promocion;
+        }
+
+        public double getDescuento() {
+            return descuento;
+        }
+   }
       
 }

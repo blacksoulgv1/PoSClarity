@@ -10,7 +10,7 @@ public class SaleCreateRequest {
     private Integer sellerId;
     private Integer clientId;
     private Integer discountId;
-
+    private String couponCode;  
     private String folio;
 
     private String odEsf;
@@ -167,5 +167,13 @@ public class SaleCreateRequest {
 
     public void setDetails(List<SaleDetailRequest> details) {
         this.details = details;
+    }
+    
+    public String getCouponCode() {
+        return couponCode;
+    }
+
+    public void setCouponCode(String couponCode) {
+        this.couponCode = couponCode;
     }
 }

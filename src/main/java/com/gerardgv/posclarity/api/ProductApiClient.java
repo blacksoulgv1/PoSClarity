@@ -49,7 +49,9 @@ public class ProductApiClient extends BaseApiClient {
     public Product getByModel(String model)
             throws IOException, InterruptedException{
         
-        return get(BASE_URL + "/model/" + model,Product.class);
+        String encodedMode = URLEncoder.encode(model, StandardCharsets.UTF_8);
+        
+        return get(BASE_URL + "/model/" + encodedMode,Product.class);
     }
     
     /*

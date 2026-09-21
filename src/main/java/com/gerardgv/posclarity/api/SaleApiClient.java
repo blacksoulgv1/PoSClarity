@@ -81,7 +81,8 @@ public class SaleApiClient extends BaseApiClient {
             String oiCil,
             String oiEje,
             String addLens,
-            String promotionName) throws IOException,InterruptedException{
+            String promotionName,
+            String couponCode) throws IOException,InterruptedException{
         
         SaleCreateRequest request = new SaleCreateRequest();
         
@@ -110,6 +111,7 @@ public class SaleApiClient extends BaseApiClient {
         Promoción
         */
         request.setPromotionName(promotionName);
+        request.setCouponCode(couponCode);
 
 
         /*

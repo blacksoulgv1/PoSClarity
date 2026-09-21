@@ -2,11 +2,11 @@ package com.gerardgv.posclarity.api;
 
 public class ApiConfig {
     
-    private static final String HOST =
-            "http://192.168.1.50:8080";
-
+    /*public static final String BASE_URL =
+        "http://localhost:8080/api";*/
+    
     public static final String BASE_URL =
-            HOST + "/api";
+            "http://10.50.0.1:8080/api";
 
     private ApiConfig() {
         // Evita que la clase pueda instanciarse.

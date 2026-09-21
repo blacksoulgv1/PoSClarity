@@ -1,11 +1,13 @@
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.api.DiscountApiClient;
+import com.gerardgv.posclarity.Ui.PosSearchPopup;
+import com.gerardgv.posclarity.api.*;
 import com.gerardgv.posclarity.api.dto.discount.DiscountCreateRequest;
-import com.gerardgv.posclarity.models.Discount;
+import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.utils.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -52,8 +54,12 @@ public class DiscountController implements Initializable {
     @FXML private TableColumn<Discount, Void> colAccion;
     
     private final DiscountApiClient apiClient = new DiscountApiClient();
+    private final ProductApiClient productApiClient = new ProductApiClient();
+    private final PosSearchPopup<Product> popupProducts = new PosSearchPopup<>();
     
+    private Product productoBeneficioSeleccionado;    
     private Discount descuentoSeleccionado;
+    
     private ObservableList<Discount> listaDescuentos = FXCollections.observableArrayList();
 
     
@@ -66,6 +72,7 @@ public class DiscountController implements Initializable {
         cargarCombos();
         formaterCombos();
         configurarFormularioDinamico();
+        configurarPopupProductoBeneficio();
         
         SearchUtils.setupSearch(txtBuscar, tabla, listaDescuentos,
                 d -> d.getName(),
@@ -99,7 +106,7 @@ public class DiscountController implements Initializable {
 
         cbTipoValor.setItems(FXCollections.observableArrayList(
                 "PORCENTAJE",
-                "FIJO",
+                "MONTO",
                 "GRATIS"
         ));
 
@@ -349,9 +356,9 @@ public class DiscountController implements Initializable {
         }
 
         /*
-        * FIJO
+        * MONTO
         */
-        if ("FIJO".equals(d.getValueType())) {
+        if ("MONTO".equals(d.getValueType())) {
 
             if (d.getValue() == null) {
                 mostrarMensaje("Ingresa el monto del descuento");
@@ -461,18 +468,15 @@ public class DiscountController implements Initializable {
                 d.setValue(Double.parseDouble(txtValor.getText()));
             }
 
-            d.setCouponCode(txtCupon.getText());
-            d.setCategory(cbCategoria.getValue());
-
-            d.setRequireFrame(chkRequiereArmazon.isSelected());
+                d.setCouponCode(txtCupon.getText());
+                d.setCategory(cbCategoria.getValue());
+                d.setRequireFrame(chkRequiereArmazon.isSelected());
 
             if (!txtDioptriaMax.getText().isBlank()) {
                 d.setMaxDiopter(Double.parseDouble(txtDioptriaMax.getText()));
             }
-
-            d.setStartDate(dpInicio.getValue());
-            d.setEndDate(dpFin.getValue());
-
+                d.setStartDate(dpInicio.getValue());
+                d.setEndDate(dpFin.getValue());
             if (!txtPrioridad.getText().isBlank()) {
                 d.setPriority(Integer.parseInt(txtPrioridad.getText()));
             } else {
@@ -491,7 +495,18 @@ public class DiscountController implements Initializable {
             /*
             producto Beneficio "no Tenemos"
             */
-            d.setBenefitProductId(null);
+            if("GRATIS".equals(d.getValueType())){
+                                
+                if(productoBeneficioSeleccionado  == null){
+                    mostrarMensaje("Selecciona el producto beneficio");
+                    txtModeloProducto.requestFocus();
+                    return;
+                }
+                
+                d.setBenefitProductId(productoBeneficioSeleccionado.getId());
+            } else {
+                d.setBenefitProductId(null);
+            }
             
             /*
             Validacion
@@ -500,43 +515,42 @@ public class DiscountController implements Initializable {
                 return;
             }
 
-        /*
-         * Crear
-        */
-        if (descuentoSeleccionado == null) {
-
-            DiscountCreateRequest request = new DiscountCreateRequest(d);
-            apiClient.create(request);
-            mostrarMensaje("Descuento creado correctamente");
-
-        } else {
-
             /*
-            * Actualizar
+            * Crear
             */
-            DiscountCreateRequest request = new DiscountCreateRequest(d);
+            if (descuentoSeleccionado == null) {
 
-            apiClient.update(descuentoSeleccionado.getId(),request);
-            mostrarMensaje("Descuento actualizado correctamente");
+                DiscountCreateRequest request = new DiscountCreateRequest(d);
+                apiClient.create(request);
+                mostrarMensaje("Descuento creado correctamente");
+
+            } else {
+
+                /*
+                * Actualizar
+                */
+                DiscountCreateRequest request = new DiscountCreateRequest(d);
+                apiClient.update(descuentoSeleccionado.getId(),request);
+                mostrarMensaje("Descuento actualizado correctamente");
+            }
+
+            cargarTabla();
+            limpiar();
+
+        } catch (NumberFormatException e) {
+
+            mostrarMensaje("Revisa los valores numéricos");
+
+        } catch (IOException | InterruptedException e) {
+
+            e.printStackTrace();
+            mostrarMensaje("Error de comunicación con el servidor");
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            mostrarMensaje("Datos inválidos");
         }
-
-        cargarTabla();
-        limpiar();
-
-    } catch (NumberFormatException e) {
-
-        mostrarMensaje("Revisa los valores numéricos");
-
-    } catch (IOException | InterruptedException e) {
-
-        e.printStackTrace();
-        mostrarMensaje("Error de comunicación con el servidor");
-
-    } catch (Exception e) {
-
-        e.printStackTrace();
-        mostrarMensaje("Datos inválidos");
-    }
     }
 
     @FXML
@@ -546,6 +560,8 @@ public class DiscountController implements Initializable {
         txtCupon.clear();
         txtPrioridad.clear();
         txtModeloProducto.clear();
+        productoBeneficioSeleccionado = null;
+        popupProducts.hide();
         txtDioptriaMax.clear();
         chkRequiereArmazon.setSelected(false);
         cbTipoAplicacion.setValue(null);
@@ -619,9 +635,9 @@ public class DiscountController implements Initializable {
         boolean esGratis = "GRATIS".equals(tipoValor);
 
         /*
-        * PORCENTAJE y FIJO utilizan valor.
+        * PORCENTAJE y MONTO utilizan valor.
         */
-        boolean usaValor = "PORCENTAJE".equals(tipoValor) || "FIJO".equals(tipoValor);
+        boolean usaValor = "PORCENTAJE".equals(tipoValor) || "MONTO".equals(tipoValor);
         txtValor.setDisable(!usaValor);
 
         /*
@@ -658,6 +674,65 @@ public class DiscountController implements Initializable {
             txtModeloProducto.clear();
         }
     }
+
+    private void configurarPopupProductoBeneficio() {
+        
+        popupProducts.setTitleProvider(p ->
+        p.getModel() + " - " + p.getBrand());
+
+        popupProducts.setSubtitleProvider(p ->
+            p.getCategory()
+            + " | $"
+            + String.format("%.2f", p.getPrice())
+            + " | stock:"
+            + p.getStock());
+
+        popupProducts.setIconProvider(p -> "fas-box-open");
+
+        popupProducts.setEmptyMessage("No se encontraron productos");
+
+        popupProducts.setOnSelected(this::seleccionarProductoBeneficio);
+
+        txtModeloProducto.textProperty().addListener((obs, oldText, newText) -> {
+
+        if (!"GRATIS".equals(cbTipoValor.getValue())) {
+            popupProducts.hide();
+            return;
+        }
+
+        if (newText == null || newText.isBlank()) {
+            productoBeneficioSeleccionado = null;
+            popupProducts.hide();
+            return;
+        }
+
+        try {
+
+            List<Product> lista =
+                    productApiClient.search(newText);
+
+            popupProducts.setItems(lista);
+            popupProducts.show(txtModeloProducto);
+
+        } catch (IOException | InterruptedException e) {
+
+            e.printStackTrace();
+            popupProducts.hide();
+            mostrarMensaje("Error buscando productos");
+            }
+        });
+    }
  
+    private void seleccionarProductoBeneficio(Product producto){
+        
+        if (producto == null) {
+            productoBeneficioSeleccionado = null;
+            return;
+        }
+
+        productoBeneficioSeleccionado = producto;
+        txtModeloProducto.setText(producto.getModel());
+        popupProducts.hide();
+    }
 }
 

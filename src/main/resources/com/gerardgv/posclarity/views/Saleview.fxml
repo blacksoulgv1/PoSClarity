@@ -252,9 +252,19 @@
         <VBox spacing="10">
             <Label text="Método de pago" styleClass="field-label"/>
             <ComboBox fx:id="cbMetodoPago" maxWidth="Infinity"/>
+            
+            <Label text="Cupón de descuento" styleClass="field-label"/>
+            <HBox styleClass="input-icon">
+                <children>
+                    <FontIcon iconLiteral="fas-ticket-alt" iconSize="15"/>
+                    <TextField fx:id="txtCupon"
+                       promptText="Código de cupón"
+                       HBox.hgrow="ALWAYS"/>
+                </children>
+            </HBox>
 
             <Label text="Importe recibido" styleClass="field-label"/>
-            <HBox styleClass="input-icon">
+            <HBox styleClass="input-icon">                                
                 <children>
                     <FontIcon iconLiteral="fas-dollar-sign" iconSize="15"/>
                     <TextField fx:id="txtMonto"

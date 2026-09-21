@@ -28,7 +28,7 @@
         <ikonli.version>12.3.1</ikonli.version>
         <jasperreports.version>7.0.6</jasperreports.version>
 
-        <main.class>com.gerardgv.posclarity.app.App</main.class>
+        <main.class>com.gerardgv.posclarity.app.Launcher</main.class>
     </properties>
 
     <!-- ===================================================== -->

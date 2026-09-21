@@ -5,7 +5,6 @@ import com.gerardgv.posclarity.models.Discount;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 
 public class DiscountApiClient extends BaseApiClient {
@@ -117,6 +116,26 @@ public class DiscountApiClient extends BaseApiClient {
             BASE_URL + "/" + id,
             request,
             Discount.class);
+    }
+    
+    /*
+    * Consulta un cupón activo por código.
+    */
+    public Discount getActiveCoupon(String couponCode)
+            throws IOException, InterruptedException {
+
+        if (couponCode == null || couponCode.isBlank()) {
+            return null;
+        }
+
+        return get(
+            BASE_URL + "/active/coupon/"
+                    + java.net.URLEncoder.encode(
+                            couponCode.trim(),
+                            java.nio.charset.StandardCharsets.UTF_8
+                    ),
+            Discount.class
+        );
     }
     
 }
