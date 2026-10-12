@@ -3,128 +3,524 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<BorderPane fx:id="root" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gerardgv.posclarity.controllers.DiscountController">
-   <center>
-      <SplitPane fx:id="splitPane" dividerPositions="0.40" styleClass="main-split">
-         <items>
-            <ScrollPane fitToWidth="true" prefWidth="450.0">
-               <content>
-                  <VBox minWidth="450.0" prefWidth="450.0" spacing="10.0" styleClass="form-panel">
-                     <padding>
-                        <Insets top="10.0" />
-                     </padding>
-                     <children>
-                        <Label styleClass="form-title" text="Alta / Edición de Promoción" />
-                        
-                                    <GridPane hgap="15.0" prefHeight="144.0" prefWidth="406.0" vgap="18" VBox.vgrow="NEVER">
-                          <columnConstraints>
-                            <ColumnConstraints minWidth="130.0"  prefWidth="130.0" />
-                            <ColumnConstraints hgrow="ALWAYS" />
-                          </columnConstraints>
-                          <rowConstraints>
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                              <RowConstraints minHeight="50.0" vgrow="NEVER" />
-                          </rowConstraints>
-                           <children>
-                              <Label styleClass="form-label" text="Nombre" />
-                              <TextField fx:id="txtNombre" maxWidth="Infinity" styleClass="text-field" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" />
-                              <Label styleClass="form-label" text="Tipo Aplicación" GridPane.rowIndex="1" />
-                              <ComboBox fx:id="cbTipoAplicacion" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                              <Label styleClass="form-label" text="Tipo Valor" GridPane.rowIndex="2" />
-                              <ComboBox fx:id="cbTipoValor" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="2" />
-                              <Label styleClass="form-label" text="Valor" GridPane.rowIndex="3" />
-                              <TextField fx:id="txtValor" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-                              <Label styleClass="form-label" text="Cupón" GridPane.rowIndex="4" />
-                              <TextField fx:id="txtCupon" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-                              <Label styleClass="form-label" text="Categoría" GridPane.rowIndex="5" />
-                              <ComboBox fx:id="cbCategoria" maxWidth="Infinity" styleClass="combo-box" GridPane.columnIndex="1" GridPane.rowIndex="5" />
-                              <Label styleClass="form-label" text="Producto Beneficio" GridPane.rowIndex="6" />
-                              <TextField fx:id="txtModeloProducto" GridPane.columnIndex="1" GridPane.rowIndex="6" />
-                              <Label text="Req. Armazón" GridPane.rowIndex="7" />
-                              <CheckBox fx:id="chkRequiereArmazon" text="Sí" GridPane.columnIndex="1" GridPane.rowIndex="7" />
-                              <Label text="Dioptría Máx." GridPane.rowIndex="8" />
-                              <TextField fx:id="txtDioptriaMax" promptText="3.00" GridPane.columnIndex="1" GridPane.rowIndex="8" />
-                              <Label styleClass="form-label" text="Fecha Inicio" GridPane.rowIndex="9" />
-                              <DatePicker fx:id="dpInicio" GridPane.columnIndex="1" GridPane.rowIndex="9" />
-                              <Label text="Fecha Fin" GridPane.rowIndex="10" />
-                              <DatePicker fx:id="dpFin" GridPane.columnIndex="1" GridPane.rowIndex="10" />
-                              <Label text="Prioridad" GridPane.rowIndex="11" />
-                              <TextField fx:id="txtPrioridad" GridPane.columnIndex="1" GridPane.rowIndex="11" />
-                           </children>
-                           <VBox.margin>
-                              <Insets left="10.0" right="15.0" />
-                           </VBox.margin>
-                           <padding>
-                              <Insets bottom="20" left="25" right="25" top="20" />
-                           </padding>
-                        </GridPane>
-                        <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                           <children>
-                              <Button fx:id="btnGuardar" mnemonicParsing="false" onAction="#guardar" styleClass="btn-primary" text="Guardar" />
-                              <Button fx:id="btnClear" mnemonicParsing="false" onAction="#limpiar" styleClass="btn-secondary" text="Limpiar" />
-                           </children>
+<StackPane fx:id="root"
+           styleClass="pos-theme discounts-root"
+           stylesheets="@/com/gerardgv/posclarity/css/theme/PosTheme.css,
+                        @/com/gerardgv/posclarity/css/components/pos-card.css,
+                        @/com/gerardgv/posclarity/css/components/pos-form.css,
+                        @/com/gerardgv/posclarity/css/components/pos-buttons.css,
+                        @/com/gerardgv/posclarity/css/components/pos-table.css,
+                        @/com/gerardgv/posclarity/css/components/pos-badge.css,
+                        @/com/gerardgv/posclarity/css/components/pos-textfield.css,
+                        @/com/gerardgv/posclarity/css/components/pos-toast.css"
+           xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.gerardgv.posclarity.controllers.DiscountController">
+
+    <HBox spacing="18"
+          fillHeight="true"
+          maxWidth="Infinity"
+          maxHeight="Infinity"
+          styleClass="pos-view">
+
+        <!-- =====================================================
+             FORMULARIO
+             ===================================================== -->
+
+        <ScrollPane fitToWidth="true"
+                    fitToHeight="true"
+                    hbarPolicy="NEVER"
+                    vbarPolicy="AS_NEEDED"
+                    prefWidth="430"
+                    minWidth="430"
+                    maxWidth="430"
+                    maxHeight="Infinity"
+                    styleClass="transparent-scroll">
+
+            <content>
+
+                <VBox spacing="14"
+                      styleClass="pos-form-card">
+
+                    <!-- TÍTULO -->
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
+
+                        <FontIcon iconLiteral="fas-tags"
+                                  iconSize="18"
+                                  styleClass="clarity-section-icon"/>
+
+                        <Label text="Descuento"
+                               styleClass="clarity-title"/>
+
+                    </HBox>
+
+                    <Label text="Alta y edición de descuentos y promociones"
+                           styleClass="pos-form-subtitle"/>
+
+                    <Separator/>
+
+
+                    <!-- INFORMACIÓN DEL DESCUENTO -->
+
+                    <VBox spacing="4">
+
+                        <HBox styleClass="pos-section-header">
+
+                            <FontIcon iconLiteral="fas-tag"
+                                      iconSize="16"
+                                      styleClass="pos-section-icon"/>
+
+                            <Label text="Información del descuento"
+                                   styleClass="pos-section-title"/>
+
                         </HBox>
-                     </children>
-                  </VBox>
-               </content>
-            </ScrollPane>
-            <VBox spacing="8.0">
-               <children>
-                  <HBox prefWidth="200.0" spacing="8.0" styleClass="table-panel">
-                     <children>
-                        <TextField fx:id="txtBuscar" promptText="Buscar por código o nombre" styleClass="search-field" />
-                     </children>
-                  </HBox>
-                  <TableView fx:id="tabla" prefHeight="252.0" prefWidth="776.0">
+
+                        <Separator styleClass="pos-section-separator"/>
+
+                    </VBox>
+
+
+                    <!-- CAMPOS -->
+
+                    <GridPane hgap="14"
+                              vgap="12"
+                              styleClass="pos-form-grid">
+
+                        <columnConstraints>
+
+                            <ColumnConstraints percentWidth="30"/>
+
+                            <ColumnConstraints percentWidth="70"/>
+
+                        </columnConstraints>
+
+                        <children>
+
+                            <!-- NOMBRE -->
+
+                            <Label text="Nombre"
+                                   styleClass="pos-form-label"/>
+
+                            <TextField fx:id="txtNombre"
+                                       promptText="Nombre del descuento"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"/>
+
+
+                            <!-- TIPO APLICACIÓN -->
+
+                            <Label text="Aplicación"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="1"/>
+
+                            <ComboBox fx:id="cbTipoAplicacion"
+                                      maxWidth="Infinity"
+                                      GridPane.columnIndex="1"
+                                      GridPane.rowIndex="1"/>
+
+
+                            <!-- TIPO VALOR -->
+
+                            <Label text="Tipo valor"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="2"/>
+
+                            <ComboBox fx:id="cbTipoValor"
+                                      maxWidth="Infinity"
+                                      GridPane.columnIndex="1"
+                                      GridPane.rowIndex="2"/>
+
+
+                            <!-- VALOR -->
+
+                            <Label text="Valor"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="3"/>
+
+                            <TextField fx:id="txtValor"
+                                       promptText="0.00"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"
+                                       GridPane.rowIndex="3"/>
+
+
+                            <!-- CUPÓN -->
+
+                            <Label text="Cupón"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="4"/>
+
+                            <TextField fx:id="txtCupon"
+                                       promptText="Código de cupón"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"
+                                       GridPane.rowIndex="4"/>
+
+
+                            <!-- CATEGORÍA -->
+
+                            <Label text="Categoría"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="5"/>
+
+                            <ComboBox fx:id="cbCategoria"
+                                      maxWidth="Infinity"
+                                      GridPane.columnIndex="1"
+                                      GridPane.rowIndex="5"/>
+
+                        </children>
+
+                    </GridPane>
+
+
+                    <Separator/>
+
+
+                    <!-- BENEFICIO -->
+
+                    <VBox spacing="4">
+
+                        <HBox styleClass="pos-section-header">
+
+                            <FontIcon iconLiteral="fas-gift"
+                                      iconSize="16"
+                                      styleClass="pos-section-icon"/>
+
+                            <Label text="Beneficio"
+                                   styleClass="pos-section-title"/>
+
+                        </HBox>
+
+                        <Separator styleClass="pos-section-separator"/>
+
+                    </VBox>
+
+
+                    <GridPane hgap="14"
+                              vgap="12"
+                              styleClass="pos-form-grid">
+
+                        <columnConstraints>
+
+                            <ColumnConstraints percentWidth="30"/>
+
+                            <ColumnConstraints percentWidth="70"/>
+
+                        </columnConstraints>
+
+                        <children>
+
+                            <!-- PRODUCTO BENEFICIO -->
+
+                            <Label text="Producto"
+                                   styleClass="pos-form-label"/>
+
+                            <TextField fx:id="txtModeloProducto"
+                                       promptText="Modelo del producto"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"/>
+
+
+                            <!-- REQUIERE ARMAZÓN -->
+
+                            <Label text="Armazón"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="1"/>
+
+                            <CheckBox fx:id="chkRequiereArmazon"
+                                      text="Requiere armazón"
+                                      GridPane.columnIndex="1"
+                                      GridPane.rowIndex="1"/>
+
+
+                            <!-- DIOPTRÍA -->
+
+                            <Label text="Dioptría máx."
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="2"/>
+
+                            <TextField fx:id="txtDioptriaMax"
+                                       promptText="3.00"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"
+                                       GridPane.rowIndex="2"/>
+
+                        </children>
+
+                    </GridPane>
+
+
+                    <Separator/>
+
+
+                    <!-- VIGENCIA -->
+
+                    <VBox spacing="4">
+
+                        <HBox styleClass="pos-section-header">
+
+                            <FontIcon iconLiteral="fas-calendar-alt"
+                                      iconSize="16"
+                                      styleClass="pos-section-icon"/>
+
+                            <Label text="Vigencia"
+                                   styleClass="pos-section-title"/>
+
+                        </HBox>
+
+                        <Separator styleClass="pos-section-separator"/>
+
+                    </VBox>
+
+
+                    <GridPane hgap="14"
+                              vgap="12"
+                              styleClass="pos-form-grid">
+
+                        <columnConstraints>
+
+                            <ColumnConstraints percentWidth="30"/>
+
+                            <ColumnConstraints percentWidth="70"/>
+
+                        </columnConstraints>
+
+                        <children>
+
+                            <!-- FECHA INICIO -->
+
+                            <Label text="Fecha inicio"
+                                   styleClass="pos-form-label"/>
+
+                            <DatePicker fx:id="dpInicio"
+                                        maxWidth="Infinity"
+                                        GridPane.columnIndex="1"/>
+
+
+                            <!-- FECHA FIN -->
+
+                            <Label text="Fecha fin"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="1"/>
+
+                            <DatePicker fx:id="dpFin"
+                                        maxWidth="Infinity"
+                                        GridPane.columnIndex="1"
+                                        GridPane.rowIndex="1"/>
+
+
+                            <!-- PRIORIDAD -->
+
+                            <Label text="Prioridad"
+                                   styleClass="pos-form-label"
+                                   GridPane.rowIndex="2"/>
+
+                            <TextField fx:id="txtPrioridad"
+                                       promptText="0"
+                                       maxWidth="Infinity"
+                                       GridPane.columnIndex="1"
+                                       GridPane.rowIndex="2"/>
+
+                        </children>
+
+                    </GridPane>
+
+
+                    <Separator/>
+
+
+                    <!-- BOTONES -->
+
+                    <HBox styleClass="pos-form-footer">
+
+                        <Button fx:id="btnClear"
+                                text="Limpiar"
+                                minWidth="115"
+                                onAction="#limpiar"
+                                styleClass="pos-btn">
+
+                            <graphic>
+
+                                <FontIcon iconLiteral="fas-eraser"
+                                          iconSize="14"/>
+
+                            </graphic>
+
+                        </Button>
+
+                        <Button fx:id="btnGuardar"
+                                text="Guardar"
+                                minWidth="115"
+                                onAction="#guardar"
+                                styleClass="pos-btn-primary">
+
+                            <graphic>
+
+                                <FontIcon iconLiteral="fas-save"
+                                          iconSize="14"/>
+
+                            </graphic>
+
+                        </Button>
+
+                    </HBox>
+
+                </VBox>
+
+            </content>
+
+        </ScrollPane>
+
+
+        <!-- =====================================================
+             DESCUENTOS REGISTRADOS
+             ===================================================== -->
+
+        <BorderPane minWidth="0"
+                    minHeight="0"
+                    maxWidth="Infinity"
+                    maxHeight="Infinity"
+                    styleClass="pos-card"
+                    HBox.hgrow="ALWAYS">
+
+            <!-- ENCABEZADO -->
+
+            <top>
+
+                <VBox spacing="14">
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
+
+                        <FontIcon iconLiteral="fas-tags"
+                                  iconSize="18"
+                                  styleClass="clarity-section-icon"/>
+
+                        <Label text="Descuentos registrados"
+                               styleClass="clarity-title"/>
+
+                    </HBox>
+
+
+                    <!-- BUSCADOR -->
+
+                    <HBox styleClass="clarity-search"
+                          HBox.hgrow="ALWAYS">
+
+                        <children>
+
+                            <FontIcon iconLiteral="fas-search"
+                                      iconSize="15"/>
+
+                            <TextField fx:id="txtBuscar"
+                                       promptText="Buscar por código o nombre..."
+                                       HBox.hgrow="ALWAYS"/>
+
+                        </children>
+
+                    </HBox>
+
+                    <padding>
+                        <Insets bottom="14"/>
+                    </padding>
+
+                </VBox>
+
+            </top>
+
+
+            <!-- TABLA -->
+
+            <center>
+
+                <TableView fx:id="tabla"
+                           minWidth="0"
+                           minHeight="0"
+                           maxWidth="Infinity"
+                           maxHeight="Infinity"
+                           styleClass="pos-table">
+
                     <columns>
-                      <TableColumn fx:id="colId" prefWidth="75.0" text="Id" />
-                      <TableColumn fx:id="colNombre" prefWidth="75.0" text="Promocion" />
-                        <TableColumn fx:id="colTAplicacion" prefWidth="75.0" text="Aplicacion" />
-                        <TableColumn fx:id="colTValor" prefWidth="75.0" text="Tipo Valor" />
-                        <TableColumn fx:id="colValor" prefWidth="75.0" text="Valor" />
-                        <TableColumn fx:id="colcupon" prefWidth="75.0" text="Cupon" />
-                        <TableColumn fx:id="colCategoria" prefWidth="75.0" text="Categoria" />
-                        <TableColumn fx:id="colFi" prefWidth="75.0" text="Fecha Inicio" />
-                        <TableColumn fx:id="colFf" prefWidth="75.0" text="Fecha Final" />
-                        <TableColumn fx:id="colPrioridad" prefWidth="75.0" text="Prioridad" />
-                        <TableColumn fx:id="colActivo" prefWidth="75.0" text="Activo" />
-                        <TableColumn fx:id="colAccion" prefWidth="75.0" text="Accion" />
+
+                        <TableColumn fx:id="colId"
+                                     text="ID"/>
+
+                        <TableColumn fx:id="colNombre"
+                                     text="Promoción"/>
+
+                        <TableColumn fx:id="colTAplicacion"
+                                     text="Aplicación"/>
+
+                        <TableColumn fx:id="colTValor"
+                                     text="Tipo valor"/>
+
+                        <TableColumn fx:id="colValor"
+                                     text="Valor"/>
+
+                        <TableColumn fx:id="colcupon"
+                                     text="Cupón"/>
+
+                        <TableColumn fx:id="colCategoria"
+                                     text="Categoría"/>
+
+                        <TableColumn fx:id="colFi"
+                                     text="Fecha inicio"/>
+
+                        <TableColumn fx:id="colFf"
+                                     text="Fecha final"/>
+
+                        <TableColumn fx:id="colPrioridad"
+                                     text="Prioridad"/>
+
+                        <TableColumn fx:id="colActivo"
+                                     text="Activo"/>
+
+                        <TableColumn fx:id="colAccion"
+                                     text="Acción"/>
+
                     </columns>
-                  </TableView>
-               </children>
-               <padding>
-                  <Insets top="10.0" />
-               </padding>
-            </VBox>
-         </items>
-      </SplitPane>
-   </center>
-   <top>
-      <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="10.0" styleClass="header-bar">
-         <padding>
-            <Insets left="25" right="25" />
-         </padding>
-         <children>
-            <Label styleClass="header-title" text="Gestión de Promociones" />
-         </children>
-      </HBox>
-   </top>
-   <bottom>
-      <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0" BorderPane.alignment="CENTER_RIGHT">
-         <padding>
-            <Insets top="10.0" />
-         </padding>
-      </HBox>
-   </bottom>
-</BorderPane>
+
+                </TableView>
+
+            </center>
+
+
+            <!-- FOOTER + PAGINACIÓN -->
+
+            <bottom>
+
+                <HBox alignment="CENTER_LEFT"
+                      minHeight="46"
+                      prefHeight="46"
+                      maxHeight="46"
+                      styleClass="clarity-table-footer">
+
+                    <HBox alignment="CENTER_LEFT"
+                          spacing="8">
+
+                        <FontIcon iconLiteral="fas-tags"
+                                  iconSize="15"/>
+
+                        <Label text="Catálogo de descuentos"
+                               styleClass="clarity-table-footer-label"/>
+
+                    </HBox>
+
+                    <Region HBox.hgrow="ALWAYS"/>
+
+                    <fx:include source="PaginationView.fxml"
+                                fx:id="pagination"/>
+
+                </HBox>
+
+            </bottom>
+
+        </BorderPane>
+
+    </HBox>
+
+</StackPane>

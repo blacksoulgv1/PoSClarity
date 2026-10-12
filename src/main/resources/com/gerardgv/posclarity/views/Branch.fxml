@@ -273,33 +273,25 @@
 
 
             <!-- FOOTER -->
-
             <bottom>
+                <HBox alignment="CENTER_LEFT"
+                    minHeight="46"
+                    prefHeight="46"
+                    maxHeight="46"
+                    styleClass="clarity-table-footer">
 
-                <HBox minHeight="38"
-                      prefHeight="38"
-                      styleClass="clarity-table-footer">
-
-                    <children>
-
-                        <FontIcon iconLiteral="fas-store"
-                                  iconSize="15"/>
-
-                        <Label text="Directorio de sucursales"
-                               styleClass="clarity-table-footer-label"/>
-
-                    </children>
-
-                    <BorderPane.margin>
-                        <Insets top="8"/>
-                    </BorderPane.margin>
-
+                <HBox alignment="CENTER_LEFT"
+                    spacing="8">
+                <FontIcon iconLiteral="fas-store"
+                    iconSize="15"/>
+                <Label text="Directorio de sucursales"
+                    styleClass="clarity-table-footer-label"/>
+            </HBox>
+            <Region HBox.hgrow="ALWAYS"/>
+            <fx:include source="PaginationView.fxml"
+                    fx:id="pagination"/>
                 </HBox>
-
             </bottom>
-
         </BorderPane>
-
     </HBox>
-
 </StackPane>
