@@ -79,24 +79,22 @@ public class TicketService {
         
         Map<String,Object> params = new HashMap<>();
         
-        System.out.println("===== DATOS CLIENTE PARA TICKET =====");
-        System.out.println("cliente: " + sale.getClient().getName());
-        System.out.println("telefono_clien: " + sale.getClient().getPhone());
-        System.out.println("direccion_clien: " + sale.getClient().getAddress());
-        System.out.println("======================================");
         //Sucursal
         params.put("sucursal", sale.getBranch().getName());
         params.put("telefono_suc", sale.getBranch().getPhone());
         params.put("direccion_suc", sale.getBranch().getAddress());
+        
         //cliente
         params.put("cliente", sale.getClient().getName());
         params.put("telefono_clien", sale.getClient().getPhone());
         params.put("direccion_clien", sale.getClient().getAddress());
+        
         //Vendedor
         params.put("vendedor", sale.getSeller().getName());
         params.put("fecha", sale.getSaleDate().
                 format(DateTimeFormatter.ofPattern("dd/MM/yyy HH:mm")));
         params.put("nota", String.valueOf(sale.getFolio()));
+        
         //Totales & Descuentos
         double subtotal = sale.getGrossTotal();        
         double descuento = sale.getTotalDiscount();        
@@ -114,15 +112,31 @@ public class TicketService {
         if(pendiente < 0){
             pendiente = 0;
         }
-
         
         params.put("subtotal", subtotal);
         params.put("descuento", descuento);
         params.put("total", total);
         params.put("pago", pagado);
         params.put("pendiente", pendiente);
+        
+        // Seguro Clarity
+        boolean tieneSeguro = sale.getInsuranceId() != null;
+
+        params.put("tiene_seguro", tieneSeguro);
+        params.put("seguro_nombre",tieneSeguro &&
+                sale.getInsuranceName() != null
+                ? sale.getInsuranceName(): "");
+        params.put("seguro_porcentaje",tieneSeguro
+                ? sale.getInsuranceCoveragePercentage(): 0.0);
+        params.put("seguro_base", tieneSeguro
+                ? sale.getInsuranceInsuredAmount(): 0.0);
+        params.put("seguro_cobertura",tieneSeguro
+                ? sale.getInsuranceCoverageAmount(): 0.0);
+        params.put("seguro_cliente",tieneSeguro
+                ? sale.getInsuranceCustomerAmount(): 0.0);
+        
         params.put("logo", getClass().getResourceAsStream(
-                "/com/gerardgv/posclarity/img/logo-removebg.png"));
+                "/com/gerardgv/posclarity/img/Logo-Clarity.png"));
         
         return params;
         
@@ -201,7 +215,7 @@ public class TicketService {
     // ➕ ADD
         params.put("add", sale.getAddLens()!= null ? sale.getAddLens():"");
         params.put("logo", getClass().getResourceAsStream(
-                "/com/gerardgv/posclarity/img/logo-removebg.png"));
+                "/com/gerardgv/posclarity/img/Logo-Clarity.png"));
     
     return params;
     }
@@ -385,7 +399,7 @@ public class TicketService {
         params.put(
             "logo",
             getClass().getResourceAsStream(
-                    "/com/gerardgv/posclarity/img/logo-removebg.png"));
+                    "/com/gerardgv/posclarity/img/Logo-Clarity.png"));
 
         return params;
     }
@@ -489,7 +503,7 @@ public class TicketService {
             params.put("oi_eje", "");
             params.put("add", "");
         }
-            params.put("logo",getClass().getResourceAsStream( "/com/gerardgv/posclarity/img/logo-removebg.png"));
+            params.put("logo",getClass().getResourceAsStream( "/com/gerardgv/posclarity/img/Logo-Clarity.png"));
 
         return params;
     }

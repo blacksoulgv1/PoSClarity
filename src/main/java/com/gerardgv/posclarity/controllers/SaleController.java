@@ -59,6 +59,12 @@ public class SaleController implements Initializable {
     @FXML private TableColumn<SaleItem,Double> colSubtotal;
     @FXML private TableColumn<SaleItem,Void> colAcciones;
     @FXML private StackPane rootSale;
+    
+    @FXML private CheckBox chkSeguro;
+    @FXML private Label lblSeguroCobertura;
+    @FXML private Label lblSeguroAsegurable;
+    @FXML private Label lblSeguroCoberturaMonto;
+    @FXML private Label lblSeguroCliente;
     /*
     API
     */
@@ -68,6 +74,7 @@ public class SaleController implements Initializable {
     private final ClientApiClient clientApiClient = new ClientApiClient();
     private final SellerApiClient sellerApiClient = new SellerApiClient();
     private final DiscountApiClient discountApiClient = new DiscountApiClient();
+    private final InsuranceApiClient insuranceApiClient =new InsuranceApiClient();
     
     private ObservableList<SaleItem> carrito = FXCollections.observableArrayList(); 
     
@@ -76,6 +83,8 @@ public class SaleController implements Initializable {
     private Seller vendedorSeleccionado = null;
     private Discount cuponSeleccionado = null;
     private String codigoCuponValidado = "";
+    private Insurance seguroActivo = null;
+    private boolean seguroSeleccionado = false;
     
     
     private PosSearchPopup<Product> popupProductos = new PosSearchPopup<>();
@@ -87,6 +96,7 @@ public class SaleController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         aplicarComportamientos();
         cargarSucursal();
+        cargarSeguroActivo();
         cargarFecha();
         configurarTabla();
         configurarPopupProductos();
@@ -108,6 +118,22 @@ public class SaleController implements Initializable {
         if (!newVal) {
             validarCupon();
         }
+        });
+        
+        chkSeguro.setOnAction(e -> {
+            seguroSeleccionado = chkSeguro.isSelected();
+            
+            if(seguroSeleccionado){
+                if(cuponSeleccionado != null 
+                        || !txtCupon.getText().isBlank()){
+                    txtCupon.clear();
+                    cuponSeleccionado = null;
+                    codigoCuponValidado = "";
+                    mostrarError("El Cupon Fue Retirado");
+                }
+            }
+            recalcularPromociones();
+            actualizarPago();
         });
         
         cbMetodoPago.setOnAction(e ->{
@@ -310,6 +336,60 @@ public class SaleController implements Initializable {
             txtTelefonoSuc.setText(suc.getPhone());            
         }
     }
+    
+    private void cargarSeguroActivo() {
+
+        try {
+
+            List<Insurance> seguros =
+                insuranceApiClient.getActive();
+
+            if (seguros == null || seguros.isEmpty()) {
+
+                seguroActivo = null;
+                chkSeguro.setDisable(true);
+                chkSeguro.setSelected(false);
+                lblSeguroCobertura.setText("--");
+                lblSeguroAsegurable.setText("$0.00");
+                lblSeguroCoberturaMonto.setText("$0.00");
+                lblSeguroCliente.setText("$0.00");
+                return;
+            }
+
+            // Por ahora utilizamos el primer seguro activo.
+            seguroActivo = seguros.get(0);
+
+            lblSeguroCobertura.setText(
+                String.format(
+                        "%.0f%%",
+                        seguroActivo.getCoveragePercentage()
+                )
+            );
+
+            chkSeguro.setDisable(false);
+            chkSeguro.setSelected(false);
+            lblSeguroAsegurable.setText("$0.00");
+            lblSeguroCoberturaMonto.setText("$0.00");
+            lblSeguroCliente.setText("$0.00");
+        } catch (IOException | InterruptedException e) {
+
+            e.printStackTrace();
+            seguroActivo = null;
+            chkSeguro.setDisable(true);
+            chkSeguro.setSelected(false);
+            lblSeguroCobertura.setText("--");
+            lblSeguroAsegurable.setText("$0.00");
+            lblSeguroCoberturaMonto.setText("$0.00");
+            lblSeguroCliente.setText("$0.00");
+
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
+            mostrarError("No se pudo cargar el seguro desde el servidor.");
+        }
+    }
+
            
     private void configurarPopupProductos(){
         
@@ -777,15 +857,10 @@ if (promociones != null) {
         return totalFinal;
     }
 }
-    
-   private ResumenVenta calcularResumenVenta() {
+
+    private ResumenVenta calcularResumenVenta() {
 
     double totalBruto = 0;
-    double descuentoProductos = 0;
-
-    // ==========================================
-    // 1. PRODUCTOS
-    // ==========================================
 
     for (SaleItem item : carrito) {
 
@@ -793,18 +868,81 @@ if (promociones != null) {
             continue;
         }
 
-        double precio = item.getProduct().getPrice();
-        int cantidad = item.getQuantity();
-        double descuento = item.getDiscount();
+        double precio =
+                item.getProduct().getPrice();
+
+        int cantidad =
+                item.getQuantity();
 
         totalBruto += precio * cantidad;
-        descuentoProductos += descuento * cantidad;
     }
 
-    // ==========================================
-    // 2. TOTAL DESPUÉS DE DESCUENTOS
-    //    POR PRODUCTO
-    // ==========================================
+    /*
+     * ============================================================
+     * SEGURO CLARITY
+     * ============================================================
+     *
+     * Cuando hay seguro:
+     *
+     * - No aplicamos descuentos de producto.
+     * - No aplicamos descuento general.
+     * - No aplicamos cupón.
+     *
+     * El seguro se calcula sobre las categorías asegurables.
+     *
+     * El total final es:
+     *
+     * total bruto - cobertura del seguro
+     *
+     * Las categorías no asegurables permanecen al 100%.
+     */
+
+    if (seguroSeleccionado && seguroActivo != null) {
+
+        double montoAsegurable =
+                calcularMontoAsegurable();
+
+        double cobertura =
+                calcularCoberturaSeguro();
+
+        double totalFinal =
+                Math.max(
+                        totalBruto - cobertura,
+                        0
+                );
+
+        return new ResumenVenta(
+                totalBruto,
+                0,
+                0,
+                0,
+                totalFinal
+        );
+    }
+
+    /*
+     * ============================================================
+     * VENTA NORMAL
+     * ============================================================
+     */
+
+    double descuentoProductos = 0;
+
+    for (SaleItem item : carrito) {
+
+        if (item.getProduct() == null) {
+            continue;
+        }
+
+        int cantidad =
+                item.getQuantity();
+
+        double descuento =
+                item.getDiscount();
+
+        descuentoProductos +=
+                descuento * cantidad;
+    }
 
     double totalConDescuento =
             Math.max(
@@ -812,9 +950,9 @@ if (promociones != null) {
                     0
             );
 
-    // ==========================================
-    // 3. DESCUENTO GENERAL
-    // ==========================================
+    /*
+     * DESCUENTO GENERAL
+     */
 
     double descuentoGeneral = 0;
 
@@ -831,10 +969,12 @@ if (promociones != null) {
                             .filter(Objects::nonNull)
                             .filter(d ->
                                     "PORCENTAJE".equalsIgnoreCase(
-                                            d.getValueType())
+                                            d.getValueType()
+                                    )
                                     ||
                                     "MONTO".equalsIgnoreCase(
-                                            d.getValueType())
+                                            d.getValueType()
+                                    )
                             )
                             .filter(d ->
                                     d.getValue() != null
@@ -888,26 +1028,25 @@ if (promociones != null) {
         );
     }
 
-    // ==========================================
-    // 4. TOTAL DESPUÉS DEL DESCUENTO GENERAL
-    // ==========================================
-
     double totalDespuesGeneral =
             Math.max(
                     totalConDescuento - descuentoGeneral,
                     0
             );
 
-    // ==========================================
-    // 5. CUPÓN
-    // ==========================================
+    /*
+     * CUPÓN
+     */
 
     double descuentoCupon = 0;
 
     if (cuponSeleccionado != null) {
 
-        String tipo = cuponSeleccionado.getValueType();
-        Double valor = cuponSeleccionado.getValue();
+        String tipo =
+                cuponSeleccionado.getValueType();
+
+        Double valor =
+                cuponSeleccionado.getValue();
 
         if (valor != null) {
 
@@ -928,10 +1067,6 @@ if (promociones != null) {
         }
     }
 
-    // ==========================================
-    // 6. TOTAL FINAL
-    // ==========================================
-
     double totalFinal =
             Math.max(
                     totalDespuesGeneral - descuentoCupon,
@@ -949,6 +1084,87 @@ if (promociones != null) {
     
     private double calcularTotalVenta() {
         return calcularResumenVenta().getTotalFinal();
+    }
+    
+    private double calcularMontoAsegurable() {
+
+        if (!seguroSeleccionado || seguroActivo == null) {
+            return 0;
+        }
+
+        double montoAsegurable = 0;
+
+        for (SaleItem item : carrito) {
+
+            if (item.getProduct() == null) {
+                continue;
+            }
+
+            String categoria =
+                item.getProduct().getCategory();
+
+            if (categoria == null) {
+                continue;
+            }
+
+        /*
+        * CATEGORÍAS CUBIERTAS POR SEGURO CLARITY
+        */
+            boolean cubierta =
+                categoria.equalsIgnoreCase("armazon")
+                || categoria.equalsIgnoreCase("mica")
+                || categoria.equalsIgnoreCase("tratamiento");
+
+            if (!cubierta) {
+                continue;
+            }
+
+            double precio = item.getProduct().getPrice();
+            int cantidad = item.getQuantity();
+
+        /*
+         * El seguro se calcula sobre el importe
+         * bruto de la línea.
+         *
+         * Los descuentos no aplican cuando hay seguro.
+         */
+            montoAsegurable +=precio * cantidad;
+        }
+        return Math.max(montoAsegurable, 0);
+    }
+
+    private double calcularCoberturaSeguro() {
+
+        if (!seguroSeleccionado || seguroActivo == null) {
+            return 0;
+        }
+
+        double montoAsegurable = calcularMontoAsegurable();
+
+        if (montoAsegurable <= 0) {
+            return 0;
+        }
+
+        double porcentaje =
+            seguroActivo.getCoveragePercentage()
+                    .doubleValue();
+
+        return montoAsegurable
+            * (porcentaje / 100.0);
+    }
+
+    private double calcularMontoClienteSeguro() {
+
+        if (!seguroSeleccionado || seguroActivo == null) {
+            return 0;
+        }
+
+        double montoAsegurable = calcularMontoAsegurable();
+        double cobertura = calcularCoberturaSeguro();
+        return Math.max(
+            montoAsegurable - cobertura,
+            0
+        );
     }
     
     private void actualizarTotal() {
@@ -975,7 +1191,37 @@ if (promociones != null) {
                     resumen.getTotalFinal()
             )
     );
-}
+    
+    double montoAsegurable =
+        calcularMontoAsegurable();
+
+    double coberturaSeguro =
+        calcularCoberturaSeguro();
+
+    double montoClienteSeguro =
+        calcularMontoClienteSeguro();
+
+    lblSeguroAsegurable.setText(
+        "$" + String.format(
+                "%.2f",
+                montoAsegurable
+        )
+    );
+
+    lblSeguroCoberturaMonto.setText(
+        "$" + String.format(
+                "%.2f",
+                coberturaSeguro
+        )
+    );
+
+    lblSeguroCliente.setText(
+        "$" + String.format(
+                "%.2f",
+                montoClienteSeguro
+        )
+    );
+    }
           
     @FXML
     private void guardarVenta(){
@@ -1006,19 +1252,10 @@ if (promociones != null) {
             return;
         }
         
-        if(esBajoPedido){
-            double anticipoMinimo = total * 0.30;
-            if(monto < anticipoMinimo){
-                mostrarError("Se Requiere Mínimo el 30% de Anticipo: $"
-                        + String.format("%.2f",anticipoMinimo));
-                return;
-            }
-        } else{
-            if(monto<=0){
-                mostrarError("Debe ingresar un monto");
-                return;
-            }
-        }       
+        if(monto <= 0) {
+            mostrarError("Debe Ingresar un Monto");
+            return;
+        }
                 
         Payment payment = null;
         
@@ -1049,7 +1286,9 @@ if (promociones != null) {
                     txtEjeOI.getText(),
                     txtAdd.getText(),
                     null,
-                    txtCupon.getText());
+                    txtCupon.getText(),
+                    seguroSeleccionado && seguroActivo != null
+                    ? seguroActivo.getId() : null);
             
             if(clienteSeleccionado != null){
                 sale.setClient(clienteSeleccionado);
@@ -1140,7 +1379,9 @@ if (promociones != null) {
         txtMonto.clear();
         txtCupon.clear();
         cuponSeleccionado = null;
-        codigoCuponValidado = "";
+        codigoCuponValidado = "";        
+        seguroSeleccionado = false;
+        chkSeguro.setSelected(false);
         cbMetodoPago.setValue("EFECTIVO");
         
         //==== PAGO ====
@@ -1223,107 +1464,176 @@ if (promociones != null) {
         }
     }
     
-    private void recalcularPromociones(){
-        
-        for (SaleItem item : carrito) {
-            
-            Product product = item.getProduct();
-            ResultadoPromocion resultado = evaluarPromocion(product);
-            item.setDiscount(resultado.getDescuento());
-            
-            if(resultado.getPromocion() != null){
-                item.setDiscountName(
+private void recalcularPromociones() {
+
+    for (SaleItem item : carrito) {
+
+        Product product = item.getProduct();
+
+        /*
+         * Si hay Seguro Clarity seleccionado,
+         * no se permite ninguna promoción de producto.
+         */
+        if (seguroSeleccionado) {
+
+            item.setDiscount(0);
+            item.setDiscountName("Sin Descuento");
+
+            continue;
+        }
+
+        /*
+         * Venta normal:
+         * calcular promociones como antes.
+         */
+        ResultadoPromocion resultado =
+                evaluarPromocion(product);
+
+        item.setDiscount(
+                resultado.getDescuento()
+        );
+
+        if (resultado.getPromocion() != null) {
+
+            item.setDiscountName(
                     resultado.getPromocion().getName()
             );
-            }else{
-                item.setDiscountName(
+
+        } else {
+
+            item.setDiscountName(
                     "Sin Descuento"
             );
-            }
         }
-        
-        tableProduct.refresh();
-        actualizarTotal();
     }
-    
+
+    tableProduct.refresh();
+
+    actualizarTotal();
+}
+
     private void validarCupon() {
-        
-        String codigo = txtCupon.getText();
 
-        /*
-        * Si el campo está vacío
-        */
-        if (codigo == null || codigo.isBlank()) {
+    String codigo = txtCupon.getText();
 
-            cuponSeleccionado = null;
-            codigoCuponValidado = "";
-            actualizarTotal();
-            actualizarPago();
-            return;
+    /*
+     * ============================================================
+     * SEGURO + CUPÓN NO SON COMPATIBLES
+     * ============================================================
+     */
+    if (seguroSeleccionado) {
+
+        if (codigo != null && !codigo.isBlank()) {
+
+            txtCupon.clear();
         }
 
-        codigo = codigo.trim();
+        cuponSeleccionado = null;
+        codigoCuponValidado = "";
 
-        /*
-        * Si el código no cambió
-        */
-        if (codigo.equalsIgnoreCase(codigoCuponValidado)
+        actualizarTotal();
+        actualizarPago();
+
+        mostrarError(
+                "El Seguro Clarity no puede combinarse con un cupón."
+        );
+
+        return;
+    }
+
+    /*
+     * Si el campo está vacío
+     */
+    if (codigo == null || codigo.isBlank()) {
+
+        cuponSeleccionado = null;
+        codigoCuponValidado = "";
+
+        actualizarTotal();
+        actualizarPago();
+
+        return;
+    }
+
+    codigo = codigo.trim();
+
+    /*
+     * Si el código no cambió
+     */
+    if (codigo.equalsIgnoreCase(codigoCuponValidado)
             && cuponSeleccionado != null) {
 
+        actualizarTotal();
+        actualizarPago();
+
+        return;
+    }
+
+    try {
+
+        Discount coupon =
+                discountApiClient.getActiveCoupon(codigo);
+
+        if (coupon == null) {
+
+            cuponSeleccionado = null;
+            codigoCuponValidado = "";
+
             actualizarTotal();
             actualizarPago();
+
+            mostrarError("Cupón no encontrado.");
+
             return;
         }
 
-        try {
+        cuponSeleccionado = coupon;
+        codigoCuponValidado = codigo;
 
-            Discount coupon = discountApiClient.getActiveCoupon(codigo);
+        actualizarTotal();
+        actualizarPago();
 
-            if (coupon == null) {
+        mostrarExito(
+                "Cupón aplicado: "
+                + coupon.getName()
+        );
 
-                cuponSeleccionado = null;
-                codigoCuponValidado = "";
-                actualizarTotal();
-                actualizarPago();
-                mostrarError("Cupón no encontrado.");
-                return;
-            }
+    } catch (IOException | InterruptedException e) {
 
-            cuponSeleccionado = coupon;
-            codigoCuponValidado = codigo;
-            actualizarTotal();
-            actualizarPago();
-            mostrarExito("Cupón aplicado: " + coupon.getName());
+        e.printStackTrace();
 
-        } catch (IOException | InterruptedException e) {
+        cuponSeleccionado = null;
+        codigoCuponValidado = "";
 
-            e.printStackTrace();
-            cuponSeleccionado = null;
-            codigoCuponValidado = "";
-            actualizarTotal();
-            actualizarPago();
+        actualizarTotal();
+        actualizarPago();
 
-            if (e instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
+        if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+        }
 
-            mostrarError("No se pudo validar el cupón con el servidor.");
+        mostrarError(
+                "No se pudo validar el cupón con el servidor."
+        );
 
-        } catch (Exception e) {
+    } catch (Exception e) {
 
-            e.printStackTrace();
-            cuponSeleccionado = null;
-            codigoCuponValidado = "";
-            actualizarTotal();
-            actualizarPago();
-            mostrarError(
+        e.printStackTrace();
+
+        cuponSeleccionado = null;
+        codigoCuponValidado = "";
+
+        actualizarTotal();
+        actualizarPago();
+
+        mostrarError(
                 e.getMessage() != null
                         ? e.getMessage()
                         : "Cupón no válido."
-            );
-        }
+        );
     }
-    
+}
+
    private static class ResultadoPromocion {
        private final Discount promocion;
         private final double descuento;

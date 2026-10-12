@@ -10,6 +10,7 @@ public class SaleCreateRequest {
     private Integer sellerId;
     private Integer clientId;
     private Integer discountId;
+    private Integer insuranceId;
     private String couponCode;  
     private String folio;
 
@@ -176,4 +177,13 @@ public class SaleCreateRequest {
     public void setCouponCode(String couponCode) {
         this.couponCode = couponCode;
     }
+
+    public Integer getInsuranceId() {
+        return insuranceId;
+    }
+
+    public void setInsuranceId(Integer insuranceId) {
+        this.insuranceId = insuranceId;
+    }
+    
 }

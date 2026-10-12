@@ -17,11 +17,19 @@ public class Sale {
     private double grossTotal;
     private double totalDiscount;
     private double finalTotal;
+    
+    private Integer insuranceId;
+    private String insuranceName;
+    private double insuranceCoveragePercentage;
+    private double insuranceInsuredAmount;
+    private double insuranceCoverageAmount;
+    private double insuranceCustomerAmount;
 
     private double paid;
     private double remaining;
 
     private String paymentStatus;
+    private String saleType;
     private String workStatus;
 
     private String odEsf;
@@ -215,4 +223,61 @@ public class Sale {
     public void setPayments(List<Payment> payments) {
         this.payments = payments;
     }
+
+    public Integer getInsuranceId() {
+        return insuranceId;
+    }
+
+    public void setInsuranceId(Integer insuranceId) {
+        this.insuranceId = insuranceId;
+    }
+
+    public String getInsuranceName() {
+        return insuranceName;
+    }
+
+    public void setInsuranceName(String insuranceName) {
+        this.insuranceName = insuranceName;
+    }
+
+    public double getInsuranceCoveragePercentage() {
+        return insuranceCoveragePercentage;
+    }
+
+    public void setInsuranceCoveragePercentage(double insuranceCoveragePercentage) {
+        this.insuranceCoveragePercentage = insuranceCoveragePercentage;
+    }
+
+    public double getInsuranceInsuredAmount() {
+        return insuranceInsuredAmount;
+    }
+
+    public void setInsuranceInsuredAmount(double insuranceInsuredAmount) {
+        this.insuranceInsuredAmount = insuranceInsuredAmount;
+    }
+
+    public double getInsuranceCoverageAmount() {
+        return insuranceCoverageAmount;
+    }
+
+    public void setInsuranceCoverageAmount(double insuranceCoverageAmount) {
+        this.insuranceCoverageAmount = insuranceCoverageAmount;
+    }
+
+    public double getInsuranceCustomerAmount() {
+        return insuranceCustomerAmount;
+    }
+
+    public void setInsuranceCustomerAmount(double insuranceCustomerAmount) {
+        this.insuranceCustomerAmount = insuranceCustomerAmount;
+    }
+
+    public String getSaleType() {
+        return saleType;
+    }
+
+    public void setSaleType(String saleType) {
+        this.saleType = saleType;
+    }
+    
 }

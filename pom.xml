@@ -9,7 +9,7 @@
 
     <groupId>com.gerardgv</groupId>
     <artifactId>PoSClarity</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <name>PoSClarity</name>
@@ -175,6 +175,7 @@
                             <mainClass>${main.class}</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
 
                         <manifestEntries>

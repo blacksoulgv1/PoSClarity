@@ -82,7 +82,8 @@ public class SaleApiClient extends BaseApiClient {
             String oiEje,
             String addLens,
             String promotionName,
-            String couponCode) throws IOException,InterruptedException{
+            String couponCode,
+            Integer insuranceId) throws IOException,InterruptedException{
         
         SaleCreateRequest request = new SaleCreateRequest();
         
@@ -112,6 +113,7 @@ public class SaleApiClient extends BaseApiClient {
         */
         request.setPromotionName(promotionName);
         request.setCouponCode(couponCode);
+        request.setInsuranceId(insuranceId);
 
 
         /*
@@ -271,6 +273,42 @@ public class SaleApiClient extends BaseApiClient {
     sale.setFinalTotal(
             convertirDouble(response.getFinalTotal())
     );
+    
+    /*
+    * Seguro Clarity
+    */
+    sale.setInsuranceId(
+        response.getInsuranceId()
+    );
+
+    sale.setInsuranceName(
+        response.getInsuranceName()
+    );
+
+    sale.setInsuranceCoveragePercentage(
+        convertirDouble(
+                response.getInsuranceCoveragePercentage()
+        )
+    );
+
+    sale.setInsuranceInsuredAmount(
+        convertirDouble(
+                response.getInsuranceInsuredAmount()
+        )
+    );
+
+    sale.setInsuranceCoverageAmount(
+        convertirDouble(
+                response.getInsuranceCoverageAmount()
+        )
+    );
+
+    sale.setInsuranceCustomerAmount(
+        convertirDouble(
+                response.getInsuranceCustomerAmount()
+        )
+    );
+    
 
     /*
     Pagos
@@ -348,6 +386,7 @@ public class SaleApiClient extends BaseApiClient {
     Estados
     */
     sale.setPaymentStatus(response.getPaymentStatus());
+    sale.setSaleType(response.getSaleType());
     sale.setWorkStatus(response.getWorkStatus());
 
     /*

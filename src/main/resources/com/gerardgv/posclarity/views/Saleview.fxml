@@ -211,6 +211,52 @@
             <FontIcon iconLiteral="fas-cash-register" iconSize="18" styleClass="pos-section-icon"/>
             <Label text="Resumen de cobro" styleClass="pos-title"/>
         </HBox>
+        
+        <!-- SEGURO CLARITY -->
+        <VBox spacing="8" styleClass="pos-summary-insurance">
+
+            <HBox alignment="CENTER_LEFT" spacing="8">
+                <CheckBox fx:id="chkSeguro"
+                    text="Seguro"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblSeguroCobertura"
+                    text="70%"
+                    styleClass="pos-summary-value"/>
+            </HBox>
+
+        <VBox spacing="4">
+            <HBox>
+                <Label text="Monto asegurable"
+                   styleClass="pos-summary-label"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblSeguroAsegurable"
+                   text="\$0.00"
+                   styleClass="pos-summary-value"/>
+            </HBox>
+
+            <HBox>
+                <Label text="Cobertura Clarity"
+                   styleClass="pos-summary-label"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblSeguroCoberturaMonto"
+                   text="\$0.00"
+                   styleClass="pos-summary-value"/>
+            </HBox>
+
+            <HBox>
+                
+            <Label text="A cargo del cliente"
+                   styleClass="pos-summary-label"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblSeguroCliente"
+                   text="\$0.00"
+                   styleClass="pos-summary-total-value"/>
+            </HBox>
+        </VBox>
+
+    </VBox>
+
+    <Separator/>
 
         <VBox spacing="10">
             <HBox styleClass="pos-summary-item">

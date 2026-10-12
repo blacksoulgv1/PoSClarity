@@ -13,6 +13,13 @@ public class SaleResponse {
 
     private Integer discountId;
     private String promotionName;
+    
+    private Integer insuranceId;
+    private String insuranceName;
+    private BigDecimal insuranceCoveragePercentage;
+    private BigDecimal insuranceInsuredAmount;
+    private BigDecimal insuranceCoverageAmount;
+    private BigDecimal insuranceCustomerAmount;
 
     private Integer sellerId;
     private String sellerName;
@@ -43,6 +50,7 @@ public class SaleResponse {
     private BigDecimal remaining;
 
     private String paymentStatus;
+    private String saleType;
     private String workStatus;
 
     private LocalDateTime createdAt;
@@ -292,6 +300,61 @@ public class SaleResponse {
     public void setPayments(List<PaymentResponse> payments) {
         this.payments = payments;
     }
-    
+
+    public Integer getInsuranceId() {
+        return insuranceId;
+    }
+
+    public void setInsuranceId(Integer insuranceId) {
+        this.insuranceId = insuranceId;
+    }
+
+    public String getInsuranceName() {
+        return insuranceName;
+    }
+
+    public void setInsuranceName(String insuranceName) {
+        this.insuranceName = insuranceName;
+    }
+
+    public BigDecimal getInsuranceCoveragePercentage() {
+        return insuranceCoveragePercentage;
+    }
+
+    public void setInsuranceCoveragePercentage(BigDecimal insuranceCoveragePercentage) {
+        this.insuranceCoveragePercentage = insuranceCoveragePercentage;
+    }
+
+    public BigDecimal getInsuranceInsuredAmount() {
+        return insuranceInsuredAmount;
+    }
+
+    public void setInsuranceInsuredAmount(BigDecimal insuranceInsuredAmount) {
+        this.insuranceInsuredAmount = insuranceInsuredAmount;
+    }
+
+    public BigDecimal getInsuranceCoverageAmount() {
+        return insuranceCoverageAmount;
+    }
+
+    public void setInsuranceCoverageAmount(BigDecimal insuranceCoverageAmount) {
+        this.insuranceCoverageAmount = insuranceCoverageAmount;
+    }
+
+    public BigDecimal getInsuranceCustomerAmount() {
+        return insuranceCustomerAmount;
+    }
+
+    public void setInsuranceCustomerAmount(BigDecimal insuranceCustomerAmount) {
+        this.insuranceCustomerAmount = insuranceCustomerAmount;
+    }
+
+    public String getSaleType() {
+        return saleType;
+    }
+
+    public void setSaleType(String saleType) {
+        this.saleType = saleType;
+    }
     
 }

@@ -15,6 +15,12 @@
 	<parameter name="total" class="java.lang.Double"/>
 	<parameter name="pago" class="java.lang.Double"/>
 	<parameter name="pendiente" class="java.lang.Double"/>
+        <parameter name="tiene_seguro" class="java.lang.Boolean"/>
+        <parameter name="seguro_nombre" class="java.lang.String"/>
+        <parameter name="seguro_porcentaje" class="java.lang.Double"/>
+        <parameter name="seguro_base" class="java.lang.Double"/>
+        <parameter name="seguro_cobertura" class="java.lang.Double"/>
+        <parameter name="seguro_cliente" class="java.lang.Double"/>
 	<parameter name="logo" class="java.io.InputStream"/>
 	<query language="sql"><![CDATA[]]></query>
 	<field name="quantity" class="java.lang.Integer"/>
@@ -179,7 +185,7 @@
 			<property name="com.jaspersoft.studio.unit.height" value="px"/>
 		</band>
 	</detail>
-	<columnFooter height="126">
+	<columnFooter height="250">
 		<element kind="staticText" uuid="b86fc33a-f472-4df7-a1bd-45b0140c8b41" x="49" y="10" width="57" height="20">
 			<text><![CDATA[SubTotal:]]></text>
 		</element>
@@ -210,5 +216,141 @@
 		<element kind="textField" uuid="79175407-7ae6-4295-b33e-74b7642037b4" x="110" y="100" width="50" height="20">
 			<expression><![CDATA[$P{pendiente}]]></expression>
 		</element>
+
+<!-- ================================================== -->
+        <!-- SEGURO CLARITY -->
+        <!-- ================================================== -->
+
+        <element kind="frame"
+                 uuid="f4a7d8e1-6b42-4a93-9c21-7e8b5d2f0146"
+                 x="5"
+                 y="130"
+                 width="180"
+                 height="110">
+
+            <printWhenExpression><![CDATA[$P{tiene_seguro}]]></printWhenExpression>
+
+            <!-- Separador -->
+
+            <element kind="line"
+                     uuid="a4e8c2f1-3d75-4b91-8e62-5c7a1d9f2048"
+                     x="0"
+                     y="0"
+                     width="180"
+                     height="1">
+
+                <pen lineStyle="Dashed"/>
+
+            </element>
+
+            <!-- Titulo -->
+
+            <element kind="staticText"
+                     uuid="b7c1e4a9-5f32-4d86-9a71-2e8c6f0d3154"
+                     x="0"
+                     y="8"
+                     width="180"
+                     height="18"
+                     hTextAlign="Center">
+
+                <text><![CDATA[SEGURO CLARITY]]></text>
+
+            </element>
+
+            <!-- Nombre -->
+
+            <element kind="textField"
+                     uuid="c8d2f5b0-6a43-4e97-8b21-3f9c7d1e5265"
+                     x="5"
+                     y="28"
+                     width="175"
+                     height="18">
+
+                <expression><![CDATA[$P{seguro_nombre}]]></expression>
+
+            </element>
+
+            <!-- Cobertura -->
+
+            <element kind="staticText"
+                     uuid="d9e3a6c1-7b54-4f08-9c32-4a0d8e2f6376"
+                     x="5"
+                     y="47"
+                     width="100"
+                     height="18">
+
+                <text><![CDATA[Cobertura:]]></text>
+
+            </element>
+
+            <element kind="textField"
+                     uuid="e1f4b7d2-8c65-4091-a743-5b1e9d3f7482"
+                     x="110"
+                     y="47"
+                     width="65"
+                     height="18"
+                     hTextAlign="Right">
+
+                <expression><![CDATA[
+                    String.format("%.0f%%", $P{seguro_porcentaje})
+                ]]></expression>
+
+            </element>
+
+            <!-- Monto cubierto -->
+
+            <element kind="staticText"
+                     uuid="f2a5c8e3-9d76-4102-b854-6c2f0e4a8593"
+                     x="5"
+                     y="66"
+                     width="100"
+                     height="18">
+
+                <text><![CDATA[Monto cubierto:]]></text>
+
+            </element>
+
+            <element kind="textField"
+                     uuid="a3b6d9f4-0e87-4213-c965-7d3f1a5b9604"
+                     x="110"
+                     y="66"
+                     width="65"
+                     height="18"
+                     hTextAlign="Right">
+
+                <expression><![CDATA[
+                    String.format("$%,.2f", $P{seguro_cobertura})
+                ]]></expression>
+
+            </element>
+
+            <!-- Cliente paga -->
+
+            <element kind="staticText"
+                     uuid="b4c7e0a5-1f98-4326-d076-8e4a2b6c1075"
+                     x="5"
+                     y="85"
+                     width="100"
+                     height="18">
+
+                <text><![CDATA[Cliente paga:]]></text>
+
+            </element>
+
+            <element kind="textField"
+                     uuid="c5d8f1b6-2a09-4437-e187-9f5b3c7d2186"
+                     x="110"
+                     y="85"
+                     width="65"
+                     height="18"
+                     hTextAlign="Right">
+
+                <expression><![CDATA[
+                    String.format("$%,.2f", $P{seguro_cliente})
+                ]]></expression>
+
+            </element>
+</element>
+
 	</columnFooter>
 </jasperReport>
