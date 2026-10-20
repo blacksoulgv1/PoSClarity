@@ -1,158 +1,298 @@
+
 package com.gerardgv.posclarity.controllers;
 
-//Librerias Java
+import com.gerardgv.posclarity.utils.ViewInf;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.HashMap;
 import java.util.Map;
-import com.gerardgv.posclarity.utils.ViewInf;
-
-//Librerias Java Fx
+import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 public class MainController implements Initializable {
-    
-    //guardar vistas
-    private Map<String,ViewInf> Showviews= new HashMap<>();
 
-    @FXML
-    private StackPane stackContent;
- 
+    private final Map<String, ViewInf> showViews = new HashMap<>();
+
+    @FXML private StackPane stackContent;
+    @FXML private VBox sideMenu;
+    @FXML private HBox brandContainer;
+    @FXML private javafx.scene.control.ScrollPane sideMenuScroll;
+    @FXML private javafx.scene.image.ImageView brandLogo;
+
+    @FXML private Label currentViewLabel;
+    @FXML private Label connectionStatusLabel;
+    @FXML private Label branchLabel;
+    @FXML private MenuButton userMenuButton;
+
+    @FXML private Button btnVentas;
+    @FXML private Button btnPendientes;
+    @FXML private Button btnGarantias;
+    @FXML private Button btnProductos;
+    @FXML private Button btnTraspasos;
+    @FXML private Button btnDescuentos;
+    @FXML private Button btnClientes;
+    @FXML private Button btnSucursales;
+    @FXML private Button btnColaboradores;
+    @FXML private Button btnReportes;
+
+    private boolean menuCollapsed = false;
+    private Button activeButton;
+
+    private final Map<Button, String> buttonLabels = new HashMap<>();
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-         // Metodo para iniciar la ventana de ventas al abrir
-        viewVista("Saleview");
-    }    
+        registrarEtiquetas();
 
-     // Metodo para el llamado de ventanas.
-    private void viewVista(String vista) {
-        
-        try{
-            
-            //Si la Vista ya Fue Cargada se Reutiliza.
-            if (Showviews.containsKey(vista)){
-                stackContent.getChildren().setAll(
-                        Showviews.get(vista).getView()
+        // Estos datos se conectarán con la sesión y la API
+        // cuando implementemos la autenticación.
+        connectionStatusLabel.setText("Estado por verificar");
+        branchLabel.setText("Sin verificar");
+        userMenuButton.setText("Sin sesión");
+
+        viewVista("Saleview", "Ventas", btnVentas);
+    }
+
+    private void registrarEtiquetas() {
+        buttonLabels.put(btnVentas, "Ventas");
+        buttonLabels.put(btnPendientes, "Ventas Pendientes");
+        buttonLabels.put(btnGarantias, "Garantías");
+        buttonLabels.put(btnProductos, "Productos");
+        buttonLabels.put(btnTraspasos, "Traspasos");
+        buttonLabels.put(btnDescuentos, "Descuentos");
+        buttonLabels.put(btnClientes, "Clientes");
+        buttonLabels.put(btnSucursales, "Sucursales");
+        buttonLabels.put(btnColaboradores, "Colaboradores");
+        buttonLabels.put(btnReportes, "Reportes");
+
+        buttonLabels.forEach((button, label) ->
+                button.setTooltip(new Tooltip(label)));
+    }
+
+    @FXML
+    private void toggleMenu() {
+        menuCollapsed = !menuCollapsed;
+
+        if (menuCollapsed) {
+            sideMenuScroll.getStyleClass().add("collapsed");
+            sideMenu.getStyleClass().add("collapsed");
+        } else {
+            sideMenuScroll.getStyleClass().remove("collapsed");
+            sideMenu.getStyleClass().remove("collapsed");
+        }
+
+        for (Map.Entry<Button, String> entry : buttonLabels.entrySet()) {
+            Button button = entry.getKey();
+            String label = entry.getValue();
+
+            button.setText(menuCollapsed ? "" : label);
+            button.setTooltip(new Tooltip(label));
+            button.setMaxWidth(Double.MAX_VALUE);
+        }
+
+        sideMenu.getChildren().stream()
+                .filter(node -> node instanceof Label)
+                .map(node -> (Label) node)
+                .filter(label -> label.getStyleClass().contains("menu-section"))
+                .forEach(label -> {
+                    label.setVisible(!menuCollapsed);
+                    label.setManaged(!menuCollapsed);
+                });
+
+        if (brandLogo != null) {
+            brandLogo.setVisible(!menuCollapsed);
+            brandLogo.setManaged(!menuCollapsed);
+        }
+
+        sideMenu.getChildren().stream()
+                .filter(node -> node instanceof Label)
+                .map(node -> (Label) node)
+                .filter(label -> label.getStyleClass().contains("brand-title"))
+                .forEach(label -> {
+                    label.setVisible(!menuCollapsed);
+                    label.setManaged(!menuCollapsed);
+                });
+
+        if (brandContainer != null) {
+            brandContainer.setAlignment(
+                    menuCollapsed ? Pos.CENTER : Pos.CENTER
+            );
+        }
+    }
+
+    private void viewVista(String vista, String titulo, Button button) {
+        try {
+            ViewInf cachedView = showViews.get(vista);
+            Parent root;
+
+            if (cachedView != null) {
+                root = cachedView.getView();
+            } else {
+                URL resource = getClass().getResource(
+                        "/com/gerardgv/posclarity/views/" + vista + ".fxml"
                 );
-                return;
+
+                if (resource == null) {
+                    throw new IOException(
+                            "No se encontró el archivo FXML de la vista: " + vista
+                    );
+                }
+
+                FXMLLoader loader = new FXMLLoader(resource);
+                root = loader.load();
+
+                Object controller = loader.getController();
+
+                URL css = getClass().getResource(
+                        "/com/gerardgv/posclarity/css/main-layout.css"
+                );
+
+                if (css != null) {
+                    String cssPath = css.toExternalForm();
+
+                    if (!root.getStylesheets().contains(cssPath)) {
+                        root.getStylesheets().add(cssPath);
+                    }
+                }
+
+                showViews.put(vista, new ViewInf(root, controller));
             }
-            
-            //La Vista Se Crea Por Primera Vez.
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/com/gerardgv/posclarity/views/" + vista + ".fxml"));
-            
-            Parent root = loader.load();
-            Object controller = loader.getController();
-            
-            //Limpiar Estilos
-            stackContent.getStylesheets().clear();
-            
-            // se Agrega el Css Correctamente
-            root.getStylesheets().add(getClass().getResource("/com/gerardgv/posclarity/css/main-layout.css").toExternalForm());
-            
-            //Se Guarda Vista & Controlador.
-            Showviews.put(vista, new ViewInf(root, controller));
+
             mostrarVista(root);
-        }catch(IOException e){
-            System.out.println("Error al Cargar la Vista:" + vista);
+            currentViewLabel.setText(titulo);
+            actualizarBotonActivo(button);
+
+        } catch (IOException | RuntimeException e) {
+            System.err.println("Error al cargar la vista: " + vista);
             e.printStackTrace();
-        }       
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error de navegación");
+            alert.setHeaderText("No se pudo abrir el módulo");
+            alert.setContentText(
+                    "Ocurrió un problema al abrir \"" + titulo
+                    + "\". Consulta el registro de errores para más detalles."
+            );
+            alert.showAndWait();
+        }
     }
-    
+
     private void mostrarVista(Parent root) {
-        
-        StackPane.setAlignment(root, javafx.geometry.Pos.TOP_LEFT);
+        StackPane.setAlignment(root, Pos.TOP_LEFT);
         stackContent.getChildren().setAll(root);
-        System.out.println("Stack width: " + stackContent.getWidth());
-System.out.println("Stack height: " + stackContent.getHeight());
-System.out.println("View width: " + root.getBoundsInParent().getWidth());
-System.out.println("View height: " + root.getBoundsInParent().getHeight());
-    }
-    // Funcionamiento de botonos para ventanas
-    
-    @FXML
-    private void abrirNuevaVenta(){
-        viewVista("Saleview");
-    }
-    
-     @FXML
-    private void AbrirGarantias(){
-        viewVista("Garantias");
-    }
-    
-    @FXML
-    private void abrirPendintes(){
-        viewVista("Ventas_pendientes");
-    }
-    
-    @FXML
-    private void abrirEntregados(){
-        viewVista("ventas_entregadas");
-    }
-    
-    @FXML
-    private void abrirProductos(){
-        
-        /*Optional<Empleados> autorizado =
-        AuthorizationDialog.solicitarGerente();
-
-        if (autorizado.isEmpty()) {
-            return;
-        }*/
-        
-        viewVista("Productsview");
-    }
-    
-    @FXML
-    private void abrirClientes(){
-        viewVista("Clientsview");
-    }
-    
-    @FXML
-    private void abrirSucursales(){
-        
-        /*Optional<Empleados> autorizado =
-        AuthorizationDialog.solicitarGerente();
-
-        if (autorizado.isEmpty()) {
-            return;
-        }*/
-        
-        viewVista("Branch");
-    }
-    @FXML
-    private void abrirTraspaso(){
-        viewVista("Transfer");
-    }
-    
-    @FXML
-    private void abrirDescuento(){
-        /*Optional<Empleados> autorizado =
-        AuthorizationDialog.solicitarGerente();
-
-        if (autorizado.isEmpty()) {
-            return;
-        }*/
-        
-        viewVista("Discount");
-    }
-    @FXML
-    private void abrirAbono(){
-        viewVista("Pending");
-    }
-    
-    @FXML
-    private void abrirEmpleados(){
-        viewVista("Sellers");
-    }
-    @FXML
-    private void abrirReportes(){
-        viewVista("Reports");
     }
 
+    private void actualizarBotonActivo(Button button) {
+        if (activeButton != null) {
+            activeButton.getStyleClass().remove("menu-button-active");
+        }
+
+        activeButton = button;
+
+        if (activeButton != null
+                && !activeButton.getStyleClass().contains("menu-button-active")) {
+            activeButton.getStyleClass().add("menu-button-active");
+        }
+    }
+
+    @FXML
+    private void abrirNuevaVenta() {
+        viewVista("Saleview", "Ventas", btnVentas);
+    }
+
+    @FXML
+    private void AbrirGarantias() {
+        viewVista("Garantias", "Garantías", btnGarantias);
+    }
+
+    @FXML
+    private void abrirPendintes() {
+        viewVista("Ventas_pendientes", "Ventas pendientes", btnPendientes);
+    }
+
+    @FXML
+    private void abrirEntregados() {
+        viewVista("ventas_entregadas", "Ventas entregadas", btnPendientes);
+    }
+
+    @FXML
+    private void abrirProductos() {
+        viewVista("Productsview", "Productos", btnProductos);
+    }
+
+    @FXML
+    private void abrirClientes() {
+        viewVista("Clientsview", "Clientes", btnClientes);
+    }
+
+    @FXML
+    private void abrirSucursales() {
+        viewVista("Branch", "Sucursales", btnSucursales);
+    }
+
+    @FXML
+    private void abrirTraspaso() {
+        viewVista("Transfer", "Traspasos", btnTraspasos);
+    }
+
+    @FXML
+    private void abrirDescuento() {
+        viewVista("Discount", "Descuentos", btnDescuentos);
+    }
+
+    @FXML
+    private void abrirAbono() {
+        viewVista("Pending", "Ventas pendientes", btnPendientes);
+    }
+
+    @FXML
+    private void abrirEmpleados() {
+        viewVista("Sellers", "Colaboradores", btnColaboradores);
+    }
+
+    @FXML
+    private void abrirReportes() {
+        viewVista("Reports", "Reportes", btnReportes);
+    }
+
+    @FXML
+    private void abrirPerfil() {
+        mostrarAvisoSesion(
+                "El perfil estará disponible cuando integremos el inicio de sesión."
+        );
+    }
+
+    @FXML
+    private void cambiarContrasena() {
+        mostrarAvisoSesion(
+                "El cambio de contraseña se habilitará con la autenticación."
+        );
+    }
+
+    @FXML
+    private void cerrarSesion() {
+        mostrarAvisoSesion(
+                "El cierre de sesión se implementará al conectar la autenticación."
+        );
+    }
+
+    private void mostrarAvisoSesion(String mensaje) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Cuenta de usuario");
+        alert.setHeaderText(null);
+        alert.setContentText(mensaje);
+        alert.showAndWait();
+    }
 }

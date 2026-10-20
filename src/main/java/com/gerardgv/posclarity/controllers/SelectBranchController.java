@@ -16,13 +16,13 @@ import javafx.scene.control.ListCell;
 import javafx.stage.Stage;
 
 public class SelectBranchController implements Initializable {
-    
+
     @FXML private ComboBox<Branch> cbBranch;
     private final BranchApiClient branchApiClient = new BranchApiClient();
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         try {
 
         cbBranch.setItems(
@@ -44,7 +44,7 @@ public class SelectBranchController implements Initializable {
                 + e.getMessage()
         );
     }
-        
+
         cbBranch.setCellFactory(lv -> new ListCell<>(){
         @Override
         protected void updateItem(Branch item, boolean empty){
@@ -58,35 +58,36 @@ public class SelectBranchController implements Initializable {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : item.getName());
             }
-        });        
+        });
     }
 
     @FXML
     private void handleSeleccionar(){
-        
+
         Branch s = cbBranch.getValue();
-        
+
         if(s == null){
             mostrarError("Selecciona una Sucursal");
             return;
         }
-        
+
         Configuracion.guardarSucursal(s.getId());
         Session.setSucursal(s);
-        
+
         try{
-            App.setRoot("main");
+            App.setRoot("Login");
         } catch(Exception e){
             e.printStackTrace();
-        }               
+            mostrarError("No se pudo abrir la pantalla de inicio de sesión.");
+        }
 
-    }   
-    
+    }
+
     private void mostrarError(String mensaje){
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
     }
-    
+
 }

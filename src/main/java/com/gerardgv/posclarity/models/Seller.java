@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Seller {
-    
+
     @JsonAlias({"idVendedor", "id_vendedor"})
     private int id;
     @JsonAlias("codigo")
@@ -74,7 +74,7 @@ public class Seller {
     public Boolean getActive() {
         return active;
     }
-    
+
     public void setActive(boolean active) {
         this.active = active;
     }
@@ -82,7 +82,4 @@ public class Seller {
     public boolean isActive() {
         return active;
     }
-   
-    
-    
 }

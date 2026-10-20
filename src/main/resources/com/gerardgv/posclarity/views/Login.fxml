@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane xmlns="http://javafx.com/javafx/21"
+           xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="com.gerardgv.posclarity.controllers.LoginController"
+           styleClass="login-root">
+
+    <VBox alignment="CENTER" maxWidth="430"
+          styleClass="login-card" spacing="0">
+
+        <padding>
+            <Insets top="34" right="38" bottom="30" left="38"/>
+        </padding>
+
+        <!-- Identidad de Ópticas Clarity -->
+        <VBox alignment="CENTER" spacing="8"
+              styleClass="login-brand">
+
+            <StackPane prefWidth="66" prefHeight="66"
+                       minWidth="66" minHeight="66"
+                       maxWidth="66" maxHeight="66"
+                       styleClass="login-logo">
+                <Label text="OC" styleClass="login-logo-text"/>
+            </StackPane>
+
+            <Label text="ÓPTICAS CLARITY"
+                   styleClass="login-brand-title"/>
+
+            <Label text="SISTEMA PUNTO DE VENTA"
+                   styleClass="login-brand-subtitle"/>
+        </VBox>
+
+        <Separator styleClass="login-separator"/>
+
+        <!-- Encabezado -->
+        <VBox spacing="7" styleClass="login-heading">
+            <Label text="Bienvenido"
+                   styleClass="login-title"/>
+
+            <Label text="Ingresa tus credenciales para continuar."
+                   wrapText="true"
+                   styleClass="login-description"/>
+        </VBox>
+
+        <!-- Formulario -->
+        <VBox spacing="8" styleClass="login-form">
+
+            <Label text="Código de empleado"
+                   styleClass="login-label"/>
+
+            <TextField fx:id="txtCodigo"
+                       promptText="Ingresa tu código"
+                       styleClass="login-input"
+                       maxWidth="Infinity"
+                       onAction="#enfocarPassword"/>
+
+            <Label text="Contraseña"
+                   styleClass="login-label login-password-label"/>
+
+            <StackPane styleClass="login-password-container">
+
+                <PasswordField fx:id="txtPassword"
+                               promptText="Ingresa tu contraseña"
+                               styleClass="login-input"
+                               maxWidth="Infinity"
+                               onAction="#handleLogin"/>
+
+                <TextField fx:id="txtPasswordVisible"
+                           promptText="Ingresa tu contraseña"
+                           styleClass="login-input"
+                           maxWidth="Infinity"
+                           visible="false"
+                           managed="false"
+                           onAction="#handleLogin"/>
+
+                <Button fx:id="btnMostrarPassword"
+                        text="Mostrar"
+                        onAction="#togglePassword"
+                        styleClass="login-password-toggle"
+                        StackPane.alignment="CENTER_RIGHT">
+                    <StackPane.margin>
+                        <Insets right="9"/>
+                    </StackPane.margin>
+                </Button>
+            </StackPane>
+
+            <Label fx:id="lblError"
+                   text=""
+                   wrapText="true"
+                   managed="false"
+                   visible="false"
+                   styleClass="login-error"/>
+
+            <Button fx:id="btnLogin"
+                    text="Iniciar sesión"
+                    onAction="#handleLogin"
+                    maxWidth="Infinity"
+                    styleClass="login-button"/>
+
+        </VBox>
+
+        <Region VBox.vgrow="ALWAYS" minHeight="22"/>
+
+        <VBox alignment="CENTER" spacing="5"
+              styleClass="login-footer">
+            <Label text="Acceso exclusivo para personal autorizado"
+                   styleClass="login-footer-text"/>
+
+            <Label text="Ópticas Clarity · Punto de Venta"
+                   styleClass="login-footer-secondary"/>
+        </VBox>
+
+    </VBox>
+
+</StackPane>

@@ -4,7 +4,7 @@ import com.gerardgv.posclarity.models.Role;
 import com.gerardgv.posclarity.models.Seller;
 
 public class SellerResponse {
-    
+
     private Integer id;
     private Integer code;
     private String name;
@@ -13,18 +13,18 @@ public class SellerResponse {
 
     public SellerResponse() {
     }
-    
+
     public Seller toSeller(){
-        
+
         Seller seller = new Seller();
-        
+
         seller.setId(id);
         seller.setCode(code);
         seller.setName(name);
         seller.setRole(role);
         seller.setActive(active);
         return seller;
-        
+
     }
 
     public SellerResponse(Integer id, Integer code, String name, Role role, Boolean active) {
@@ -74,7 +74,4 @@ public class SellerResponse {
     public void setActive(Boolean active) {
         this.active = active;
     }
-    
-    
-    
 }

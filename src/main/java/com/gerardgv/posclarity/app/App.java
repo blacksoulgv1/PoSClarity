@@ -21,49 +21,49 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        
+
         Parent root;
         boolean primeraInstalacion = false;
-        
+
         //PRIMERA INSTALACION
         if(!Instalacion.existeSucursal()){
             primeraInstalacion = true;
             root = loadFXML("ConfiguracionInicial");
-            
+
         } else {
-            
-            if(!Configuracion.existeSucursal()){                
-                root = loadFXML("SelectBranch");                
-            } else {                
+
+            if(!Configuracion.existeSucursal()){
+                root = loadFXML("SelectBranch");
+            } else {
                 Integer idSucursal = Configuracion.obtenerSucursal();
-                Branch sucursal;                
-                try {                    
-                    sucursal = branchApiClient.getById(idSucursal);                    
-                } catch (InterruptedException e){                    
+                Branch sucursal;
+                try {
+                    sucursal = branchApiClient.getById(idSucursal);
+                } catch (InterruptedException e){
                     Thread.currentThread().interrupt();
-                    sucursal = null;                    
-                } catch (IOException e){                    
+                    sucursal = null;
+                } catch (IOException e){
                     e.printStackTrace();
-                    sucursal = null;                    
+                    sucursal = null;
                 }
-                
+
                     if(sucursal == null){
                         Configuracion.guardarSucursal(-1);
                         root = loadFXML("SelectBranch");
                     } else {
                         Session.setSucursal(sucursal);
-                        root = loadFXML("main"); 
+                        root = loadFXML("Login");
                     }
             }
-        }       
-        
+        }
+
         scene = new Scene(root);
         scene.getStylesheets().add(
             App.class.getResource(
                 "/com/gerardgv/posclarity/css/theme/PosTheme.css"
                 ).toExternalForm());
         stage.setScene(scene);
-        
+
         if(primeraInstalacion){
             stage.setWidth(500);
             stage.setHeight(450);
@@ -71,11 +71,11 @@ public class App extends Application {
             stage.show();
         }else{
             configurarVentanaPrincipal(stage);
-        }       
+        }
     }
-    
+
     private static void configurarVentanaPrincipal(Stage stage){
-        
+
      // Área disponible del escritorio, sin cubrir la barra de tareas
     Rectangle2D visualBounds = Screen.getPrimary().getVisualBounds();
 
@@ -89,18 +89,18 @@ public class App extends Application {
     stage.show();
 
     // Bloqueamos el redimensionamiento después de establecer el tamaño
-    stage.setResizable(false); 
+    stage.setResizable(false);
     }
 
     public static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
-        
+
         Stage stage = (Stage) scene.getWindow();
-        
-        if(fxml.equals("main")){            
+
+        if(fxml.equals("main")){
             configurarVentanaPrincipal(stage);
         }
-        
+
     }
 
     private static Parent loadFXML(String fxml) throws IOException {
@@ -112,7 +112,7 @@ public class App extends Application {
     }
 
     public static void main(String[] args) {
-                
+
         launch();
     }
 

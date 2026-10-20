@@ -2,6 +2,7 @@ package com.gerardgv.posclarity.api;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.*;
+import com.gerardgv.posclarity.utils.AuthSession;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.*;
@@ -172,10 +173,18 @@ public abstract class BaseApiClient {
      */
     private HttpRequest.Builder baseRequest(String url) {
 
-        return HttpRequest.newBuilder()
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json");
+
+        String token = AuthSession.getToken();
+
+        if(token != null && !token.isBlank()){
+            builder.header("Authorization", "Bearer " + token);
+        }
+
+        return builder;
     }
 
     /*
@@ -241,7 +250,7 @@ public abstract class BaseApiClient {
 
     try {
 
-        if(response.body() != null 
+        if(response.body() != null
                 && !response.body().isBlank()){
 
             var json = objectMapper.readTree(

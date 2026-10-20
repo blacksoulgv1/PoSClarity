@@ -4,7 +4,7 @@ import com.gerardgv.posclarity.api.dto.seller.SellerResponse;
 
 
 public class LoginResponse {
-    
+
     private SellerResponse seller;
     private String token;
 
@@ -31,8 +31,4 @@ public class LoginResponse {
     public void setToken(String token) {
         this.token = token;
     }
-    
-    
-
-    
 }
