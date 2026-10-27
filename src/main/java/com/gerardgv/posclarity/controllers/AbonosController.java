@@ -11,6 +11,7 @@ import java.net.URL;
 import java.text.NumberFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import javafx.beans.property.*;
 import javafx.collections.*;
@@ -35,7 +36,7 @@ public class AbonosController implements Initializable {
     @FXML private TextField txtMonto;
     @FXML private ComboBox<String> cbMetodo;
     @FXML private Button btnAbonar;
-    
+    @FXML private Button btnEntregar;    
 
     @FXML private TableView<Payment> tblPagos;
     @FXML private TableColumn<Payment,String> colFecha;
@@ -270,19 +271,106 @@ public class AbonosController implements Initializable {
     }
 
     private void actualizarDisponibilidadAbono() {
-        
-        boolean liquidada = sale.getRemaining() <= 0.009 || 
-                "completa".equalsIgnoreCase(sale.getPaymentStatus());
-        
+
+        if (sale == null) {
+            return;
+        }
+
+        boolean liquidada =
+            sale.getRemaining() <= 0.009
+            || "COMPLETA".equalsIgnoreCase(
+                    sale.getPaymentStatus()
+            );
+
+        boolean entregada =
+            "ENTREGADO".equalsIgnoreCase(
+                    sale.getWorkStatus()
+            );
+
         txtMonto.setDisable(liquidada);
         cbMetodo.setDisable(liquidada);
         btnAbonar.setDisable(liquidada);
-        
-        if(liquidada){
+
+        if (liquidada) {
             btnAbonar.setText("Venta Liquidada");
         } else {
             btnAbonar.setText("Registrar Abono");
-        }        
+        }
+
+        // Botón de entrega
+        boolean mostrarEntrega = liquidada && !entregada;
+        btnEntregar.setVisible(mostrarEntrega);
+        btnEntregar.setManaged(mostrarEntrega);
+        btnEntregar.setDisable(!mostrarEntrega);
+    }
+    
+    @FXML
+    private void handleEntregar() {
+
+        if (sale == null) {
+            mostrarError("No se encontró la venta seleccionada.");
+            return;
+        }
+
+        if (!"COMPLETA".equalsIgnoreCase(sale.getPaymentStatus())) {
+            mostrarError(
+                "No puedes entregar una venta que todavía tiene saldo pendiente."
+            );
+            return;
+        }
+
+        if ("ENTREGADO".equalsIgnoreCase(sale.getWorkStatus())) {
+            mostrarInfo("La venta ya fue entregada.");
+            actualizarDisponibilidadAbono();
+            return;
+        }
+
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+
+        confirmacion.setTitle("Confirmar entrega");
+        confirmacion.setHeaderText("¿Deseas entregar el producto?");
+        confirmacion.setContentText(
+            "Venta: " + sale.getFolio()
+            + "\nCliente: "
+            + (sale.getClient() == null
+                    ? "Cliente no disponible"
+                    : sale.getClient().getName())
+        );
+
+        Optional<ButtonType> respuesta = confirmacion.showAndWait();
+
+        if (respuesta.isEmpty()
+            || respuesta.get() != ButtonType.OK) {
+            return;
+        }
+
+        try {
+
+            boolean resultado = saleApiClient.deliverSale(sale.getId());
+
+            if (!resultado) {
+                mostrarError("No se pudo entregar la venta.");
+                return;
+            }
+
+            sale = saleApiClient.getById(sale.getId());
+
+            EventBus.publishVenta(sale.getId());
+
+            actualizarEstadoVisual();
+            actualizarDisponibilidadAbono();
+
+            mostrarExito("Venta entregada correctamente.");
+
+        } catch (IOException | InterruptedException ex) {
+
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+
+            ex.printStackTrace();
+            mostrarError("No se pudo entregar la venta.");
+        }
     }
 
 }

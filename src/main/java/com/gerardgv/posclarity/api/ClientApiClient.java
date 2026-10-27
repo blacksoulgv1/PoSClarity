@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
 
 public class ClientApiClient extends BaseApiClient {
     
@@ -73,5 +74,32 @@ public class ClientApiClient extends BaseApiClient {
                 request,
                 Clients.class
         );
+    }
+    
+    /*
+    * CONSULTAR CLIENTES POR PÁGINA
+    */
+    public PageResponse<Clients> getPage(int page, int size)
+        throws IOException, InterruptedException {
+
+        String url = BASE_URL + "/page?page=" + page + "&size=" + size;
+
+        return getPage(url, Clients.class);
+    }
+
+    /*
+    * BUSCAR CLIENTES CON PAGINACIÓN
+    */
+    public PageResponse<Clients> searchPage(
+        String text, int page, int size)
+        throws IOException, InterruptedException {
+
+        String query = URLEncoder.encode(
+            text, StandardCharsets.UTF_8);
+
+        String url = BASE_URL + "/search/page?q=" + query
+            + "&page=" + page + "&size=" + size;
+
+        return getPage(url, Clients.class);
     }
 }

@@ -1,27 +1,128 @@
+
+/* =========================================
+   VENTAS - DISTRIBUCIÓN PRINCIPAL
+   ========================================= */
+
 .sale-root {
     -fx-background-color: -pos-bg;
-    -fx-padding: 18;
+    -fx-padding: 8;
     -fx-font-family: "Segoe UI";
 }
 
+/* Distribución horizontal */
 .sale-layout {
     -fx-background-color: -pos-bg;
+    -fx-alignment: top-left;
+    -fx-spacing: 8;
+    -fx-fill-height: true;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
 }
 
-.sale-header-card {
-    -fx-padding: 14 18;
+/* Columna de trabajo */
+.sale-main-column {
+    -fx-min-width: 0;
+    -fx-max-width: Infinity;
+    -fx-spacing: 12;
 }
 
+/* Tarjetas principales */
+.sale-header-card,
+.sale-rx-card,
+.sale-products-card {
+    -fx-min-width: 0;
+    -fx-max-width: Infinity;
+}
+
+.sale-header-card,
 .sale-rx-card {
-    -fx-padding: 14 18;
+    -fx-padding: 10 12;
 }
 
 .sale-products-card {
-    -fx-padding: 16 18;
+    -fx-padding: 10 12;
+    -fx-min-width: 0;
+    -fx-min-height: 0;
 }
 
+/* Tabla: crece dentro de la tarjeta de productos */
+.sale-products-card .table-view {
+    -fx-min-width: 0;
+    -fx-max-width: Infinity;
+    -fx-min-height: 60;
+    -fx-pref-height: 160;
+}
+
+/* Resumen: ancho controlado */
+.sale-summary-scroll {
+    -fx-min-width: 260;
+    -fx-pref-width: 310;
+    -fx-max-width: 320;
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.sale-summary-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.sale-summary-scroll .pos-summary-card {
+    -fx-min-width: 0;
+    -fx-pref-width: 300;
+    -fx-max-width: Infinity;
+}
+
+/* Scroll transparente, por si otra vista todavía lo utiliza */
+.sale-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.sale-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* Encabezados de graduación */
 .rx-header {
     -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-text-fill: -pos-text;
+}
+
+/* Campos e inputs */
+.sale-root .text-field,
+.sale-root .combo-box,
+.sale-root .date-picker {
+    -fx-max-width: Infinity;
+}
+
+.sale-root .input-icon,
+.sale-root .clarity-search {
+    -fx-min-width: 0;
+    -fx-max-width: Infinity;
+}
+
+/* Modo compacto opcional */
+.sale-root.compact {
+    -fx-padding: 5;
+}
+
+.sale-root.compact .sale-layout {
+    -fx-spacing: 6;
+}
+
+.sale-root.compact .sale-header-card,
+.sale-root.compact .sale-rx-card,
+.sale-root.compact .sale-products-card {
+    -fx-padding: 7 9;
+}
+
+.sale-root.compact .sale-summary-scroll {
+    -fx-min-width: 250;
+    -fx-pref-width: 270;
+    -fx-max-width: 280;
 }

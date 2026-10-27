@@ -2,8 +2,10 @@ package com.gerardgv.posclarity.controllers;
 
 import com.gerardgv.posclarity.Ui.*;
 import com.gerardgv.posclarity.api.SaleApiClient;
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
 import com.gerardgv.posclarity.models.*;
 import com.gerardgv.posclarity.utils.*;
+
 import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -12,115 +14,179 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javafx.beans.property.*;
-import javafx.collections.*;
-import javafx.collections.transformation.FilteredList;
-import javafx.fxml.*;
-import javafx.scene.*;
+
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class PendingController implements Initializable {
-    
+
+    // =========================================================
+    // COMPONENTES FXML
+    // =========================================================
+
     @FXML private TextField txtBuscarVenta;
+
     @FXML private Label lblTrabajosRealizar;
     @FXML private Label lblTrabajosEntregar;
     @FXML private Label lblSaldoRealizar;
     @FXML private Label lblSaldoEntregar;
     @FXML private Label lblTotalRegistros;
-    
-    @FXML private TableView<Sale> tblVentas;
-    @FXML private TableColumn<Sale,String> colFolio;
-    @FXML private TableColumn<Sale,String> colCliente;
-    @FXML private TableColumn<Sale,String> colFecha;
-    @FXML private TableColumn<Sale,Double> colTotal;
-    @FXML private TableColumn<Sale,Double> colPagado;
-    @FXML private TableColumn<Sale,Double> colRestante;
-    @FXML private TableColumn<Sale,String> colEstadoPago;
-    @FXML private TableColumn<Sale,String> colEstadoTrabajo;
-    @FXML private TableColumn<Sale,Void> colAcciones;
-    @FXML private StackPane root;
-    
-    @FXML private PaginationController paginationController;
-    private TablePagination<Sale> tablePagination;
-    
-    private final ObservableList<Sale> listaVentas =
-        FXCollections.observableArrayList();
 
-    private FilteredList<Sale> listaFiltrada;
-    
+    @FXML private TableView<Sale> tblVentas;
+
+    @FXML private TableColumn<Sale, String> colFolio;
+    @FXML private TableColumn<Sale, String> colCliente;
+    @FXML private TableColumn<Sale, String> colFecha;
+    @FXML private TableColumn<Sale, Double> colTotal;
+    @FXML private TableColumn<Sale, Double> colPagado;
+    @FXML private TableColumn<Sale, Double> colRestante;
+    @FXML private TableColumn<Sale, String> colEstadoPago;
+    @FXML private TableColumn<Sale, String> colEstadoTrabajo;
+    @FXML private TableColumn<Sale, Void> colAcciones;
+
+    @FXML private StackPane root;
+
+    // El fx:id del include en el FXML debe seguir siendo "pagination".
+    @FXML private PaginationController paginationController;
+
+    // =========================================================
+    // DATOS Y PAGINACIÓN
+    // =========================================================
 
     private final SaleApiClient saleApiClient = new SaleApiClient();
-    
-    public static final DateTimeFormatter FECHA_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private final ObservableList<Sale> listaVentas =
+            FXCollections.observableArrayList();
+
+    private final PauseTransition debounceBusqueda =
+            new PauseTransition(Duration.millis(300));
+
+    private Task<PageResponse<Sale>> tareaPaginaActual;
+
+    private int versionSolicitud = 0;
+    private long totalRegistros = 0;
+
+    private boolean ignorarCambioPagina = false;
+
+    public static final DateTimeFormatter FECHA_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+    private static final NumberFormat MONEDA =
+            NumberFormat.getCurrencyInstance(new Locale("es", "MX"));
+
+    // =========================================================
+    // INICIALIZACIÓN
+    // =========================================================
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        
+
         configurarTabla();
         configurarAcciones();
         configurarPaginacion();
         configurarBusqueda();
         suscribirEventos();
-        cargarVentasPendientes();    
-    }    
 
-    private void configurarTabla(){
+        cargarVentasPendientes();
+    }
+
+    // =========================================================
+    // CONFIGURACIÓN DE TABLA
+    // =========================================================
+
+    private void configurarTabla() {
 
         PosTable.apply(tblVentas);
+
         tblVentas.setColumnResizePolicy(
-            TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
+                TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN
         );
+
         configurarEstilosFilas();
 
-    // ==============================
-    // DATOS DE LAS COLUMNAS
-    // ==============================
+        // Datos de las columnas.
 
-        colFolio.setCellValueFactory(data -> new SimpleStringProperty(
-                    data.getValue().getFolio()));
+        colFolio.setCellValueFactory(data ->
+                new SimpleStringProperty(
+                        data.getValue().getFolio()
+                )
+        );
+
         colCliente.setCellValueFactory(data ->
-            new SimpleStringProperty(
-                    data.getValue().getClient()== null
-                            ? "Cliente no disponible"
-                            : data.getValue().getClient().getName()));
-        colFecha.setCellValueFactory(data ->
-            new SimpleStringProperty(
-                    data.getValue().getSaleDate() == null
-                            ? "-"
-                            : data.getValue()
-                                    .getSaleDate()
-                                    .format(FECHA_FORMATTER)));
-        colTotal.setCellValueFactory(data ->
-            new SimpleDoubleProperty(
-                    data.getValue().getFinalTotal()).asObject());
-        colPagado.setCellValueFactory(data ->
-            new SimpleDoubleProperty(
-                    data.getValue().getPaid()).asObject());
-        colRestante.setCellValueFactory(data ->
-            new SimpleDoubleProperty(
-                    data.getValue().getRemaining()).asObject());
-        colEstadoPago.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getPaymentStatus()));
-        colEstadoTrabajo.setCellValueFactory(data ->
-            new SimpleStringProperty(data.getValue().getWorkStatus()));
+                new SimpleStringProperty(
+                        data.getValue().getClient() == null
+                                ? "Cliente no disponible"
+                                : data.getValue().getClient().getName()
+                )
+        );
 
-    // ==============================
-    // FORMATO DE LAS COLUMNAS
-    // ==============================
+        colFecha.setCellValueFactory(data ->
+                new SimpleStringProperty(
+                        data.getValue().getSaleDate() == null
+                                ? "-"
+                                : data.getValue()
+                                        .getSaleDate()
+                                        .format(FECHA_FORMATTER)
+                )
+        );
+
+        colTotal.setCellValueFactory(data ->
+                new SimpleDoubleProperty(
+                        data.getValue().getFinalTotal()
+                ).asObject()
+        );
+
+        colPagado.setCellValueFactory(data ->
+                new SimpleDoubleProperty(
+                        data.getValue().getPaid()
+                ).asObject()
+        );
+
+        colRestante.setCellValueFactory(data ->
+                new SimpleDoubleProperty(
+                        data.getValue().getRemaining()
+                ).asObject()
+        );
+
+        colEstadoPago.setCellValueFactory(data ->
+                new SimpleStringProperty(
+                        data.getValue().getPaymentStatus()
+                )
+        );
+
+        colEstadoTrabajo.setCellValueFactory(data ->
+                new SimpleStringProperty(
+                        data.getValue().getWorkStatus()
+                )
+        );
+
+        // Formato de columnas.
 
         PosTable.text(colFolio);
         PosTable.text(colCliente);
         PosTable.text(colFecha);
+
         PosTable.money(colTotal);
         PosTable.money(colPagado);
         PosTable.money(colRestante);
+
         configurarBadgesEstado();
-        
-        // ==============================
-        // ALINEACIÓN
-        // ==============================
+
+        // Alineación.
 
         colFolio.setStyle("-fx-alignment: CENTER;");
         colEstadoPago.setStyle("-fx-alignment: CENTER;");
@@ -132,72 +198,215 @@ public class PendingController implements Initializable {
         colEstadoTrabajo.getStyleClass().add("center-column");
         colAcciones.getStyleClass().add("center-column");
 
-    // ==============================
-    // COMPORTAMIENTO GENERAL
-    // ==============================
+        // Placeholder.
 
         PosTable.placeholder(
-            tblVentas,
-            "No hay ventas pendientes",
-            "Las ventas activas aparecerán aquí",
-            "fas-clock"
+                tblVentas,
+                "No hay ventas pendientes",
+                "Las ventas activas aparecerán aquí",
+                "fas-clock"
         );
     }
 
-    private void cargarVentasPendientes() {
-                
-        try {
+    // =========================================================
+    // PAGINACIÓN DEL SERVIDOR
+    // =========================================================
 
-            List<Sale> trabajosPorRealizar =
-                saleApiClient.getSalesToDo();
+    private void configurarPaginacion() {
 
-            List<Sale> trabajosPorEntregar =
-                saleApiClient.getSalesToDeliver();
+        tblVentas.setItems(listaVentas);
 
-            listaVentas.clear();
-            listaVentas.addAll(trabajosPorRealizar);
-            listaVentas.addAll(trabajosPorEntregar);
-            actualizarContador();
-            cargarResumen();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-            mostrarError("No se pudieron cargar las ventas desde el API.");
-        }
+        paginationController.setItemsPerPage(6);
+        paginationController.setShowItemsPerPageSelector(false);
+
+        paginationController.setOnPageChange(pagina -> {
+
+            if (!ignorarCambioPagina) {
+                cargarPaginaPendiente(false);
+            }
+        });
     }
 
     private void configurarBusqueda() {
-        
-        listaFiltrada = SearchUtils.setupSearch(
-            txtBuscarVenta,
-            listaVentas,
-            Sale::getFolio,
-            sale -> sale.getClient() != null
-                    ? sale.getClient().getName()
-                    : null
+
+        debounceBusqueda.setOnFinished(event -> {
+
+            reiniciarPagina();
+            cargarPaginaPendiente(true);
+        });
+
+        txtBuscarVenta.textProperty().addListener(
+                (observable, anterior, actual) -> {
+
+                    debounceBusqueda.stop();
+                    debounceBusqueda.playFromStart();
+                }
         );
-
-        listaFiltrada.addListener(
-            (javafx.collections.ListChangeListener<Sale>) change -> {
-
-                tablePagination.setFilteredItems(
-                        listaFiltrada
-                );
-
-                actualizarContador();
-            }
-        );                
     }
-        
-    private void entregarVenta(Sale sale){
-        
+
+    private void reiniciarPagina() {
+
+        ignorarCambioPagina = true;
+
+        try {
+            paginationController.reset();
+        } finally {
+            ignorarCambioPagina = false;
+        }
+    }
+
+    /**
+     * Consulta una página de ventas pendientes.
+     * La búsqueda y la paginación se ejecutan en el servidor.
+     */
+    private void cargarPaginaPendiente(boolean actualizarResumen) {
+
+        if (tareaPaginaActual != null) {
+            tareaPaginaActual.cancel();
+        }
+
+        final int version = ++versionSolicitud;
+        final int pagina = paginationController.getCurrentPage();
+        final int tamano = paginationController.getItemsPerPage();
+
+        final String filtro = txtBuscarVenta.getText() == null
+                ? ""
+                : txtBuscarVenta.getText().trim();
+
+        Task<PageResponse<Sale>> tarea = new Task<>() {
+
+            @Override
+            protected PageResponse<Sale> call() throws Exception {
+
+                if (filtro.isBlank()) {
+                    return saleApiClient.getPendingPage(
+                            pagina,
+                            tamano
+                    );
+                }
+
+                return saleApiClient.searchPendingPage(
+                        filtro,
+                        pagina,
+                        tamano
+                );
+            }
+        };
+
+        tareaPaginaActual = tarea;
+
+        tarea.setOnSucceeded(event -> {
+
+            // Ignora las respuestas de solicitudes anteriores.
+            if (version != versionSolicitud) {
+                return;
+            }
+
+            PageResponse<Sale> resultado = tarea.getValue();
+
+            if (resultado == null) {
+                mostrarError("El API no devolvió resultados.");
+                return;
+            }
+
+            totalRegistros = resultado.getTotalElements();
+
+            int totalSeguro = (int) Math.min(
+                    totalRegistros,
+                    Integer.MAX_VALUE
+            );
+
+            paginationController.setTotalItems(totalSeguro);
+
+            /*
+             * Si la página actual dejó de existir, vuelve a la
+             * primera página. También contempla cero resultados.
+             */
+            if (pagina > 0 && pagina >= resultado.getTotalPages()) {
+
+                reiniciarPagina();
+                cargarPaginaPendiente(actualizarResumen);
+                return;
+            }
+
+            listaVentas.setAll(
+                    resultado.getContent() == null
+                            ? List.of()
+                            : resultado.getContent()
+            );
+
+            actualizarContador();
+
+            if (actualizarResumen) {
+                cargarResumen();
+            }
+        });
+
+        tarea.setOnFailed(event -> {
+
+            if (version != versionSolicitud) {
+                return;
+            }
+
+            Throwable error = tarea.getException();
+
+            if (error != null) {
+                error.printStackTrace();
+            }
+
+            mostrarError(
+                    "No se pudieron cargar las ventas pendientes."
+            );
+        });
+
+        tarea.setOnCancelled(event -> {
+            // No actualizar la tabla desde una tarea cancelada.
+        });
+
+        Thread hilo = new Thread(tarea, "pending-sales-page");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+    private void cargarVentasPendientes() {
+        cargarPaginaPendiente(true);
+    }
+
+    private void actualizarContador() {
+
+        lblTotalRegistros.setText(
+                totalRegistros == 1
+                        ? "1 Registro"
+                        : totalRegistros + " registros"
+        );
+    }
+
+    // =========================================================
+    // ACCIONES DE LA TABLA
+    // =========================================================
+
+    private void configurarAcciones() {
+
+        colAcciones.setCellFactory(param ->
+                TableUtils.createVentaAcions(
+                        this::abonarVenta,
+                        this::recepcionarVenta,
+                        this::entregarVenta,
+                        this::cancelarVenta
+                )
+        );
+    }
+
+    private void entregarVenta(Sale sale) {
+
         if (sale == null) {
             return;
         }
 
         if (!"COMPLETA".equalsIgnoreCase(sale.getPaymentStatus())) {
             mostrarError(
-                "No puedes entregar una venta que todavía tiene saldo pendiente."
-        );
+                    "No puedes entregar una venta que todavía tiene saldo pendiente."
+            );
             return;
         }
 
@@ -206,11 +415,14 @@ public class PendingController implements Initializable {
             return;
         }
 
-        boolean resultado;
-        
-        try{
+        final boolean resultado;
+
+        try {
             resultado = saleApiClient.deliverSale(sale.getId());
-        }catch(IOException | InterruptedException e){
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             e.printStackTrace();
             mostrarError("No se pudo entregar la venta.");
             return;
@@ -224,13 +436,14 @@ public class PendingController implements Initializable {
         EventBus.publishVenta(sale.getId());
         mostrarExito("Venta entregada correctamente.");
     }
-    
-    private void abonarVenta(Sale sale){
-        
+
+    private void abonarVenta(Sale sale) {
+
         if (sale == null) {
             return;
         }
 
+        // Se conserva la validación original del controlador.
         if ("COMPLETA".equalsIgnoreCase(sale.getWorkStatus())) {
             mostrarInfo("La venta ya está liquidada.");
             return;
@@ -238,8 +451,10 @@ public class PendingController implements Initializable {
 
         try {
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource(
-                        "/com/gerardgv/posclarity/views/Abonos.fxml"));
+                    getClass().getResource(
+                            "/com/gerardgv/posclarity/views/Abonos.fxml"
+                    )
+            );
 
             Parent vista = loader.load();
 
@@ -251,17 +466,18 @@ public class PendingController implements Initializable {
             stage.setTitle("Abonos");
             stage.setResizable(false);
 
-            stage.setOnHidden(event ->cargarVentasPendientes());
+            stage.setOnHidden(event -> cargarVentasPendientes());
 
             stage.show();
+
         } catch (Exception ex) {
             ex.printStackTrace();
             mostrarError("No se pudo abrir la ventana de abonos.");
         }
     }
 
-    private void recepcionarVenta(Sale sale){
-        
+    private void recepcionarVenta(Sale sale) {
+
         if (sale == null) {
             return;
         }
@@ -273,16 +489,19 @@ public class PendingController implements Initializable {
 
         if ("ENTREGADO".equalsIgnoreCase(sale.getWorkStatus())) {
             mostrarError(
-                "No puedes recepcionar una venta que ya fue entregada."
+                    "No puedes recepcionar una venta que ya fue entregada."
             );
             return;
         }
 
-        boolean resultado;
-        
-        try{
+        final boolean resultado;
+
+        try {
             resultado = saleApiClient.receiveSale(sale.getId());
-        } catch(IOException | InterruptedException e){
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             e.printStackTrace();
             mostrarError("No se pudo actualizar la recepción.");
             return;
@@ -294,45 +513,56 @@ public class PendingController implements Initializable {
         }
 
         EventBus.publishVenta(sale.getId());
-        mostrarExito("Producto recibido en óptica.");        
+        mostrarExito("Producto recibido en óptica.");
     }
-    
-    private void cancelarVenta(Sale sale){
-        
-        if(sale == null){
+
+    private void cancelarVenta(Sale sale) {
+
+        if (sale == null) {
             return;
         }
-        
-        Optional<Seller> autorizado = AuthorizationDialog.solicitarGerente();
-        
-        if(autorizado.isEmpty()){
+
+        Optional<Seller> autorizado =
+                AuthorizationDialog.solicitarGerente();
+
+        if (autorizado.isEmpty()) {
             return;
         }
-        
+
         Seller responsable = autorizado.get();
-                        
-        try{
-            
-           boolean resultado = saleApiClient.cancelSale(sale.getId());
-           
-           if(!resultado){
+
+        try {
+
+            boolean resultado = saleApiClient.cancelSale(sale.getId());
+
+            if (!resultado) {
                 mostrarError("No Se Puede Cancelar La Venta");
                 return;
             }
-           
+
             EventBus.publishVenta(sale.getId());
+
             mostrarExito(
-                "Venta cancelada correctamente por "
-                + responsable.getName()
-                + "."
+                    "Venta cancelada correctamente por "
+                    + responsable.getName()
+                    + "."
             );
-            cargarVentasPendientes();
-        }catch(IOException | InterruptedException e)  {
+
+            // El EventBus actualiza la tabla; se evita una segunda consulta.
+
+        } catch (IOException | InterruptedException e) {
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
             e.printStackTrace();
             mostrarError("No Se Puede Cancelar Venta");
         }
     }
-    
+
+    // =========================================================
+    // NOTIFICACIONES
+    // =========================================================
+
     private void mostrarError(String mensaje) {
         PosNotification.error(root, "Atención", mensaje);
     }
@@ -343,138 +573,93 @@ public class PendingController implements Initializable {
 
     private void mostrarInfo(String mensaje) {
         PosNotification.info(root, "Información", mensaje);
-    }   
-
-    private void configurarAcciones() {
-        
-        colAcciones.setCellFactory(param -> TableUtils.createVentaAcions(
-                this::abonarVenta,
-                this::recepcionarVenta,
-                this::entregarVenta,
-                this::cancelarVenta)
-        );
-        
     }
+
+    // =========================================================
+    // EVENTOS
+    // =========================================================
 
     private void suscribirEventos() {
 
         EventBus.subscribeVenta(idVenta ->
-            javafx.application.Platform.runLater(
-                    this::cargarVentasPendientes
-            )
-    );
-        
-    }
-    
-    private static final NumberFormat MONEDA =
-        NumberFormat.getCurrencyInstance(
-                new Locale("es", "MX")
+                Platform.runLater(this::cargarVentasPendientes)
         );
-    
+    }
+
+    // =========================================================
+    // RESUMEN GLOBAL
+    // =========================================================
+
     private void cargarResumen() {
 
-        try{
-            PendingReport summary =saleApiClient.getPendingSummary();
-            
-            lblTrabajosRealizar.setText(String.valueOf(summary.getSalesToDo()));
-            lblTrabajosEntregar.setText(String.valueOf(summary.getSalesToDeliver()));
-            lblSaldoRealizar.setText(MONEDA.format(summary.getBalanceToDo()));
-            lblSaldoEntregar.setText(MONEDA.format(summary.getBalanceToDeliver()));
-            
-        } catch(IOException | InterruptedException e){
-            e.printStackTrace();
-            mostrarError(
-                "No se pudo cargar el resumen de ventas pendientes."
-            );
-        }        
+        try {
 
-    }
+            PendingReport summary = saleApiClient.getPendingSummary();
 
-    private void actualizarContador() {
-        
-        int total = listaFiltrada.size();
-        
-        lblTotalRegistros.setText(total == 1 
-                ? "1 Registro" : total + "registros");
-        
-    }
-    
-    private void configurarBadgesEstado() {
-
-        colEstadoPago.setCellFactory(column -> crearCeldaBadgePago());
-
-        colEstadoTrabajo.setCellFactory(column -> crearCeldaBadgeTrabajo());
-    }
-    
-    private TableCell<Sale, String> crearCeldaBadgePago() {
-
-    return new TableCell<>() {
-
-        private final Label badge = new Label();
-
-        {
-            badge.getStyleClass().add("pending-status-badge");
-            setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-            setAlignment(javafx.geometry.Pos.CENTER);
-        }
-
-        @Override
-        protected void updateItem(String estado, boolean empty) {
-            super.updateItem(estado, empty);
-
-            if (empty || estado == null || estado.isBlank()) {
-                setGraphic(null);
+            if (summary == null) {
                 return;
             }
 
-            badge.setText(formatearEstado(estado));
-
-            badge.getStyleClass().removeAll(
-                    "pending-status-pending",
-                    "pending-status-complete",
-                    "pending-status-process",
-                    "pending-status-received",
-                    "pending-status-ready",
-                    "pending-status-delivered",
-                    "pending-status-cancelled",
-                    "pending-status-default"
+            lblTrabajosRealizar.setText(
+                    String.valueOf(summary.getSalesToDo())
             );
 
-            switch (estado.toUpperCase()) {
+            lblTrabajosEntregar.setText(
+                    String.valueOf(summary.getSalesToDeliver())
+            );
 
-                case "PENDIENTE" ->
-                    badge.getStyleClass().add(
-                            "pending-status-pending"
-                    );
+            lblSaldoRealizar.setText(
+                    MONEDA.format(summary.getBalanceToDo())
+            );
 
-                case "COMPLETA" ->
-                    badge.getStyleClass().add(
-                            "pending-status-complete"
-                    );
+            lblSaldoEntregar.setText(
+                    MONEDA.format(summary.getBalanceToDeliver())
+            );
 
-                default ->
-                    badge.getStyleClass().add(
-                            "pending-status-default"
-                    );
+        } catch (IOException | InterruptedException e) {
+
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
             }
-            setGraphic(badge);
-            }
-        };
+
+            e.printStackTrace();
+
+            mostrarError(
+                    "No se pudo cargar el resumen de ventas pendientes."
+            );
+        }
     }
-    
-    private TableCell<Sale, String> crearCeldaBadgeTrabajo() {
+
+    // =========================================================
+    // BADGES DE ESTADO
+    // =========================================================
+
+    private void configurarBadgesEstado() {
+
+        colEstadoPago.setCellFactory(
+                column -> crearCeldaBadgePago()
+        );
+
+        colEstadoTrabajo.setCellFactory(
+                column -> crearCeldaBadgeTrabajo()
+        );
+    }
+
+    private TableCell<Sale, String> crearCeldaBadgePago() {
 
         return new TableCell<>() {
 
             private final Label badge = new Label();
+
             {
                 badge.getStyleClass().add("pending-status-badge");
                 setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
                 setAlignment(javafx.geometry.Pos.CENTER);
             }
 
-        @Override
+            @Override
             protected void updateItem(String estado, boolean empty) {
+
                 super.updateItem(estado, empty);
 
                 if (empty || estado == null || estado.isBlank()) {
@@ -485,47 +670,112 @@ public class PendingController implements Initializable {
                 badge.setText(formatearEstado(estado));
 
                 badge.getStyleClass().removeAll(
-                    "pending-status-pending",
-                    "pending-status-complete",
-                    "pending-status-process",
-                    "pending-status-received",
-                    "pending-status-ready",
-                    "pending-status-delivered",
-                    "pending-status-cancelled",
-                    "pending-status-default"
+                        "pending-status-pending",
+                        "pending-status-complete",
+                        "pending-status-process",
+                        "pending-status-received",
+                        "pending-status-ready",
+                        "pending-status-delivered",
+                        "pending-status-cancelled",
+                        "pending-status-default"
                 );
 
-            switch (estado.toUpperCase()) {
+                switch (estado.toUpperCase(Locale.ROOT)) {
 
-                case "PROCESO" ->
-                    badge.getStyleClass().add(
-                            "pending-status-process");
+                    case "PENDIENTE" ->
+                            badge.getStyleClass().add(
+                                    "pending-status-pending"
+                            );
 
-                case "RECIBIDO" ->
-                    badge.getStyleClass().add(
-                            "pending-status-received");
+                    case "COMPLETA" ->
+                            badge.getStyleClass().add(
+                                    "pending-status-complete"
+                            );
 
-                case "LISTO" ->
-                    badge.getStyleClass().add(
-                            "pending-status-ready");
+                    default ->
+                            badge.getStyleClass().add(
+                                    "pending-status-default"
+                            );
+                }
 
-                case "ENTREGADO" ->
-                    badge.getStyleClass().add(
-                            "pending-status-delivered");
-
-                case "CANCELADO" ->
-                    badge.getStyleClass().add(
-                            "pending-status-cancelled");
-
-                default ->
-                    badge.getStyleClass().add(
-                            "pending-status-default");
-            }
-            setGraphic(badge);
+                setGraphic(badge);
             }
         };
     }
-    
+
+    private TableCell<Sale, String> crearCeldaBadgeTrabajo() {
+
+        return new TableCell<>() {
+
+            private final Label badge = new Label();
+
+            {
+                badge.getStyleClass().add("pending-status-badge");
+                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                setAlignment(javafx.geometry.Pos.CENTER);
+            }
+
+            @Override
+            protected void updateItem(String estado, boolean empty) {
+
+                super.updateItem(estado, empty);
+
+                if (empty || estado == null || estado.isBlank()) {
+                    setGraphic(null);
+                    return;
+                }
+
+                badge.setText(formatearEstado(estado));
+
+                badge.getStyleClass().removeAll(
+                        "pending-status-pending",
+                        "pending-status-complete",
+                        "pending-status-process",
+                        "pending-status-received",
+                        "pending-status-ready",
+                        "pending-status-delivered",
+                        "pending-status-cancelled",
+                        "pending-status-default"
+                );
+
+                switch (estado.toUpperCase(Locale.ROOT)) {
+
+                    case "PROCESO" ->
+                            badge.getStyleClass().add(
+                                    "pending-status-process"
+                            );
+
+                    case "RECIBIDO" ->
+                            badge.getStyleClass().add(
+                                    "pending-status-received"
+                            );
+
+                    case "LISTO" ->
+                            badge.getStyleClass().add(
+                                    "pending-status-ready"
+                            );
+
+                    case "ENTREGADO" ->
+                            badge.getStyleClass().add(
+                                    "pending-status-delivered"
+                            );
+
+                    case "CANCELADO" ->
+                            badge.getStyleClass().add(
+                                    "pending-status-cancelled"
+                            );
+
+                    default ->
+                            badge.getStyleClass().add(
+                                    "pending-status-default"
+                            );
+                }
+
+                setGraphic(badge);
+            }
+        };
+    }
+
     private String formatearEstado(String estado) {
 
         if (estado == null || estado.isBlank()) {
@@ -533,76 +783,70 @@ public class PendingController implements Initializable {
         }
 
         String texto = estado
-            .trim()
-            .toLowerCase()
-            .replace("_", " ");
+                .trim()
+                .toLowerCase(Locale.ROOT)
+                .replace("_", " ");
 
         return Character.toUpperCase(texto.charAt(0))
-            + texto.substring(1);
+                + texto.substring(1);
     }
+
+    // =========================================================
+    // ESTILOS DE FILAS
+    // =========================================================
 
     private void configurarEstilosFilas() {
-        
+
         tblVentas.setRowFactory(table -> new TableRow<>() {
 
-        @Override
-        protected void updateItem(Sale sale, boolean empty) {
-            super.updateItem(sale, empty);
+            @Override
+            protected void updateItem(Sale sale, boolean empty) {
 
-            getStyleClass().removeAll(
-                    "pending-row-process",
-                    "pending-row-received",
-                    "pending-row-ready",
-                    "pending-row-unpaid",
-                    "pending-row-default"
-            );
+                super.updateItem(sale, empty);
 
-            if (empty || sale == null) {
-                return;
-            }
+                getStyleClass().removeAll(
+                        "pending-row-process",
+                        "pending-row-received",
+                        "pending-row-ready",
+                        "pending-row-unpaid",
+                        "pending-row-default"
+                );
 
-            String estadoTrabajo = sale.getWorkStatus();
-            String estadoPago = sale.getPaymentStatus();
+                if (empty || sale == null) {
+                    return;
+                }
 
-            if ("PENDIENTE".equalsIgnoreCase(estadoPago)
-                    && ("RECIBIDO".equalsIgnoreCase(estadoTrabajo)
-                    || "LISTO".equalsIgnoreCase(estadoTrabajo))) {
+                String estadoTrabajo = sale.getWorkStatus();
+                String estadoPago = sale.getPaymentStatus();
 
-                getStyleClass().add("pending-row-unpaid");
-                return;
-            }
+                if ("PENDIENTE".equalsIgnoreCase(estadoPago)
+                        && ("RECIBIDO".equalsIgnoreCase(estadoTrabajo)
+                        || "LISTO".equalsIgnoreCase(estadoTrabajo))) {
 
-            if (estadoTrabajo == null) {
-                getStyleClass().add("pending-row-default");
-                return;
-            }
+                    getStyleClass().add("pending-row-unpaid");
+                    return;
+                }
 
-            switch (estadoTrabajo.toUpperCase()) {
-
-                case "PROCESO" ->
-                    getStyleClass().add("pending-row-process");
-
-                case "RECIBIDO" ->
-                    getStyleClass().add("pending-row-received");
-
-                case "LISTO" ->
-                    getStyleClass().add("pending-row-ready");
-
-                default ->
+                if (estadoTrabajo == null) {
                     getStyleClass().add("pending-row-default");
-            }
-        }
-    });
-    }
-    
-    private void configurarPaginacion() {
+                    return;
+                }
 
-        tablePagination = new TablePagination<>(
-        tblVentas,
-        paginationController
-        );
-        paginationController.setItemsPerPage(6);
-        paginationController.setShowItemsPerPageSelector(false); 
+                switch (estadoTrabajo.toUpperCase(Locale.ROOT)) {
+
+                    case "PROCESO" ->
+                            getStyleClass().add("pending-row-process");
+
+                    case "RECIBIDO" ->
+                            getStyleClass().add("pending-row-received");
+
+                    case "LISTO" ->
+                            getStyleClass().add("pending-row-ready");
+
+                    default ->
+                            getStyleClass().add("pending-row-default");
+                }
+            }
+        });
     }
-    
 }

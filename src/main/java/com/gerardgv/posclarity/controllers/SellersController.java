@@ -15,6 +15,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
+import javafx.animation.PauseTransition;
+import javafx.concurrent.Task;
+import javafx.util.Duration;
 
 
 
@@ -37,6 +41,14 @@ public class SellersController implements Initializable {
     @FXML private Button btnGuardar;
     @FXML private Button btnClear;
     @FXML private StackPane root;
+    @FXML private PaginationController paginationController;
+
+    private TablePagination<Seller> tablePagination;
+
+    private Task<PageResponse<Seller>> tareaCarga;
+    private PauseTransition debounceBusqueda;
+    private int versionCarga = 0;
+    private boolean actualizandoPaginacion = false;
     
     private Seller selectedSeller  =null;
     private boolean modoEdicion = false;
@@ -51,6 +63,7 @@ public class SellersController implements Initializable {
         
         configurarTabla();
         cargarEmpleados();
+        configurarPaginacion();
         configurarEventos();
         configurarBusqueda();
         configurarCombos();
@@ -141,27 +154,79 @@ public class SellersController implements Initializable {
         );
         
     }
-
+    
     private void cargarEmpleados() {
 
-        try {
-
-            sellerList.setAll(sellerApi.getAll());
-            tblEmpleados.setItems(sellerList);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            mostrarError(
-                "No se pudieron cargar los empleados desde el servidor."
-            );
-
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            mostrarError(
-                "La consulta de empleados fue interrumpida."
-            );
+        if (tareaCarga != null && tareaCarga.isRunning()) {
+            tareaCarga.cancel(true);
         }
+
+        final int versionActual = ++versionCarga;
+        final int pagina = paginationController.getCurrentPage();
+        final int tamano = paginationController.getItemsPerPage();
+        final String busqueda = txtBuscar.getText() == null
+            ? ""
+            : txtBuscar.getText().trim();
+
+        Task<PageResponse<Seller>> tarea = new Task<>() {
+
+            @Override
+            protected PageResponse<Seller> call() throws Exception {
+
+                if (busqueda.isBlank()) {
+                    return sellerApi.getPage(pagina, tamano);
+                }
+
+                return sellerApi.searchPage(
+                    busqueda,
+                    pagina,
+                    tamano
+                );
+            }
+        };
+        
+        tareaCarga = tarea;
+        tarea.setOnSucceeded(event -> {
+
+        if (versionActual != versionCarga) {
+            return;
+        }
+
+        PageResponse<Seller> respuesta = tarea.getValue();
+
+        sellerList.setAll(respuesta.getContent());
+
+        paginationController.setTotalItems(
+                Math.toIntExact(respuesta.getTotalElements())
+        );
+    });
+
+    tarea.setOnFailed(event -> {
+
+        if (versionActual != versionCarga) {
+            return;
+        }
+
+        Throwable error = tarea.getException();
+
+        if (error != null) {
+            error.printStackTrace();
+        }
+
+        mostrarError(
+                "No se pudieron cargar los colaboradores desde el servidor."
+        );
+    });
+
+    tarea.setOnCancelled(event -> {
+        // Una consulta cancelada no debe actualizar la tabla.
+    });
+
+        Thread hilo = new Thread(tarea, "carga-colaboradores");
+        hilo.setDaemon(true);
+        hilo.start();
     }
+
     
     @FXML
     private void guardarEmpleado(){
@@ -266,18 +331,31 @@ public class SellersController implements Initializable {
         
     }
 
-    private void configurarBusqueda() {
-        SearchUtils.setupSearch(
-                txtBuscar,
-                tblEmpleados,
-                sellerList,
-                e -> e.getName(),
-                e -> String.valueOf(e.getCode()),
-                e -> e.getRole() != null
-                ? e.getRole().getDisplayName()
-                : "");   
-    }
+private void configurarBusqueda() {
 
+    debounceBusqueda = new PauseTransition(
+            Duration.millis(300)
+    );
+
+    debounceBusqueda.setOnFinished(event -> {
+
+        actualizandoPaginacion = true;
+
+        try {
+            paginationController.reset();
+        } finally {
+            actualizandoPaginacion = false;
+        }
+
+        cargarEmpleados();
+    });
+
+    txtBuscar.textProperty().addListener(
+            (observable, anterior, nuevo) ->
+                    debounceBusqueda.playFromStart()
+    );
+}
+    
     private boolean validarFormulario() {        
         
         String nombre = txtEmpleado.getText().trim();
@@ -376,7 +454,7 @@ public class SellersController implements Initializable {
 
             request.setActive(selectedSeller.getActive());
 
-            if (password == null && password.isBlank()) {
+            if (password == null || password.isBlank()) {
                 request.setPassword(null);
             }
             } else {
@@ -468,6 +546,18 @@ public class SellersController implements Initializable {
         return false;
     }
 }
+
+    private void configurarPaginacion() {
+        
+        paginationController.setItemsPerPage(12);
+        paginationController.setShowItemsPerPageSelector(false);
+        paginationController.setOnPageChange(page -> {
+            if (!actualizandoPaginacion) {
+                cargarEmpleados();
+            }
+        });
+        tblEmpleados.setItems(sellerList);
+    }
     
        
 }

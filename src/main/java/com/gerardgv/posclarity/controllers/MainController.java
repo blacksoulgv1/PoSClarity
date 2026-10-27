@@ -1,25 +1,25 @@
-
 package com.gerardgv.posclarity.controllers;
 
-import com.gerardgv.posclarity.utils.ViewInf;
+import com.gerardgv.posclarity.api.BranchApiClient;
+import com.gerardgv.posclarity.app.App;
+import com.gerardgv.posclarity.models.*;
+import com.gerardgv.posclarity.utils.*;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
+import javafx.animation.Timeline;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.Tooltip;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
+import org.kordamp.ikonli.javafx.FontIcon;
+import javafx.animation.KeyFrame;
+import javafx.util.Duration;
+import javafx.scene.paint.Color;
 
 public class MainController implements Initializable {
 
@@ -46,6 +46,12 @@ public class MainController implements Initializable {
     @FXML private Button btnSucursales;
     @FXML private Button btnColaboradores;
     @FXML private Button btnReportes;
+    @FXML private FontIcon connectionIcon;
+
+    private final BranchApiClient branchApiClient = new BranchApiClient();
+
+    private Timeline connectionMonitor;
+    private boolean checkingConnection = false;
 
     private boolean menuCollapsed = false;
     private Button activeButton;
@@ -55,15 +61,12 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         registrarEtiquetas();
-
-        // Estos datos se conectarán con la sesión y la API
-        // cuando implementemos la autenticación.
-        connectionStatusLabel.setText("Estado por verificar");
-        branchLabel.setText("Sin verificar");
-        userMenuButton.setText("Sin sesión");
-
+        actualizarDatosEncabezado();
+        iniciarMonitorConexion();
         viewVista("Saleview", "Ventas", btnVentas);
     }
+    
+    
 
     private void registrarEtiquetas() {
         buttonLabels.put(btnVentas, "Ventas");
@@ -189,10 +192,24 @@ public class MainController implements Initializable {
         }
     }
 
+    
     private void mostrarVista(Parent root) {
-        StackPane.setAlignment(root, Pos.TOP_LEFT);
+
+    // Permitir que la vista aproveche el espacio disponible.
+        if (root instanceof Region region) {
+             region.setMinWidth(0);
+            region.setMinHeight(0);
+            region.setMaxSize(
+            Double.MAX_VALUE,
+            Double.MAX_VALUE
+            );;
+        }
+
+    // El StackPane podrá distribuir el espacio a la vista.
+        stackContent.setAlignment(Pos.CENTER);
         stackContent.getChildren().setAll(root);
     }
+
 
     private void actualizarBotonActivo(Button button) {
         if (activeButton != null) {
@@ -283,9 +300,37 @@ public class MainController implements Initializable {
 
     @FXML
     private void cerrarSesion() {
-        mostrarAvisoSesion(
-                "El cierre de sesión se implementará al conectar la autenticación."
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+    confirmacion.setTitle("Cerrar sesión");
+    confirmacion.setHeaderText("¿Deseas cerrar tu sesión?");
+    confirmacion.setContentText(
+            "Tendrás que iniciar sesión nuevamente para continuar."
+    );
+
+    ButtonType resultado = confirmacion.showAndWait()
+            .orElse(ButtonType.CANCEL);
+
+    if (resultado != ButtonType.OK) {
+        return;
+    }
+
+    try {
+        App.setRoot("Login");
+
+        AuthSession.cerrarSesion();
+        Session.cerrarSesion();
+
+    } catch (IOException e) {
+        e.printStackTrace();
+
+        Alert error = new Alert(Alert.AlertType.ERROR);
+        error.setTitle("Error de navegación");
+        error.setHeaderText("No se pudo regresar al inicio de sesión");
+        error.setContentText(
+                "La sesión se mantiene activa. Intenta nuevamente."
         );
+        error.showAndWait();
+    }
     }
 
     private void mostrarAvisoSesion(String mensaje) {
@@ -294,5 +339,154 @@ public class MainController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+    
+    private void actualizarDatosEncabezado() {
+
+    // Usuario autenticado
+    Seller empleado = AuthSession.getEmpleado();
+
+    if (empleado != null
+            && empleado.getName() != null
+            && !empleado.getName().isBlank()) {
+
+        userMenuButton.setText(empleado.getName());
+
+    } else {
+        userMenuButton.setText("Sin sesión");
+    }
+
+    // Sucursal seleccionada
+    Branch sucursal = Session.getSucursal();
+
+    if (sucursal != null
+            && sucursal.getName() != null
+            && !sucursal.getName().isBlank()) {
+
+        branchLabel.setText(sucursal.getName());
+
+    } else {
+        branchLabel.setText("Sin sucursal");
+    }
+}
+
+    private void comprobarConexion() {
+
+    if (checkingConnection) {
+        return;
+    }
+
+    Branch sucursal = Session.getSucursal();
+
+    if (sucursal == null) {
+        actualizarEstadoConexion(
+            "Sin sucursal",
+            Color.ORANGE
+        );
+        return;
+    }
+
+    checkingConnection = true;
+
+    actualizarEstadoConexion(
+        "Comprobando conexión...",
+        Color.ORANGE
+    );
+
+    Task<Branch> tarea = new Task<>() {
+
+        @Override
+        protected Branch call() throws Exception {
+            return branchApiClient.getById(sucursal.getId());
+        }
+    };
+
+    tarea.setOnSucceeded(event -> {
+        checkingConnection = false;
+
+        Branch resultado = tarea.getValue();
+
+        if (resultado != null) {
+            actualizarEstadoConexion(
+                "Conectado",
+                Color.LIMEGREEN
+            );
+        } else {
+            actualizarEstadoConexion(
+                "Sucursal no encontrada",
+                Color.ORANGE
+            );
+        }
+    });
+
+    tarea.setOnFailed(event -> {
+        checkingConnection = false;
+
+        Throwable error = tarea.getException();
+
+        String mensaje = error == null
+                ? ""
+                : String.valueOf(error.getMessage());
+
+        if (mensaje.contains("401")) {
+            actualizarEstadoConexion(
+                "Sesión no autorizada",
+                Color.ORANGE
+            );
+        } else if (mensaje.contains("403")) {
+            actualizarEstadoConexion(
+                "Acceso denegado",
+                Color.ORANGE
+            );
+        } else if (mensaje.matches("(?s).*HTTP 5\\d\\d.*")) {
+            actualizarEstadoConexion(
+                "Error del servidor",
+                Color.RED
+            );
+        } else {
+            actualizarEstadoConexion(
+                "Sin conexión",
+                Color.RED
+            );
+        }
+
+        System.err.println(
+            "No se pudo verificar la conexión con PosApi: "
+            + mensaje
+        );
+    });
+
+    Thread hilo = new Thread(
+        tarea,
+        "pos-connection-check"
+    );
+
+    hilo.setDaemon(true);
+    hilo.start();
+}
+    
+    private void actualizarEstadoConexion(
+        String mensaje,
+        Color color) {
+
+    connectionStatusLabel.setText(mensaje);
+
+    if (connectionIcon != null) {
+        connectionIcon.setIconColor(color);
+    }
+}
+    
+    private void iniciarMonitorConexion() {
+        comprobarConexion();
+
+    connectionMonitor = new Timeline(
+        new KeyFrame(
+            Duration.seconds(30),
+            event -> comprobarConexion()
+        )
+    );
+
+    connectionMonitor.setCycleCount(Timeline.INDEFINITE);
+    connectionMonitor.play();
     }
 }

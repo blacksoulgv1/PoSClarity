@@ -5,6 +5,9 @@ import com.gerardgv.posclarity.models.Seller;
 import com.gerardgv.posclarity.models.StatusRequest;
 import java.io.IOException;
 import java.util.List;
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class SellerApiClient extends BaseApiClient{
     
@@ -90,4 +93,32 @@ public class SellerApiClient extends BaseApiClient{
         );
     }
     
+    public PageResponse<Seller> getPage(int page, int size)
+        throws IOException, InterruptedException {
+
+        String url = BASE_URL
+            + "/page?page=" + page
+            + "&size=" + size;
+
+        return getPage(url, Seller.class);
+    }
+
+    public PageResponse<Seller> searchPage(
+        String query, int page, int size)
+        throws IOException, InterruptedException {
+
+        String texto = query == null ? "" : query.trim();
+
+        String q = URLEncoder.encode(
+            texto,
+            StandardCharsets.UTF_8
+        );
+
+        String url = BASE_URL
+            + "/search/page?q=" + q
+            + "&page=" + page
+            + "&size=" + size;
+
+        return getPage(url, Seller.class);
+    }
 }

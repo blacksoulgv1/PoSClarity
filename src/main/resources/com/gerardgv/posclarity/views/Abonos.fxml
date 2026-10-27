@@ -143,43 +143,60 @@
                        styleClass="abonos-section-subtitle"/>
             </VBox>
 
-            <HBox spacing="10"
-                  alignment="BOTTOM_LEFT">
+            
+<HBox spacing="10"
+      alignment="BOTTOM_LEFT">
 
-                <VBox spacing="6"
-                      HBox.hgrow="ALWAYS">
+    <VBox spacing="6"
+          HBox.hgrow="ALWAYS">
 
-                    <Label text="Monto"
-                           styleClass="abonos-input-label"/>
+        <Label text="Monto"
+               styleClass="abonos-input-label"/>
 
-                    <TextField fx:id="txtMonto"
-                               promptText="Ej. 500.00"
-                               prefHeight="42"
-                               HBox.hgrow="ALWAYS"/>
-                </VBox>
+        <TextField fx:id="txtMonto"
+                   promptText="Ej. 500.00"
+                   prefHeight="42"
+                   HBox.hgrow="ALWAYS"/>
+    </VBox>
 
-                <VBox spacing="6">
+    <VBox spacing="6">
 
-                    <Label text="Método de pago"
-                           styleClass="abonos-input-label"/>
+        <Label text="Método de pago"
+               styleClass="abonos-input-label"/>
 
-                    <ComboBox fx:id="cbMetodo"
-                              prefWidth="180"
-                              prefHeight="42"/>
-                </VBox>
+        <ComboBox fx:id="cbMetodo"
+                  prefWidth="180"
+                  prefHeight="42"/>
+    </VBox>
 
-                <Button fx:id="btnAbonar"
-                        text="Registrar abono"
-                        onAction="#handleAbonar"
-                        prefHeight="42"
-                        styleClass="pos-btn-primary">
+    <Button fx:id="btnAbonar"
+            text="Registrar abono"
+            onAction="#handleAbonar"
+            prefHeight="42"
+            styleClass="pos-btn-primary">
 
-                    <graphic>
-                        <FontIcon iconLiteral="fas-plus-circle"
-                                  iconSize="16"/>
-                    </graphic>
-                </Button>
-            </HBox>
+        <graphic>
+            <FontIcon iconLiteral="fas-plus-circle"
+                      iconSize="16"/>
+        </graphic>
+    </Button>
+
+    <Button fx:id="btnEntregar"
+            text="Entregar"
+            onAction="#handleEntregar"
+            prefHeight="42"
+            visible="false"
+            managed="false"
+            styleClass="pos-btn-primary">
+
+        <graphic>
+            <FontIcon iconLiteral="fas-box-open"
+                      iconSize="16"/>
+        </graphic>
+    </Button>
+
+</HBox>
+
         </VBox>
 
         <!-- HISTORIAL -->

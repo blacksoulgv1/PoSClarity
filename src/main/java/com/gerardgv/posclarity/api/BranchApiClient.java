@@ -1,29 +1,41 @@
 package com.gerardgv.posclarity.api;
 
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
 import com.gerardgv.posclarity.models.Branch;
 import java.io.IOException;
 import java.util.List;
 
+public class BranchApiClient extends BaseApiClient {
 
-public class BranchApiClient extends BaseApiClient{
-    
     private static final String BASE_URL =
             ApiConfig.BASE_URL + "/branches";
-    
+
     /*
      * Consulta todas las sucursales activas.
-    */    
-    public List<Branch> getAll() throws IOException, InterruptedException{
-        
+     * Se conserva para el selector de sucursal y el inicio de sesión.
+     */
+    public List<Branch> getAll()
+            throws IOException, InterruptedException {
+
         return getList(BASE_URL, Branch.class);
-        
     }
-    
+
+    /*
+     * Consulta sucursales por página.
+     */
+    public PageResponse<Branch> getPage(int page, int size)
+            throws IOException, InterruptedException {
+
+        String url = BASE_URL + "/page?page=" + page
+                + "&size=" + size;
+
+        return getPage(url, Branch.class);
+    }
+
     /*
      * Consulta una sucursal por ID.
-     * Devuelve null cuando la API responde 404.
-    */
-     public Branch getById(int id)
+     */
+    public Branch getById(int id)
             throws IOException, InterruptedException {
 
         return get(
@@ -73,13 +85,37 @@ public class BranchApiClient extends BaseApiClient{
                 Branch.class
         );
     }
-    
+
+    /*
+     * Comprueba si existe alguna sucursal.
+     */
     public boolean existsAnyBranch()
-        throws IOException, InterruptedException {
+            throws IOException, InterruptedException {
 
         return get(
-            BASE_URL + "/exists",
-            Boolean.class
+                BASE_URL + "/exists",
+                Boolean.class
         );
     }
+
+
+    /*
+     * Busca sucursales con paginación.
+     */
+    public PageResponse<Branch> searchPage(
+            String text, int page, int size)
+            throws IOException, InterruptedException {
+
+        String query = java.net.URLEncoder.encode(
+                text,
+                java.nio.charset.StandardCharsets.UTF_8
+        );
+
+        String url = BASE_URL + "/search/page?q=" + query
+                + "&page=" + page
+                + "&size=" + size;
+
+        return getPage(url, Branch.class);
+    }
+
 }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.http.*;
 import java.util.List;
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
 
 public abstract class BaseApiClient {
 
@@ -245,30 +246,52 @@ public abstract class BaseApiClient {
      * Construye un mensaje útil para depuración.
      */
     private String buildErrorMessage(
-        HttpResponse<String> response
-) {
+        HttpResponse<String> response) {
 
-    try {
+        try {
 
-        if(response.body() != null
+            if(response.body() != null
                 && !response.body().isBlank()){
 
-            var json = objectMapper.readTree(
+                var json = objectMapper.readTree(
                     response.body()
-            );
+                );
 
-            if(json.has("message")){
-                return json.get("message").asText();
+                if(json.has("message")){
+                    return json.get("message").asText();
+                }
             }
-        }
 
-    } catch(Exception e){
+        } catch(Exception e){
 
         // Si no es JSON continúa abajo
+        }
+        return "Error de API HTTP "
+            + response.statusCode();
     }
 
+    protected <T> PageResponse<T> getPage(
+        String url,
+        Class<T> elementType) throws IOException, InterruptedException {
 
-    return "Error de API HTTP "
-            + response.statusCode();
-}
+    HttpRequest request = baseRequest(url)
+            .GET()
+            .build();
+
+    HttpResponse<String> response = send(request);
+
+    validateResponse(response, 200);
+
+    JavaType pageType = objectMapper.getTypeFactory()
+            .constructParametricType(
+                    PageResponse.class,
+                    elementType
+            );
+
+    return objectMapper.readValue(
+            response.body(),
+            pageType
+    );
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.gerardgv.posclarity.api;
 
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
 import com.gerardgv.posclarity.api.dto.product.ProductCreateRequest;
 import com.gerardgv.posclarity.models.Product;
 import com.gerardgv.posclarity.models.StatusRequest;
@@ -119,4 +120,45 @@ public class ProductApiClient extends BaseApiClient {
                 Product.class
         );
     }
+    
+    /*
+ * Consulta una página de productos.
+ */
+public PageResponse<Product> getPage(int page, int size)
+        throws IOException, InterruptedException {
+
+    Integer branchId = Session.getSucursal().getId();
+
+    return getPage(
+            BASE_URL + "/page?branchId=" + branchId
+                    + "&page=" + page
+                    + "&size=" + size,
+            Product.class
+    );
+}
+
+    /*
+    * Busca productos por modelo o marca con paginación.
+    */
+    public PageResponse<Product> searchPage(
+        String text,
+        int page,
+        int size)
+        throws IOException, InterruptedException {
+
+    Integer branchId = Session.getSucursal().getId();
+
+    String query = URLEncoder.encode(
+            text == null ? "" : text.trim(),
+            StandardCharsets.UTF_8
+    );
+
+    return getPage(
+            BASE_URL + "/search/page?text=" + query
+                    + "&branchId=" + branchId
+                    + "&page=" + page
+                    + "&size=" + size,
+            Product.class
+    );
+}
 }

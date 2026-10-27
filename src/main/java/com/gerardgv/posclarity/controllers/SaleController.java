@@ -10,11 +10,12 @@ import java.net.URL;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import javafx.application.Platform;
 import javafx.beans.property.*;
 import javafx.collections.*;
 import javafx.fxml.*;
 import javafx.scene.control.*;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 
 public class SaleController implements Initializable {
     
@@ -59,7 +60,7 @@ public class SaleController implements Initializable {
     @FXML private TableColumn<SaleItem,Double> colSubtotal;
     @FXML private TableColumn<SaleItem,Void> colAcciones;
     @FXML private StackPane rootSale;
-    
+       
     @FXML private CheckBox chkSeguro;
     @FXML private Label lblSeguroCobertura;
     @FXML private Label lblSeguroAsegurable;
@@ -72,7 +73,6 @@ public class SaleController implements Initializable {
     private final InventoryApiClient inventoryApiClient = new InventoryApiClient();
     private final SaleApiClient saleApiClient = new SaleApiClient();
     private final ClientApiClient clientApiClient = new ClientApiClient();
-    private final SellerApiClient sellerApiClient = new SellerApiClient();
     private final DiscountApiClient discountApiClient = new DiscountApiClient();
     private final InsuranceApiClient insuranceApiClient =new InsuranceApiClient();
     
@@ -89,19 +89,18 @@ public class SaleController implements Initializable {
     
     private PosSearchPopup<Product> popupProductos = new PosSearchPopup<>();
     private PosSearchPopup<Clients> popupClientes  = new PosSearchPopup<>();
-    private PosSearchPopup<Seller> popupVendedores  = new PosSearchPopup<>();
 
            
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         aplicarComportamientos();
         cargarSucursal();
+        cargarVendedorSesion();
         cargarSeguroActivo();
         cargarFecha();
         configurarTabla();
         configurarPopupProductos();
         configurarPopupClientes();
-        configurarPopupVendedores();
         
         cbMetodoPago.getItems().addAll("EFECTIVO","TARJETA","TRANSFERENCIA");
         cbMetodoPago.setValue("EFECTIVO");
@@ -1391,54 +1390,6 @@ if (promociones != null) {
         
     }
     
-    private void configurarPopupVendedores(){
-        
-        popupVendedores.setTitleProvider(emp -> emp.getName());
-        popupVendedores.setSubtitleProvider(emp -> "Código: " + emp.getCode());
-        popupVendedores.setIconProvider(emp -> "fas-user-tie");
-        popupVendedores.setEmptyMessage("No se encontraron colaboradores");
-
-        popupVendedores.setOnSelected(emp -> {
-            vendedorSeleccionado = emp;
-            txtColaborador.setText(emp.getName());
-        });
-
-        txtColaborador.textProperty().addListener((obs, oldText, newText) -> {
-
-            if(newText == null || newText.isBlank()){
-                popupVendedores.hide();
-                return;
-            }
-
-            try {
-
-                List<Seller> lista = sellerApiClient.getAll()
-                    .stream() .filter(emp ->
-                            emp.getName()
-                            .toLowerCase()
-                            .contains(newText.toLowerCase())
-                    ) .toList();
-                
-            popupVendedores.setItems(lista);
-            popupVendedores.show(txtColaborador);
-
-        } catch(IOException | InterruptedException e){
-
-            e.printStackTrace();
-            mostrarError("Error cargando vendedores");
-        } });
-
-        txtColaborador.setOnAction(e -> {
-            Seller emp = popupVendedores.getFirst();
-
-            if(emp != null){
-                vendedorSeleccionado = emp;
-                txtColaborador.setText(emp.getName());
-                popupVendedores.hide();
-            }
-        });
-    }
-    
     private boolean ventaTieneArmazon(){
 
     return carrito.stream()
@@ -1655,4 +1606,27 @@ private void recalcularPromociones() {
         }
    }
       
+   private void cargarVendedorSesion() {
+
+    Seller empleado = AuthSession.getEmpleado();
+
+    if (empleado == null) {
+        vendedorSeleccionado = null;
+        txtColaborador.clear();
+        txtColaborador.setEditable(false);
+
+        mostrarError(
+            "No hay un vendedor autenticado. "
+            + "Cierra sesión e inicia sesión nuevamente."
+        );
+        return;
+    }
+
+    vendedorSeleccionado = empleado;
+    txtColaborador.setText(empleado.getName());
+    txtColaborador.setEditable(false);
+    txtColaborador.setFocusTraversable(false);
+}
+      
+
 }

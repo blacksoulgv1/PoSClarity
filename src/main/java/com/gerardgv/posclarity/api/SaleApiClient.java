@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
 
 public class SaleApiClient extends BaseApiClient {
     
@@ -604,6 +604,80 @@ public class SaleApiClient extends BaseApiClient {
         }
         return sales;
     }
+    
+    
+    /*
+     * Consulta una página de ventas pendientes.
+     */
+    public PageResponse<Sale> getPendingPage(int page, int size)
+            throws IOException, InterruptedException {
+
+        Integer branchId = Session.getSucursal().getId();
+
+        PageResponse<SaleResponse> response = getPage(
+                BASE_URL + "/pending/page?branchId=" + branchId
+                        + "&page=" + page
+                        + "&size=" + size,
+                SaleResponse.class
+        );
+
+        return convertirPagina(response);
+    }
+
+    /*
+     * Busca ventas pendientes con paginación.
+     */
+    public PageResponse<Sale> searchPendingPage(
+            String filter, int page, int size)
+            throws IOException, InterruptedException {
+
+        Integer branchId = Session.getSucursal().getId();
+
+        String query = java.net.URLEncoder.encode(
+                filter == null ? "" : filter.trim(),
+                java.nio.charset.StandardCharsets.UTF_8
+        );
+
+        PageResponse<SaleResponse> response = getPage(
+                BASE_URL + "/pending/search/page?branchId=" + branchId
+                        + "&filter=" + query
+                        + "&page=" + page
+                        + "&size=" + size,
+                SaleResponse.class
+        );
+
+        return convertirPagina(response);
+    }
+
+    /*
+     * Convierte el contenido conservando los metadatos
+     * de la paginación del servidor.
+     */
+    private PageResponse<Sale> convertirPagina(
+            PageResponse<SaleResponse> response) {
+
+        PageResponse<Sale> pagina = new PageResponse<>();
+
+        List<Sale> ventas = new ArrayList<>();
+
+        if (response.getContent() != null) {
+            for (SaleResponse item : response.getContent()) {
+                ventas.add(convertirSale(item));
+            }
+        }
+
+        pagina.setContent(ventas);
+        pagina.setTotalElements(response.getTotalElements());
+        pagina.setTotalPages(response.getTotalPages());
+        pagina.setNumber(response.getNumber());
+        pagina.setSize(response.getSize());
+        pagina.setFirst(response.isFirst());
+        pagina.setLast(response.isLast());
+        pagina.setEmpty(response.isEmpty());
+
+        return pagina;
+    }
+
     
     /*
     Recepcionar venta.

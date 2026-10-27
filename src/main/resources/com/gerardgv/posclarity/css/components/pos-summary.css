@@ -1,77 +1,134 @@
+/* =========================================
+   RESUMEN DE COBRO
+   ========================================= */
+
 .pos-summary-card {
     -fx-background-color: -pos-card;
-    -fx-background-radius: 14;
-    -fx-border-radius: 14;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
     -fx-border-color: -pos-border;
-    -fx-padding: 18;
-    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.06), 12, 0, 0, 4);
+    -fx-padding: 12;
+    -fx-spacing: 8;
+    -fx-effect: dropshadow(
+        three-pass-box,
+        rgba(0,0,0,0.05),
+        8, 0, 0, 2
+    );
 }
 
 .pos-summary-item {
     -fx-background-color: -pos-soft;
-    -fx-background-radius: 10;
-    -fx-padding: 12;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10;
     -fx-alignment: center-left;
 }
 
 .pos-summary-total {
-    -fx-background-color: linear-gradient(to right, #ecfdf5, #f0fdfa);
-    -fx-background-radius: 12;
-    -fx-padding: 14;
+    -fx-background-color:
+        linear-gradient(to right, #ecfdf5, #f0fdfa);
+    -fx-background-radius: 10;
+    -fx-padding: 10;
     -fx-alignment: center-left;
     -fx-border-color: #99f6e4;
-    -fx-border-radius: 12;
+    -fx-border-radius: 10;
 }
 
 .pos-summary-label {
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-font-weight: bold;
     -fx-text-fill: -pos-text;
 }
 
 .pos-summary-subtitle {
-    -fx-font-size: 11px;
+    -fx-font-size: 10px;
     -fx-text-fill: -pos-muted;
 }
 
 .pos-summary-value {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: -pos-text;
-}
-
-.pos-summary-discount {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: -pos-success;
-}
-
-.pos-summary-total-label {
     -fx-font-size: 14px;
     -fx-font-weight: bold;
     -fx-text-fill: -pos-text;
 }
 
+.pos-summary-discount {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-success;
+}
+
+.pos-summary-total-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
 .pos-summary-total-value {
-    -fx-font-size: 24px;
+    -fx-font-size: 22px;
     -fx-font-weight: bold;
     -fx-text-fill: -pos-primary-dark;
 }
 
 .pos-payment-row {
     -fx-background-color: -pos-soft;
-    -fx-background-radius: 8;
-    -fx-padding: 10 12;
+    -fx-background-radius: 7;
+    -fx-padding: 7 9;
     -fx-alignment: center-left;
 }
 
 .pos-payment-label {
-    -fx-font-size: 13px;
+    -fx-font-size: 12px;
     -fx-text-fill: -pos-muted;
 }
 
 .pos-payment-value {
-    -fx-font-size: 14px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-text-fill: -pos-text;
+}
+
+/* =========================================
+   MODO COMPACTO
+   ========================================= */
+
+.sale-root.compact .pos-summary-card {
+    -fx-padding: 8;
+    -fx-spacing: 5;
+}
+
+.sale-root.compact .pos-summary-item {
+    -fx-padding: 6 8;
+}
+
+.sale-root.compact .pos-summary-total {
+    -fx-padding: 8;
+}
+
+.sale-root.compact .pos-summary-label,
+.sale-root.compact .pos-summary-payment-label {
+    -fx-font-size: 11px;
+}
+
+.sale-root.compact .pos-summary-subtitle {
+    -fx-font-size: 9px;
+}
+
+.sale-root.compact .pos-summary-value,
+.sale-root.compact .pos-summary-discount {
+    -fx-font-size: 12px;
+}
+
+.sale-root.compact .pos-summary-total-value {
+    -fx-font-size: 19px;
+}
+
+.sale-root.compact .pos-payment-row {
+    -fx-padding: 5 7;
+}
+
+.sale-root.compact .pos-payment-label {
+    -fx-font-size: 10px;
+}
+
+.sale-root.compact .pos-payment-value {
+    -fx-font-size: 11px;
 }

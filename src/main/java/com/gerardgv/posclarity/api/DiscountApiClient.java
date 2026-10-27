@@ -1,11 +1,13 @@
 package com.gerardgv.posclarity.api;
 
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
 import com.gerardgv.posclarity.api.dto.discount.DiscountCreateRequest;
 import com.gerardgv.posclarity.models.Discount;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class DiscountApiClient extends BaseApiClient {
     
@@ -137,5 +139,40 @@ public class DiscountApiClient extends BaseApiClient {
             Discount.class
         );
     }
+    
+    /*
+ * Consultar descuentos paginados.
+ */
+public PageResponse<Discount> getPage(int page, int size)
+        throws IOException, InterruptedException {
+
+    String url = BASE_URL
+            + "/page?page=" + page
+            + "&size=" + size;
+
+    return getPage(url, Discount.class);
+}
+
+/*
+ * Buscar descuentos paginados por nombre o categoría.
+ */
+public PageResponse<Discount> searchPage(
+        String text,
+        int page,
+        int size)
+        throws IOException, InterruptedException {
+
+    String query = URLEncoder.encode(
+            text == null ? "" : text.trim(),
+            StandardCharsets.UTF_8
+    );
+
+    String url = BASE_URL
+            + "/search/page?q=" + query
+            + "&page=" + page
+            + "&size=" + size;
+
+    return getPage(url, Discount.class);
+}
     
 }

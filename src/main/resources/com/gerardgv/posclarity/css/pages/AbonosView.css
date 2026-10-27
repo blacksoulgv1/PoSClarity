@@ -5,16 +5,16 @@
 .abonos-title{
     -fx-font-size : 23px;
     -fx-font-weight: bold;
-    -fx-font-fill: -pos-text;
+    -fx-text-fill: -pos-text;
 }
 
 .abonos-subtitle{
     -fx-font-size : 13px;
-    -fx-font-fill: -pos-text-muted;
+    -fx-text-fill: -pos-text-muted;
 }
 
 .abonos-header-icon-box{
-    -fx-background-color: linear-gradient(to bottom rigth, -pos-primary, derive(-pos-primary,-15%));
+    -fx-background-color: linear-gradient(to bottom right, -pos-primary, derive(-pos-primary,-15%));
     -fx-background-radius: 12;
 }
 
@@ -24,36 +24,36 @@
 
 .abonos-info-card,
 .abonos-payment-card,
-.abonos.history-card{
+.abonos-history-card{
     -fx-background-color: white;
     -fx-background-radius: 14;
     -fx-border-radius: 14;
     -fx-border-color: -pos-borde;
-    -fx-ádding: 18;
+    -fx-padding: 18;
 }
 
 .abonos-field-label{
     -fx-font-size : 11px;
-    -fx-font-fill: -pos-text-muted;
+    -fx-text-fill: -pos-text-muted;
 }
 
 .abonos-field-value{
     -fx-font-size : 18px;
     -fx-font-weight: bold;
-    -fx-font-fill: -pos-text;
+    -fx-text-fill: -pos-text;
 }
 
 .abonos-summary-card{
     -fx-background-color: white;
     -fx-background-radius: 12;
-    -fx-border-radiuos: 12;
+    -fx-border-radius: 12;
     -fx-border-color: -pos-borde;
     -fx-padding: 16;
 }
 
 .abonos-summary-label{
     -fx-font-size : 22px;
-    -fx-font-fill: -pos-text-muted;
+    -fx-text-fill: -pos-text-muted;
 }
 
 .abonos-summary-value{
@@ -61,8 +61,8 @@
     -fx-font-weight: bold;
 }
 
--abonos-summary-paid{
-    -fx-font-fill: -pos-success;
+.abonos-summary-paid {
+    -fx-text-fill: -pos-success;
 }
 
 .abonos-summary-balance{
@@ -76,7 +76,7 @@
 
 .abonos-section-subtitle{
     -fx-font-size : 12px;
-    -fx-font-fill: -pos-text-muted;
+    -fx-text-fill: -pos-text-muted;
 }
 
 .abonos-record-count{
@@ -98,7 +98,7 @@
 .abonos-status-pending{
     -fx-background-color: #fef3c7;
     -fx-border-color: #fcd34d;
-    -fx-text-fill: #9240e;
+    -fx-text-fill: #92400E;
 }
 
 .abonos-status-complete{

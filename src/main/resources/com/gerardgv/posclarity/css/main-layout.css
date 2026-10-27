@@ -3,6 +3,7 @@
     -fx-background-color: linear-gradient(to bottom right, #eef2f7,#dfe6ee);
 
 }
+
 /* HEADER*/
 .header-bar {
     -fx-background-color: white;
@@ -273,16 +274,24 @@
     -fx-background-color: #f4f6f8;
 }
 
-/* BARRA SUPERIOR */
+
+/* ================= BARRA SUPERIOR ================= */
 
 .top-bar {
-    -fx-background-color: white;
+    -fx-background-color: #ffffff;
     -fx-padding: 12 22;
-    -fx-spacing: 14;
+    -fx-spacing: 16;
     -fx-alignment: center-left;
-    -fx-border-color: transparent transparent #e8edf3 transparent;
-    -fx-effect: dropshadow(three-pass-box, rgba(15, 23, 42, 0.06), 8, 0, 0, 3);
+    -fx-border-color: transparent transparent #e5eaf1 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(
+        three-pass-box,
+        rgba(15, 23, 42, 0.07),
+        9, 0, 0, 3
+    );
 }
+
+/* IDENTIDAD Y VISTA ACTUAL */
 
 .app-title {
     -fx-font-size: 19px;
@@ -292,31 +301,49 @@
 
 .app-subtitle {
     -fx-font-size: 12px;
-    -fx-text-fill: #778397;
+    -fx-text-fill: #718096;
 }
 
+/* BOTÓN DEL MENÚ */
+
 .icon-button {
-    -fx-background-color: #f3f6fa;
-    -fx-background-radius: 9;
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 10;
+    -fx-border-color: #e6ebf2;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
     -fx-min-width: 40;
+    -fx-pref-width: 40;
     -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-padding: 0;
     -fx-cursor: hand;
 }
 
 .icon-button:hover {
-    -fx-background-color: #e8eef7;
+    -fx-background-color: #e6edf7;
+    -fx-border-color: #d6e1ef;
+}
+
+.icon-button:pressed {
+    -fx-background-color: #dbe5f2;
 }
 
 .icon-button .ikonli-font-icon {
-    -fx-icon-color: #344256;
+    -fx-icon-color: #334155;
 }
 
 /* ESTADO DE CONEXIÓN */
 
 .connection-indicator {
-    -fx-padding: 8 11;
-    -fx-background-color: #f3f6fa;
-    -fx-background-radius: 8;
+    -fx-padding: 8 12;
+    -fx-spacing: 8;
+    -fx-alignment: center;
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 9;
+    -fx-border-color: #e5eaf1;
+    -fx-border-radius: 9;
+    -fx-border-width: 1;
 }
 
 .connection-indicator .ikonli-font-icon {
@@ -325,13 +352,16 @@
 
 .connection-label {
     -fx-font-size: 11px;
+    -fx-font-weight: bold;
     -fx-text-fill: #64748b;
 }
 
-/* SUCURSAL */
+/* SUCURSAL ACTIVA */
 
 .branch-summary {
-    -fx-padding: 0 6;
+    -fx-padding: 0 4;
+    -fx-spacing: 4;
+    -fx-alignment: center-left;
 }
 
 .header-caption {
@@ -346,12 +376,16 @@
     -fx-text-fill: #263449;
 }
 
-/* PERFIL */
+/* MENÚ DEL USUARIO */
 
 .user-menu-button {
-    -fx-background-color: transparent;
-    -fx-background-radius: 9;
-    -fx-padding: 8 10;
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5eaf1;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 8 12;
+    -fx-spacing: 8;
     -fx-cursor: hand;
     -fx-text-fill: #263449;
     -fx-font-size: 12px;
@@ -359,16 +393,51 @@
 }
 
 .user-menu-button:hover {
-    -fx-background-color: #f3f6fa;
+    -fx-background-color: #eff4fa;
+    -fx-border-color: #d6e1ef;
+}
+
+.user-menu-button:showing {
+    -fx-background-color: #eaf1fa;
+    -fx-border-color: #cbd9eb;
 }
 
 .user-menu-button .ikonli-font-icon {
-    -fx-icon-color: #334155;
+    -fx-icon-color: #475569;
 }
 
 .user-menu-button .arrow {
     -fx-background-color: #64748b;
 }
+
+/* DESPLEGABLE DEL USUARIO */
+
+.user-menu-button .context-menu {
+    -fx-background-color: white;
+    -fx-background-radius: 10;
+    -fx-border-color: #e5eaf1;
+    -fx-border-radius: 10;
+    -fx-border-width: 1;
+    -fx-padding: 6;
+    -fx-effect: dropshadow(
+        three-pass-box,
+        rgba(15, 23, 42, 0.14),
+        12, 0, 0, 4
+    );
+}
+
+.context-menu .menu-item {
+    -fx-padding: 10 14;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: #eff6ff;
+}
+
+.context-menu .menu-item:focused .label {
+    -fx-text-fill: #1d4ed8;
+}
+
 
 /* MENÚ LATERAL */
 
@@ -376,9 +445,10 @@
     -fx-background-color: #111827;
     -fx-border-color: transparent;
     -fx-padding: 0;
+
     -fx-pref-width: 246;
-    -fx-min-width: 246;
-    -fx-max-width: 246;
+    -fx-min-width: 190;
+    -fx-max-width: 270;
 }
 
 .side-menu-scroll > .viewport {
@@ -387,9 +457,11 @@
 
 .side-menu {
     -fx-background-color: #111827;
+
     -fx-pref-width: 246;
-    -fx-min-width: 246;
-    -fx-max-width: 246;
+    -fx-min-width: 0;
+    -fx-max-width: Infinity;
+
     -fx-padding: 20 14 20 14;
     -fx-spacing: 8;
 }
@@ -425,7 +497,11 @@
     -fx-padding: 11 12;
     -fx-background-radius: 9;
     -fx-cursor: hand;
+
     -fx-pref-width: 218;
+    -fx-min-width: 0;
+    -fx-max-width: Infinity;
+
     -fx-min-height: 42;
     -fx-graphic-text-gap: 13;
     -fx-text-overrun: ellipsis;

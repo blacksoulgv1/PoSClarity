@@ -9,7 +9,7 @@
 
     <groupId>com.gerardgv</groupId>
     <artifactId>PoSClarity</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
 
     <name>PoSClarity</name>
@@ -76,7 +76,7 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>8.3.0</version>
         </dependency>
-        
+
         <!-- Jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

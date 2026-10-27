@@ -1,24 +1,401 @@
-.root{
-    -pos-primary: #14b8a6;
-    -pos-primary-dark: #0f766e;
-    -pos-success: #10b981;
-    -pos-danger: #ef4444;
-    -pos-warning: #f59e0b;
-    -pos-info: #3b82f6;
 
-    -pos-bg: #f4f6f8;
-    -pos-card: #ffffff;
-    -pos-border: #e5e7eb;
-    -pos-soft: #f8fafc;
-    -pos-text: #0f172a;
-    -pos-muted: #64748b;
+/*
+ * PoSClarity — Clarity Moderno
+ * Sistema visual global para JavaFX 21
+ */
+
+/* =====================================================
+   1. TOKENS DEL SISTEMA
+   ===================================================== */
+
+.root {
+    -pos-primary: #10B981;
+    -pos-primary-hover: #059669;
+    -pos-primary-pressed: #047857;
+    -pos-primary-dark: #047857;
+    -pos-primary-soft: #D1FAE5;
+    -pos-soft: #ECFDF5;
+
+    -pos-bg: #F3F6FA;
+    /* Alias para compatibilidad con hojas existentes */
+    -pos-background: #F3F6FA;
+    -pos-surface: #FFFFFF;
+    -pos-card: #FFFFFF;
+    -pos-surface-muted: #F8FAFC;
+
+    -pos-text: #172B4D;
+    -pos-muted: #64748B;
+    -pos-text-muted: #64748B;
+    -pos-placeholder: #98A4B3;
+
+    -pos-border: #E2E8F0;
+    -pos-borde: #E2E8F0;
+    -pos-border-strong: #CBD5E1;
+
+    -pos-success: #059669;
+    -pos-warning: #D97706;
+    -pos-danger: #DC2626;
+    -pos-info: #2563EB;
+
+    -fx-font-family: "Segoe UI";
+    -fx-font-size: 13px;
+    -fx-text-fill: -pos-text;
+    -fx-background-color: -pos-bg;
 }
 
-/* =========================================================
-   CONTENEDOR UNIVERSAL DE VISTAS
-   ========================================================= */
+/* =====================================================
+   2. CONTENEDORES
+   ===================================================== */
 
-.pos-view {
-    -fx-alignment: TOP_LEFT;
-    -fx-spacing: 18px;
+.pos-theme {
+    -fx-background-color: -pos-bg;
+}
+
+.pos-page {
+    -fx-background-color: -pos-bg;
+    -fx-padding: 20;
+    -fx-spacing: 16;
+}
+
+.pos-card {
+    -fx-background-color: -pos-surface;
+    -fx-background-radius: 12;
+    -fx-border-color: -pos-border;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-padding: 16;
+}
+
+.pos-section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+.pos-muted {
+    -fx-text-fill: -pos-muted;
+}
+
+/* =====================================================
+   3. ETIQUETAS Y TEXTO
+   ===================================================== */
+
+.label {
+    -fx-text-fill: -pos-text;
+}
+
+.pos-caption {
+    -fx-font-size: 11px;
+    -fx-text-fill: -pos-muted;
+}
+
+.pos-page-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -pos-text;
+}
+
+/* =====================================================
+   4. BOTONES
+   ===================================================== */
+
+.button {
+    -fx-background-color: -pos-surface;
+    -fx-text-fill: -pos-text;
+    -fx-border-color: -pos-border-strong;
+    -fx-border-width: 1;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-padding: 9 15;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: -pos-surface-muted;
+    -fx-border-color: -pos-primary;
+}
+
+.button:pressed {
+    -fx-background-color: #E2E8F0;
+}
+
+.button:focused {
+    -fx-border-color: -pos-primary;
+    -fx-border-width: 1.5;
+}
+
+.pos-button-primary {
+    -fx-background-color: -pos-primary;
+    -fx-text-fill: white;
+    -fx-border-color: -pos-primary;
+}
+
+.pos-button-primary:hover {
+    -fx-background-color: -pos-primary-hover;
+    -fx-border-color: -pos-primary-hover;
+}
+
+.pos-button-primary:pressed {
+    -fx-background-color: -pos-primary-pressed;
+    -fx-border-color: -pos-primary-pressed;
+}
+
+.pos-button-secondary {
+    -fx-background-color: white;
+    -fx-text-fill: -pos-text;
+    -fx-border-color: -pos-border-strong;
+}
+
+.pos-button-danger {
+    -fx-background-color: -pos-danger;
+    -fx-text-fill: white;
+    -fx-border-color: -pos-danger;
+}
+
+.pos-button-danger:hover {
+    -fx-background-color: #B91C1C;
+    -fx-border-color: #B91C1C;
+}
+
+/* =====================================================
+   5. CAMPOS DE TEXTO
+   ===================================================== */
+
+.text-field,
+.password-field,
+.text-area {
+    -fx-background-color: white;
+    -fx-text-fill: -pos-text;
+    -fx-prompt-text-fill: -pos-placeholder;
+    -fx-border-color: -pos-border-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 9 11;
+    -fx-font-size: 12px;
+}
+
+.text-field:focused,
+.password-field:focused,
+.text-area:focused {
+    -fx-border-color: -pos-primary;
+    -fx-border-width: 1.4;
+    -fx-background-color: white;
+}
+
+.text-area .content {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+}
+
+.readonly-field {
+    -fx-background-color: #F1F5F9;
+    -fx-text-fill: #526174;
+    -fx-border-color: #E2E8F0;
+}
+
+.readonly-field:focused {
+    -fx-background-color: #F1F5F9;
+    -fx-border-color: #CBD5E1;
+}
+
+/* =====================================================
+   6. COMBOBOX Y DATEPICKER
+   ===================================================== */
+
+.combo-box-base,
+.date-picker {
+    -fx-background-color: white;
+    -fx-border-color: -pos-border-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 12px;
+}
+
+.combo-box-base:focused,
+.date-picker:focused {
+    -fx-border-color: -pos-primary;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -pos-text;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: white;
+    -fx-border-color: -pos-border;
+}
+
+.combo-box-popup .list-cell {
+    -fx-padding: 9 12;
+    -fx-background-color: white;
+    -fx-text-fill: -pos-text;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #ECFDF5;
+}
+
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: -pos-primary-soft;
+    -fx-text-fill: -pos-text;
+}
+
+/* =====================================================
+   7. TABLAS
+   ===================================================== */
+
+.table-view {
+    -fx-background-color: white;
+    -fx-border-color: -pos-border;
+    -fx-border-radius: 10;
+    -fx-background-radius: 10;
+    -fx-table-cell-border-color: #F1F5F9;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #F8FAFC;
+    -fx-background-radius: 10 10 0 0;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -pos-border transparent;
+    -fx-size: 38px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #475569;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 8;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-cell-size: 38px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #FCFDFE;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #F0FDF4;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #D1FAE5;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: -pos-text;
+}
+
+.table-cell {
+    -fx-text-fill: -pos-text;
+    -fx-padding: 7 8;
+}
+
+/* =====================================================
+   8. CHECKBOX Y RADIOBUTTON
+   ===================================================== */
+
+.check-box,
+.radio-button {
+    -fx-text-fill: -pos-text;
+    -fx-spacing: 8;
+}
+
+.check-box .box,
+.radio-button .radio {
+    -fx-background-color: white;
+    -fx-border-color: -pos-border-strong;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -pos-primary;
+    -fx-border-color: -pos-primary;
+}
+
+.radio-button:selected .radio {
+    -fx-border-color: -pos-primary;
+}
+
+.radio-button:selected .dot {
+    -fx-background-color: -pos-primary;
+}
+
+/* =====================================================
+   9. SEPARADORES
+   ===================================================== */
+
+.separator .line {
+    -fx-border-color: -pos-border;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* =====================================================
+   10. SCROLLBARS
+   ===================================================== */
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2;
+}
+
+.scroll-bar:vertical .track,
+.scroll-bar:horizontal .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #CBD5E1;
+    -fx-background-radius: 8;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #94A3B8;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 3;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
+}
+
+/* =====================================================
+   11. FOCUS Y ACCESIBILIDAD
+   ===================================================== */
+
+.button:disabled,
+.text-field:disabled,
+.combo-box-base:disabled {
+    -fx-opacity: 0.65;
+}
+
+.tooltip {
+    -fx-background-color: #172B4D;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+    -fx-padding: 7 10;
+    -fx-font-size: 11px;
 }

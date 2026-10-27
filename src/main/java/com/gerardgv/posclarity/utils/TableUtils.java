@@ -262,88 +262,129 @@ public class TableUtils {
 }
     
     //Funcion Button Active
-    public static <T> TableCell <T,Boolean> createActiveToggle(
-            Function <T,Integer> idGetter,
-            ActiveToggleHandler updateAction){
-        
-        return new TableCell<>(){
-            
-            private final ToggleButton toggle = new ToggleButton();
-            private boolean updating = false;
-            
-             {
-                 toggle.setPrefWidth(45);
-                 toggle.setStyle("-fx-background-radius: 20;");
-                 
-                 toggle.selectedProperty().addListener((obs,oldVal,newVal) -> {
-                     
-                     if(updating){
-                         return;
-                     }
-                     
-                    T item = getTableView().getItems().get(getIndex());
-                    
-                    if(item == null){
-                        return;
-                    }
-                    
-                    int id = idGetter.apply(item);
-                     
-                    try {
-                        boolean ok = updateAction.update(id,newVal);
-                        
-                        if(ok){
-                            actualizarEstilo(newVal);                            
-                        } else {
-                            updating = true;
-                            toggle.setSelected(oldVal);
-                            updating = false;
-                        }
-                    } catch (Exception ex){
-                        updating = true;
-                        toggle.setSelected(oldVal);
-                        updating = false;
-                        
-                        Alert alert = new Alert(Alert.AlertType.ERROR);
-                        alert.setHeaderText(null);
-                        alert.setContentText(ex.getMessage());
-                        alert.showAndWait();
-                    }
-                 });                 
-             }
-             
-             private void actualizarEstilo(boolean activo){
-                 if(activo){
-                     toggle.setText("ON");
-                     toggle.setStyle(
-                        "-fx-background-color:#4CAF50;"+
-                        "-fx-text-fill:white;"+
-                        "-fx-background-radius:20;");
-                 } else{
-                     toggle.setText("OFF");
-                     toggle.setStyle(
-                        "-fx-background-color:#b0b0b0;"+
-                        "-fx-text-fill:white;"+
-                        "-fx-background-radius:20;");
-                 }
-             }
-             
-             @Override
-             protected void updateItem(Boolean activo,boolean empty){
-                 super.updateItem(activo, empty);
-                 
-                 if(empty || activo == null){
-                     setGraphic(null);
-                 } else {
-                     toggle.setSelected(activo);
-                     actualizarEstilo(activo);
-                     updating = false;
-                     setGraphic(toggle);
-                 }
-             }
-        };
-    }
     
+public static <T> TableCell<T, Boolean> createActiveToggle(
+        Function<T, Integer> idGetter,
+        ActiveToggleHandler updateAction) {
+
+    return new TableCell<>() {
+
+        private final ToggleButton toggle = new ToggleButton();
+        private boolean updating = false;
+
+        {
+            toggle.setPrefWidth(45);
+            toggle.setStyle("-fx-background-radius: 20;");
+
+            toggle.selectedProperty().addListener(
+                    (obs, oldVal, newVal) -> {
+
+                // Ignorar cambios visuales de JavaFX.
+                if (updating) {
+                    return;
+                }
+
+                T item = obtenerItemActual();
+
+                if (item == null) {
+                    return;
+                }
+
+                Integer id = idGetter.apply(item);
+
+                if (id == null) {
+                    return;
+                }
+
+                try {
+                    updating = true;
+
+                    boolean ok = updateAction.update(id, newVal);
+
+                    if (ok) {
+                        actualizarEstilo(newVal);
+                    } else {
+                        toggle.setSelected(oldVal);
+                        actualizarEstilo(oldVal);
+                    }
+
+                } catch (Exception ex) {
+
+                    toggle.setSelected(oldVal);
+                    actualizarEstilo(oldVal);
+
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setHeaderText(null);
+                    alert.setContentText(
+                            ex.getMessage() != null
+                                    ? ex.getMessage()
+                                    : "No se pudo actualizar el estado."
+                    );
+                    alert.showAndWait();
+
+                } finally {
+                    updating = false;
+                }
+            });
+        }
+
+        private T obtenerItemActual() {
+
+            int index = getIndex();
+
+            if (getTableView() == null
+                    || index < 0
+                    || index >= getTableView().getItems().size()) {
+                return null;
+            }
+
+            return getTableView().getItems().get(index);
+        }
+
+        private void actualizarEstilo(boolean activo) {
+
+            if (activo) {
+                toggle.setText("ON");
+                toggle.setStyle(
+                        "-fx-background-color: #4CAF50;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-background-radius: 20;"
+                );
+            } else {
+                toggle.setText("OFF");
+                toggle.setStyle(
+                        "-fx-background-color: #b0b0b0;"
+                        + "-fx-text-fill: white;"
+                        + "-fx-background-radius: 20;"
+                );
+            }
+        }
+
+        @Override
+        protected void updateItem(Boolean activo, boolean empty) {
+
+            super.updateItem(activo, empty);
+
+            // Bloquear el listener durante la actualización visual.
+            updating = true;
+
+            try {
+                if (empty || activo == null) {
+                    setGraphic(null);
+                    return;
+                }
+
+                toggle.setSelected(activo);
+                actualizarEstilo(activo);
+                setGraphic(toggle);
+
+            } finally {
+                updating = false;
+            }
+        }
+    };
+}
+
     //GARANTIAS 
     public static <T> TableCell <T,Void>createGarantiaAcions(
             Consumer<T> onRecepcionG,

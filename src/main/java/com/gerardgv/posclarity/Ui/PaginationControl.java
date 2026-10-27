@@ -3,24 +3,28 @@ package com.gerardgv.posclarity.Ui;
 import java.util.function.IntConsumer;
 
 public class PaginationControl {
-    
+
     private int totalItems = 0;
     private int itemsPerPage = 10;
     private int currentPage = 0;
-    
+
     private IntConsumer pageChangeListener;
 
     public void setTotalItems(int totalItems) {
-        
+
     /**
      * Establece el total de registros.
     */
 
         this.totalItems = Math.max(0, totalItems);
 
+        int paginaAnterior = currentPage;
+
         ajustarPaginaActual();
 
-        notificarCambio();
+        if (paginaAnterior != currentPage) {
+            notificarCambio();
+        }
     }
 
     /**

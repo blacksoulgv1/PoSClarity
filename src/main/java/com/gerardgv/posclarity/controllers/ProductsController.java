@@ -11,11 +11,14 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.beans.property.*;
 import javafx.collections.*;
-import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
+import javafx.concurrent.Task;
+import com.gerardgv.posclarity.api.dto.common.PageResponse;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 
 public class ProductsController implements Initializable {
@@ -51,12 +54,17 @@ public class ProductsController implements Initializable {
 
     @FXML private StackPane  root;
     @FXML private PaginationController paginationController;
-    private TablePagination<Product> tablePagination;
     private boolean modoEdicion = false;
     private Product productoSeleccionado;
     
-    private final ObservableList<Product> listaProductos = FXCollections.observableArrayList();
-    private FilteredList<Product> productosFiltrados;
+    // PAGINACION CON API
+    private Task<PageResponse<Product>> tareaCargaProductos;
+    private final ObservableList<Product> listaProductos =
+        FXCollections.observableArrayList();
+    private boolean actualizandoPaginacion = false;
+    private int versionCargaProductos = 0;
+    private final PauseTransition debounceBusqueda =
+        new PauseTransition(Duration.millis(300));
 
 
     /**
@@ -64,7 +72,6 @@ public class ProductsController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
- 
         configurarTabla();        
         configurarCombos();
         configurarEventos();
@@ -72,8 +79,7 @@ public class ProductsController implements Initializable {
         configurarBusqueda();        
         suscribirEventos();
         cargarProductos();
-        formatearCombos();      
-                           
+        formatearCombos();
     }
 
     
@@ -417,65 +423,9 @@ public class ProductsController implements Initializable {
     
     //Funcionando con API
     private void cargarProductos() {
-
-    try {
-
-        List<Product> productos = productApi.getAll();
-
-        for (Product p : productos) {
-
-            try {
-
-                Inventory inventory =
-                        inventoryApi.getProductStock(
-                                Session.getSucursal().getId(),
-                                p.getId()
-                        );
-
-                if (inventory != null) {
-
-                    Integer stock = inventory.getStock();
-
-                    p.setStock(
-                            stock != null
-                                    ? stock
-                                    : 0
-                    );
-
-                } else {
-
-                    p.setStock(0);
-
-                }
-
-            } catch (Exception ex) {
-
-                ex.printStackTrace();
-                p.setStock(0);
-            }
-        }
-
-        // --------------------------------------------------------
-        // Actualizar lista principal
-        // --------------------------------------------------------
-
-        listaProductos.setAll(productos);
-
-        // --------------------------------------------------------
-        // Actualizar paginación
-        // --------------------------------------------------------
-
-        tablePagination.setItems(productos);
-
-    } catch (Exception e) {
-
-        e.printStackTrace();
-
-        mostrarError(
-                "Error cargando productos desde API"
-        );
+    
+        cargarPaginaProductos();
     }
-}    
     
     private void mostrarError(String msg){
         PosNotification.error(root, "Atención", msg);
@@ -597,20 +547,19 @@ public class ProductsController implements Initializable {
 
     private void configurarBusqueda() {
         
-        productosFiltrados = SearchUtils.setupSearch(
-            txtBuscar,
-            listaProductos,
-            Product::getModel,
-            Product::getBrand
-        );
-
-        productosFiltrados.addListener(
-            (javafx.collections.ListChangeListener<Product>) change -> {
-
-                tablePagination.setFilteredItems(
-                        productosFiltrados
-                );
+        debounceBusqueda.setOnFinished(event -> {
+            actualizandoPaginacion = true;
+            
+            try{
+                paginationController.reset();
+            } finally{
+                actualizandoPaginacion = false;
             }
+            cargarProductos();
+        });
+        
+        txtBuscar.textProperty().addListener(
+                (observable,anterior,actual) -> debounceBusqueda.playFromStart()
         );
         
     }
@@ -620,12 +569,116 @@ public class ProductsController implements Initializable {
     }
     
     private void configurarPaginacion(){
-        
-        tablePagination = new TablePagination<>(
-            tblProductos,
-            paginationController
-        );
+
         paginationController.setItemsPerPage(12);
         paginationController.setShowItemsPerPageSelector(false);
+        paginationController.setOnPageChange(page -> {
+            if(!actualizandoPaginacion){
+                cargarPaginaProductos();
+            }
+        });
+        tblProductos.setItems(listaProductos);
+    }
+
+    private void cargarPaginaProductos() {
+        
+        if(tareaCargaProductos != null && tareaCargaProductos.isRunning()){
+            tareaCargaProductos.cancel(true);
+        }
+        
+        final int version = ++versionCargaProductos;
+        final int pagina = paginationController.getCurrentPage();
+        final int filas = paginationController.getItemsPerPage();
+        final String busqueda = txtBuscar.getText() == null
+            ? ""
+            : txtBuscar.getText().trim();
+        
+        tareaCargaProductos = new Task<>(){
+        
+            @Override
+            protected PageResponse<Product> call() throws Exception {
+
+                if (isCancelled()) {
+                    return null;
+                }
+                if (busqueda.isBlank()) {
+                    return productApi.getPage(pagina, filas);
+                }
+                return productApi.searchPage(
+                    busqueda,
+                    pagina,
+                    filas
+                );
+            }
+        };
+
+        tareaCargaProductos.setOnSucceeded(event -> {
+
+            if (version != versionCargaProductos) {
+                return;
+            }
+
+        PageResponse<Product> respuesta =
+                tareaCargaProductos.getValue();
+
+            if (respuesta == null) {
+                return;
+            }
+
+        long total = respuesta.getTotalElements();
+
+        int totalSeguro = (int) Math.min(
+                Integer.MAX_VALUE,
+                Math.max(0L, total)
+        );
+
+        actualizandoPaginacion = true;
+
+        try {
+            paginationController.setTotalItems(totalSeguro);
+        } finally {
+            actualizandoPaginacion = false;
+        }
+
+        /*
+         * Si el total cambió y la página solicitada ya no existe,
+         * volver a consultar la página válida.
+         */
+        if (pagina != paginationController.getCurrentPage()) {
+            cargarPaginaProductos();
+            return;
+        }
+
+        List<Product> productos = respuesta.getContent();
+
+        listaProductos.setAll(
+                productos != null ? productos : List.of()
+        );
+
+        tblProductos.refresh();
+    });
+
+    tareaCargaProductos.setOnFailed(event -> {
+
+        if (version != versionCargaProductos) {
+            return;
+        }
+
+        Throwable error = tareaCargaProductos.getException();
+
+        if (error != null) {
+            error.printStackTrace();
+        }
+
+        mostrarError("Error cargando productos desde la API.");
+    });
+
+    Thread hilo = new Thread(
+            tareaCargaProductos,
+            "CargaProductos"
+    );
+
+    hilo.setDaemon(true);
+    hilo.start();
     }
 }
