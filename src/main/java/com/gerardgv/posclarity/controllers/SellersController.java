@@ -262,7 +262,7 @@ public class SellersController implements Initializable {
     }
     
     private void mostrarError(String mensaje){
-        PosNotification.error(root, "Atención", mensaje);
+        PosNotification.error(root, "AtenciÃ³n", mensaje);
     }
     
     private void mostrarExito(String mensaje) {
@@ -276,8 +276,8 @@ public class SellersController implements Initializable {
         cbRol.getSelectionModel().clearSelection();
         txtPassword.clear();
         txtConfirmarPassword.clear();
-        txtPassword.setPromptText("Contraseña");
-        txtConfirmarPassword.setPromptText("Confirmar contraseña");
+        txtPassword.setPromptText("ContraseÃ±a");
+        txtConfirmarPassword.setPromptText("Confirmar contraseÃ±a");
         selectedSeller = null;
         modoEdicion = false;
         btnGuardar.setText("Guardar");
@@ -307,10 +307,10 @@ public class SellersController implements Initializable {
         );
         
         txtPassword.setPromptText(
-        "Dejar vacío para conservar la contraseña");
+        "Dejar vacÃ­o para conservar la contraseÃ±a");
 
         txtConfirmarPassword.setPromptText(
-        "Confirmar nueva contraseña");
+        "Confirmar nueva contraseÃ±a");
 
         txtPassword.clear();
         txtConfirmarPassword.clear();
@@ -370,7 +370,7 @@ private void configurarBusqueda() {
         }
 
         if (codigoTexto.isEmpty()) {
-            mostrarError("El código del empleado es obligatorio.");
+            mostrarError("El cÃ³digo del empleado es obligatorio.");
             txtCodigo.requestFocus();
             return false;
         }
@@ -387,12 +387,12 @@ private void configurarBusqueda() {
             codigo = Integer.parseInt(codigoTexto);
 
             if (codigo <= 0) {
-                mostrarError("El código debe ser mayor que cero.");
+                mostrarError("El cÃ³digo debe ser mayor que cero.");
                 txtCodigo.requestFocus();
                 return false;
             }
         } catch (NumberFormatException e) {
-            mostrarError("El código debe contener solo números.");
+            mostrarError("El cÃ³digo debe contener solo nÃºmeros.");
             txtCodigo.requestFocus();
             return false;
         }
@@ -410,13 +410,13 @@ private void configurarBusqueda() {
             confirmacion == null || confirmacion.isBlank();
 
         if (!modoEdicion && passwordVacio) {
-            mostrarError("La contraseña es obligatoria para empleados nuevos.");
+            mostrarError("La contraseÃ±a es obligatoria para empleados nuevos.");
             txtPassword.requestFocus();
             return false;
         }
 
         if (passwordVacio != confirmacionVacia) {
-            mostrarError("Debes completar ambos campos de contraseña.");
+            mostrarError("Debes completar ambos campos de contraseÃ±a.");
             txtPassword.requestFocus();
             return false;
         }
@@ -424,13 +424,13 @@ private void configurarBusqueda() {
         if (!passwordVacio) {
 
             if (password.length() < 6) {
-                mostrarError("La contraseña debe tener al menos 6 caracteres.");
+                mostrarError("La contraseÃ±a debe tener al menos 6 caracteres.");
                 txtPassword.requestFocus();
                 return false;
             }
 
             if (!password.equals(confirmacion)) {
-                mostrarError("Las contraseñas no coinciden.");
+                mostrarError("Las contraseÃ±as no coinciden.");
                 txtConfirmarPassword.requestFocus();
                 return false;
             }
@@ -438,30 +438,34 @@ private void configurarBusqueda() {
         return true;
     }
 
-    private SellerRequest  buildSellerRequest() {
-        
-        SellerRequest request = new SellerRequest ();
+    private SellerRequest buildSellerRequest() {
+            SellerRequest request = new SellerRequest();
 
-        request.setName(txtEmpleado.getText().trim());
-        request.setCode(Integer.parseInt(txtCodigo.getText().trim()));
-        request.setRole(cbRol.getValue());
+    request.setName(txtEmpleado.getText().trim());
+    request.setCode(Integer.parseInt(txtCodigo.getText().trim()));
+    request.setRole(cbRol.getValue());
 
-        String password = txtPassword.getText();
+    String password = txtPassword.getText();
 
-        if (modoEdicion && selectedSeller != null) {
+    if (modoEdicion && selectedSeller != null) {
+        request.setId(selectedSeller.getId());
+        request.setActive(selectedSeller.getActive());
 
-            request.setId(selectedSeller.getId());
-
-            request.setActive(selectedSeller.getActive());
-
-            if (password == null || password.isBlank()) {
-                request.setPassword(null);
-            }
-            } else {
-            request.setActive(true);
+        // Si estÃ¡ vacÃ­a, conserva la contraseÃ±a actual.
+        // Si se escribiÃ³ una nueva, envÃ­ala al API.
+        if (password == null || password.isBlank()) {
+            request.setPassword(null);
+        } else {
             request.setPassword(password);
         }
-        return request;    
+
+    } else {
+        // Alta de un empleado nuevo
+        request.setActive(true);
+        request.setPassword(password);
+    }
+
+    return request;
     }
     
     private boolean guardarEmpleadoNuevo(SellerRequest request) {
@@ -540,7 +544,7 @@ private void configurarBusqueda() {
         Thread.currentThread().interrupt();
 
         mostrarError(
-                "La operación fue interrumpida."
+                "La operaciÃ³n fue interrumpida."
         );
 
         return false;
